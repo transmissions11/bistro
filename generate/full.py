@@ -13,11 +13,11 @@ from lightning.fabric.strategies import FSDPStrategy
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from lit_gpt.scripts.prepare_alpaca import generate_prompt
 from generate.base import generate
-from bistro import GPT, Tokenizer, Config
+from bistro import GPT
+from lit_gpt import Tokenizer, Config
 from bistro.model import Block
-from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir, quantization
+from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
 
 
 def main(
@@ -25,11 +25,6 @@ def main(
     input: str = "",
     finetuned_path: Path = Path("out/full/alpaca/lit_model_finetuned.pth"),
     checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
-    quantize: Optional[
-        Literal[
-            "bnb.nf4", "bnb.nf4-dq", "bnb.fp4", "bnb.fp4-dq", "bnb.int8", "gptq.int4"
-        ]
-    ] = None,
     max_new_tokens: int = 100,
     top_k: int = 200,
     temperature: float = 0.8,
@@ -47,11 +42,6 @@ def main(
         finetuned_path: Path to the checkpoint with trained weights, which are the output of
             `finetune/full.py`.
         checkpoint_dir: The path to the checkpoint folder with pretrained GPT weights.
-        quantize: Whether to quantize the model and using which method:
-            - bnb.nf4, bnb.nf4-dq, bnb.fp4, bnb.fp4-dq: 4-bit quantization from bitsandbytes
-            - bnb.int8: 8-bit quantization from bitsandbytes
-            - gptq.int4: 4-bit quantization from GPTQ
-            for more details, see https://github.com/Lightning-AI/lit-gpt/blob/main/tutorials/quantize.md
         max_new_tokens: The number of generation steps to take.
         top_k: The number of top most probable tokens to consider in the sampling process.
         temperature: A value controlling the randomness of the sampling process. Higher values result in more random
@@ -70,17 +60,12 @@ def main(
     with open(checkpoint_dir / "lit_config.json") as fp:
         config = Config(**json.load(fp))
 
-    if quantize is not None:
-        # TODO: we need to clean-up the logic for quantizing the finetuned models and loading them after
-        raise NotImplementedError
-    checkpoint_path = finetuned_path
-
     fabric.print(
-        f"Loading model {str(checkpoint_path)!r} with {config.__dict__}",
+        f"Loading model {str(finetuned_path)!r} with {config.__dict__}",
         file=sys.stderr,
     )
     t0 = time.time()
-    with fabric.init_module(empty_init=True), quantization(quantize):
+    with fabric.init_module(empty_init=True):
         model = GPT(config)
     fabric.print(
         f"Time to instantiate model: {time.time() - t0:.02f} seconds.", file=sys.stderr
@@ -88,9 +73,7 @@ def main(
 
     t0 = time.time()
     with lazy_load(finetuned_path) as checkpoint:
-        model.load_state_dict(
-            checkpoint.get("model", checkpoint), strict=quantize is None
-        )
+        model.load_state_dict(checkpoint.get("model", checkpoint), strict=True)
     fabric.print(
         f"Time to load the model weights: {time.time() - t0:.02f} seconds.",
         file=sys.stderr,
