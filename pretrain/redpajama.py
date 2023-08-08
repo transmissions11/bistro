@@ -16,8 +16,8 @@ sys.path.append(str(wd))
 
 from bistro.model import Block, GPT, Config
 from bistro.packed_dataset import PackedDataset, CombinedDataset
-from bistro.utils import step_csv_logger, chunked_cross_entropy
-from bistro.speed_monitor import SpeedMonitorFabric as SpeedMonitor, estimate_flops, measure_flops
+from lit_gpt.utils import step_csv_logger, chunked_cross_entropy
+from lit_gpt.speed_monitor import SpeedMonitorFabric as SpeedMonitor, estimate_flops, measure_flops
 
 model_name = "pythia-70m"
 name = "redpajama"

@@ -16,8 +16,12 @@ sys.path.append(str(wd))
 
 from bistro import Config
 from bistro.model import GPT, Block
-from bistro.speed_monitor import SpeedMonitorFabric as SpeedMonitor, measure_flops, estimate_flops
-from bistro.utils import step_csv_logger, chunked_cross_entropy
+from lit_gpt.speed_monitor import (
+    SpeedMonitorFabric as SpeedMonitor,
+    measure_flops,
+    estimate_flops,
+)
+from lit_gpt.utils import step_csv_logger, chunked_cross_entropy
 
 model_name = "pythia-70m"
 name = "openwebtext"
@@ -44,12 +48,19 @@ warmup_iters = 2000
 lr_decay_iters = max_iters
 min_lr = 6e-5
 
-hparams = {k: v for k, v in locals().items() if isinstance(v, (int, float, str)) and not k.startswith("_")}
+hparams = {
+    k: v
+    for k, v in locals().items()
+    if isinstance(v, (int, float, str)) and not k.startswith("_")
+}
 logger = step_csv_logger("out", name, flush_logs_every_n_steps=log_interval)
 
 
 def setup(
-    devices: int = 1, precision: Optional[str] = None, tpu: bool = False, resume: Union[bool, Path] = False
+    devices: int = 1,
+    precision: Optional[str] = None,
+    tpu: bool = False,
+    resume: Union[bool, Path] = False,
 ) -> None:
     if precision is None:
         precision = "32-true" if tpu else "bf16-mixed"
@@ -69,7 +80,9 @@ def setup(
     else:
         strategy = "auto"
 
-    fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=logger)
+    fabric = L.Fabric(
+        devices=devices, strategy=strategy, precision=precision, loggers=logger
+    )
     fabric.launch(main, resume=resume)
 
 
@@ -80,7 +93,9 @@ def main(fabric, resume) -> None:
     if fabric.global_rank == 0:
         out_dir.mkdir(parents=True, exist_ok=True)
 
-    fabric.seed_everything(1337, workers=True)  # same seed for every process to init model (FSDP)
+    fabric.seed_everything(
+        1337, workers=True
+    )  # same seed for every process to init model (FSDP)
 
     config = Config.from_name(model_name)
     fabric.print(f"Loading model with {config.__dict__}")
@@ -94,16 +109,30 @@ def main(fabric, resume) -> None:
     fabric.print(f"Total parameters {num_total_params}")
 
     optimizer = torch.optim.AdamW(
-        model.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=(beta1, beta2), foreach=False
+        model.parameters(),
+        lr=learning_rate,
+        weight_decay=weight_decay,
+        betas=(beta1, beta2),
+        foreach=False,
     )
     model, optimizer = fabric.setup(model, optimizer)
 
     train_data, val_data = load_datasets(data_dir, block_size=model.config.block_size)
-    train_dataloader = DataLoader(train_data, batch_size=micro_batch_size, num_workers=2)
+    train_dataloader = DataLoader(
+        train_data, batch_size=micro_batch_size, num_workers=2
+    )
     val_dataloader = DataLoader(val_data, batch_size=micro_batch_size, num_workers=2)
-    train_dataloader, val_dataloader = fabric.setup_dataloaders(train_dataloader, val_dataloader)
+    train_dataloader, val_dataloader = fabric.setup_dataloaders(
+        train_dataloader, val_dataloader
+    )
 
-    state = {"model": model, "optimizer": optimizer, "hparams": hparams, "iter_num": 0, "step_count": 0}
+    state = {
+        "model": model,
+        "optimizer": optimizer,
+        "hparams": hparams,
+        "iter_num": 0,
+        "step_count": 0,
+    }
 
     if resume is True:
         resume = sorted(out_dir.glob("*.pth"))[-1]
@@ -126,10 +155,14 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
         meta_model = GPT(model.config)
         # estimated is too much of an optimistic estimate, left just for reference
         estimated_flops = estimate_flops(meta_model) * micro_batch_size
-        fabric.print(f"Estimated TFLOPs: {estimated_flops * fabric.world_size / 1e12:.2f}")
+        fabric.print(
+            f"Estimated TFLOPs: {estimated_flops * fabric.world_size / 1e12:.2f}"
+        )
         x = torch.randint(0, 1, (micro_batch_size, model.config.block_size))
         measured_flops = measure_flops(meta_model, x)
-        fabric.print(f"Measured TFLOPs: {measured_flops * fabric.world_size / 1e12:.2f}")
+        fabric.print(
+            f"Measured TFLOPs: {measured_flops * fabric.world_size / 1e12:.2f}"
+        )
         del meta_model, x
 
     total_lengths = 0
@@ -187,7 +220,9 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
             val_loss = validate(fabric, model, val_data)
             t1 = time.time() - t0
             speed_monitor.eval_end(t1)
-            fabric.print(f"step {state['iter_num']}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms")
+            fabric.print(
+                f"step {state['iter_num']}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms"
+            )
             fabric.barrier()
         if not is_accumulating and state["step_count"] % save_interval == 0:
             checkpoint_path = out_dir / f"iter-{state['iter_num']:06d}-ckpt.pth"
@@ -196,7 +231,9 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
 
 
 @torch.no_grad()
-def validate(fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoader) -> torch.Tensor:
+def validate(
+    fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoader
+) -> torch.Tensor:
     fabric.print("Validating ...")
     model.eval()
     val_iter = iter(val_dataloader)
@@ -230,7 +267,9 @@ class Dataset(IterableDataset):
         while True:
             i = torch.randint(len(data) - self.block_size, (1,)).item()
             x = torch.from_numpy((data[i : i + self.block_size]).astype(np.int64))
-            y = torch.from_numpy((data[i + 1 : i + 1 + self.block_size]).astype(np.int64))
+            y = torch.from_numpy(
+                (data[i + 1 : i + 1 + self.block_size]).astype(np.int64)
+            )
             yield x, y
 
 

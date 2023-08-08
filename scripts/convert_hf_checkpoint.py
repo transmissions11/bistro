@@ -13,7 +13,7 @@ wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
 from bistro import Config
-from bistro.utils import lazy_load, incremental_save, NotYetLoadedTensor
+from lit_gpt.utils import lazy_load, incremental_save, NotYetLoadedTensor
 
 
 def copy_weights_gpt_neox(

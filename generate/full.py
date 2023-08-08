@@ -13,11 +13,11 @@ from lightning.fabric.strategies import FSDPStrategy
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from scripts.prepare_alpaca import generate_prompt
+from lit_gpt.scripts.prepare_alpaca import generate_prompt
 from generate.base import generate
 from bistro import GPT, Tokenizer, Config
 from bistro.model import Block
-from bistro.utils import lazy_load, check_valid_checkpoint_dir, quantization
+from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir, quantization
 
 
 def main(
@@ -25,7 +25,11 @@ def main(
     input: str = "",
     finetuned_path: Path = Path("out/full/alpaca/lit_model_finetuned.pth"),
     checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
-    quantize: Optional[Literal["bnb.nf4", "bnb.nf4-dq", "bnb.fp4", "bnb.fp4-dq", "bnb.int8", "gptq.int4"]] = None,
+    quantize: Optional[
+        Literal[
+            "bnb.nf4", "bnb.nf4-dq", "bnb.fp4", "bnb.fp4-dq", "bnb.int8", "gptq.int4"
+        ]
+    ] = None,
     max_new_tokens: int = 100,
     top_k: int = 200,
     temperature: float = 0.8,
@@ -71,16 +75,26 @@ def main(
         raise NotImplementedError
     checkpoint_path = finetuned_path
 
-    fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}", file=sys.stderr)
+    fabric.print(
+        f"Loading model {str(checkpoint_path)!r} with {config.__dict__}",
+        file=sys.stderr,
+    )
     t0 = time.time()
     with fabric.init_module(empty_init=True), quantization(quantize):
         model = GPT(config)
-    fabric.print(f"Time to instantiate model: {time.time() - t0:.02f} seconds.", file=sys.stderr)
+    fabric.print(
+        f"Time to instantiate model: {time.time() - t0:.02f} seconds.", file=sys.stderr
+    )
 
     t0 = time.time()
     with lazy_load(finetuned_path) as checkpoint:
-        model.load_state_dict(checkpoint.get("model", checkpoint), strict=quantize is None)
-    fabric.print(f"Time to load the model weights: {time.time() - t0:.02f} seconds.", file=sys.stderr)
+        model.load_state_dict(
+            checkpoint.get("model", checkpoint), strict=quantize is None
+        )
+    fabric.print(
+        f"Time to load the model weights: {time.time() - t0:.02f} seconds.",
+        file=sys.stderr,
+    )
 
     model.eval()
     model = fabric.setup(model)
@@ -110,9 +124,15 @@ def main(
     fabric.print(output)
 
     tokens_generated = y.size(0) - prompt_length
-    fabric.print(f"\n\nTime for inference: {t:.02f} sec total, {tokens_generated / t:.02f} tokens/sec", file=sys.stderr)
+    fabric.print(
+        f"\n\nTime for inference: {t:.02f} sec total, {tokens_generated / t:.02f} tokens/sec",
+        file=sys.stderr,
+    )
     if fabric.device.type == "cuda":
-        fabric.print(f"Memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB", file=sys.stderr)
+        fabric.print(
+            f"Memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB",
+            file=sys.stderr,
+        )
 
 
 if __name__ == "__main__":
