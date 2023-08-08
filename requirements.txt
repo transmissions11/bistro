@@ -6,3 +6,4 @@ bitsandbytes>=0.40.0  # quantize
 scipy  # TODO: remove when bnb has resolved https://github.com/TimDettmers/bitsandbytes/issues/544 and released the fix
 datasets  # quantize/gptq.py
 zstandard  # prepare_redpajama.py
+lit_gpt @ git+https://github.com/Lightning-AI/lit-gpt@main

@@ -9,7 +9,7 @@ from lightning.fabric.utilities.rank_zero import rank_zero_only as fabric_rank_z
 from lightning.pytorch.utilities.rank_zero import rank_zero_only as trainer_rank_zero_only
 from torch.utils.flop_counter import FlopCounterMode
 
-from lit_gpt import GPT
+from bistro import GPT
 
 GPU_AVAILABLE_FLOPS = {
     # source: https://resources.nvidia.com/en-us-tensor-core/nvidia-tensor-core-gpu-datasheet

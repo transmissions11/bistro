@@ -9,7 +9,7 @@ with open(os.path.join(_PATH_ROOT, "README.md"), encoding="utf-8") as fo:
     readme = fo.read()
 
 setup(
-    name="",
+    name="bistro",
     version="0.1.0",
     description="Opinionated LLaMA implementation and finetuning harness.",
     author="MF FOOM / Lightning AI",

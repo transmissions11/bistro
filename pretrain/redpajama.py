@@ -14,10 +14,10 @@ from torch.utils.data import DataLoader
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from lit_gpt.model import Block, GPT, Config
-from lit_gpt.packed_dataset import PackedDataset, CombinedDataset
-from lit_gpt.utils import step_csv_logger, chunked_cross_entropy
-from lit_gpt.speed_monitor import SpeedMonitorFabric as SpeedMonitor, estimate_flops, measure_flops
+from bistro.model import Block, GPT, Config
+from bistro.packed_dataset import PackedDataset, CombinedDataset
+from bistro.utils import step_csv_logger, chunked_cross_entropy
+from bistro.speed_monitor import SpeedMonitorFabric as SpeedMonitor, estimate_flops, measure_flops
 
 model_name = "pythia-70m"
 name = "redpajama"

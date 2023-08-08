@@ -16,10 +16,10 @@ from lightning.pytorch.strategies import FSDPStrategy, XLAStrategy
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from lit_gpt import Config
-from lit_gpt.model import GPT, Block
-from lit_gpt.speed_monitor import measure_flops, estimate_flops, SpeedMonitorCallback
-from lit_gpt.utils import step_csv_logger, chunked_cross_entropy
+from bistro import Config
+from bistro.model import GPT, Block
+from bistro.speed_monitor import measure_flops, estimate_flops, SpeedMonitorCallback
+from bistro.utils import step_csv_logger, chunked_cross_entropy
 
 model_name = "pythia-70m"
 name = "openwebtext"

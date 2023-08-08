@@ -12,7 +12,7 @@ from lightning_utilities.core.imports import RequirementCache
 from typing_extensions import Self
 
 from lit_gpt.config import Config
-from lit_gpt.rmsnorm import RMSNorm
+from bistro.rmsnorm import RMSNorm
 
 RoPECache = Tuple[torch.Tensor, torch.Tensor]
 KVCache = Tuple[torch.Tensor, torch.Tensor]

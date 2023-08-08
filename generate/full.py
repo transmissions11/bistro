@@ -15,9 +15,9 @@ sys.path.append(str(wd))
 
 from scripts.prepare_alpaca import generate_prompt
 from generate.base import generate
-from lit_gpt import GPT, Tokenizer, Config
-from lit_gpt.model import Block
-from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir, quantization
+from bistro import GPT, Tokenizer, Config
+from bistro.model import Block
+from bistro.utils import lazy_load, check_valid_checkpoint_dir, quantization
 
 
 def main(

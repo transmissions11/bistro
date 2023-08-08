@@ -11,8 +11,8 @@ import torch
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from lit_gpt import Config
-from lit_gpt.utils import lazy_load, incremental_save, NotYetLoadedTensor
+from bistro import Config
+from bistro.utils import lazy_load, incremental_save, NotYetLoadedTensor
 from scripts.convert_hf_checkpoint import load_param, layer_template
 
 

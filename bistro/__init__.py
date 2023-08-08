@@ -1,6 +1,6 @@
-from lit_gpt.model import GPT
+from bistro.model import GPT
 from lit_gpt.config import Config
-from lit_gpt.tokenizer import Tokenizer
+from bistro.tokenizer import Tokenizer
 
 from lightning_utilities.core.imports import RequirementCache
 
