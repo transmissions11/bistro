@@ -16,7 +16,7 @@ from lightning.pytorch.strategies import FSDPStrategy, XLAStrategy
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from bistro import Config
+from lit_gpt import Config
 from bistro.model import GPT, Block
 from lit_gpt.speed_monitor import measure_flops, estimate_flops, SpeedMonitorCallback
 from lit_gpt.utils import step_csv_logger, chunked_cross_entropy
@@ -45,7 +45,11 @@ warmup_iters = 2000
 lr_decay_iters = max_iters
 min_lr = 6e-5
 
-hparams = {k: v for k, v in locals().items() if isinstance(v, (int, float, str)) and not k.startswith("_")}
+hparams = {
+    k: v
+    for k, v in locals().items()
+    if isinstance(v, (int, float, str)) and not k.startswith("_")
+}
 
 
 class LightningGPTModule(L.LightningModule):
@@ -61,7 +65,11 @@ class LightningGPTModule(L.LightningModule):
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         return torch.optim.AdamW(
-            self.module.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=(beta1, beta2), foreach=False
+            self.module.parameters(),
+            lr=learning_rate,
+            weight_decay=weight_decay,
+            betas=(beta1, beta2),
+            foreach=False,
         )
 
     def on_fit_start(self) -> None:
@@ -70,10 +78,14 @@ class LightningGPTModule(L.LightningModule):
             meta_model = GPT(self.module.config)
             # estimated is too much of an optimistic estimate, left just for reference
             estimated_flops = estimate_flops(meta_model) * micro_batch_size
-            self.print(f"Estimated TFLOPs: {estimated_flops * trainer.world_size / 1e12:.2f}")
+            self.print(
+                f"Estimated TFLOPs: {estimated_flops * trainer.world_size / 1e12:.2f}"
+            )
             x = torch.randint(0, 1, (micro_batch_size, meta_model.config.block_size))
             self.measured_flops = measure_flops(meta_model, x)
-            self.print(f"Measured TFLOPs: {self.measured_flops * trainer.world_size / 1e12:.2f}")
+            self.print(
+                f"Measured TFLOPs: {self.measured_flops * trainer.world_size / 1e12:.2f}"
+            )
 
     def on_train_batch_start(self, batch: Any, batch_idx: int) -> None:
         if not decay_lr:
@@ -118,11 +130,18 @@ def main(devices: int = 1, precision: Optional[str] = None, tpu: bool = False) -
     else:
         strategy = "auto"
 
-    logger = step_csv_logger("out", name, cls=CSVLogger, flush_logs_every_n_steps=log_interval)
-    speed_monitor = SpeedMonitorCallback(
-        length_fn=lambda batch: batch[0].size(1), batch_size=micro_batch_size, window_size=50, time_unit="seconds"
+    logger = step_csv_logger(
+        "out", name, cls=CSVLogger, flush_logs_every_n_steps=log_interval
     )
-    model_checkpoint = ModelCheckpoint(dirpath=out_dir, every_n_train_steps=save_interval, save_last=True, verbose=True)
+    speed_monitor = SpeedMonitorCallback(
+        length_fn=lambda batch: batch[0].size(1),
+        batch_size=micro_batch_size,
+        window_size=50,
+        time_unit="seconds",
+    )
+    model_checkpoint = ModelCheckpoint(
+        dirpath=out_dir, every_n_train_steps=save_interval, save_last=True, verbose=True
+    )
     trainer = L.Trainer(
         devices=devices,
         strategy=strategy,
@@ -137,7 +156,9 @@ def main(devices: int = 1, precision: Optional[str] = None, tpu: bool = False) -
         val_check_interval=eval_interval,
     )
 
-    L.seed_everything(1337, workers=True)  # same seed for every process to init model (FSDP)
+    L.seed_everything(
+        1337, workers=True
+    )  # same seed for every process to init model (FSDP)
 
     trainer.print(hparams)
 
@@ -152,7 +173,9 @@ def main(devices: int = 1, precision: Optional[str] = None, tpu: bool = False) -
 
     train_data = Dataset(str(data_dir / "train.bin"), config.block_size)
     val_data = Dataset(str(data_dir / "val.bin"), config.block_size)
-    train_dataloader = DataLoader(train_data, batch_size=micro_batch_size, num_workers=2)
+    train_dataloader = DataLoader(
+        train_data, batch_size=micro_batch_size, num_workers=2
+    )
     val_dataloader = DataLoader(val_data, batch_size=micro_batch_size, num_workers=2)
 
     t0 = time.time()
@@ -171,7 +194,9 @@ class Dataset(IterableDataset):
         while True:
             i = torch.randint(len(data) - self.block_size, (1,)).item()
             x = torch.from_numpy((data[i : i + self.block_size]).astype(np.int64))
-            y = torch.from_numpy((data[i + 1 : i + 1 + self.block_size]).astype(np.int64))
+            y = torch.from_numpy(
+                (data[i + 1 : i + 1 + self.block_size]).astype(np.int64)
+            )
             yield x, y
 
 

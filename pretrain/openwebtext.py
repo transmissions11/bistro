@@ -14,7 +14,7 @@ from lightning.fabric.strategies import FSDPStrategy, XLAStrategy
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from bistro import Config
+from lit_gpt import Config
 from bistro.model import GPT, Block
 from lit_gpt.speed_monitor import (
     SpeedMonitorFabric as SpeedMonitor,
