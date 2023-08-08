@@ -62,6 +62,7 @@ def setup(
     data_dir: Path = Path("data/alpaca"),
     checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
     out_dir: Path = Path("out/full/alpaca"),
+    # TODO: Try precision="transformer-engine" (https://github.com/Lightning-AI/lightning/pull/17597)
     precision: str = "bf16-mixed",
 ):
     if devices > 1:
