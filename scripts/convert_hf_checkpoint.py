@@ -12,7 +12,7 @@ import torch
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from bistro import Config
+from lit_gpt import Config
 from lit_gpt.utils import lazy_load, incremental_save, NotYetLoadedTensor
 
 
@@ -184,7 +184,9 @@ def load_param(param: Union[torch.Tensor, NotYetLoadedTensor]) -> torch.Tensor:
 
 @torch.inference_mode()
 def convert_hf_checkpoint(
-    *, checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"), model_name: Optional[str] = None
+    *,
+    checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
+    model_name: Optional[str] = None,
 ) -> None:
     if model_name is None:
         model_name = checkpoint_dir.name
