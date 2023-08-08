@@ -6,7 +6,7 @@ from typing import Optional, Tuple, Dict, List
 
 import lightning as L
 import torch
-from lightning.fabric.strategies import FSDPStrategy, XLAStrategy
+from lightning.fabric.strategies import FSDPStrategy
 
 # support running without installing as a package
 wd = Path(__file__).parent.parent.resolve()
@@ -62,25 +62,16 @@ def setup(
     data_dir: Path = Path("data/alpaca"),
     checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
     out_dir: Path = Path("out/full/alpaca"),
-    precision: Optional[str] = None,
-    tpu: bool = False,
+    precision: str = "bf16-mixed",
 ):
-    if precision is None:
-        precision = "32-true" if tpu else "bf16-mixed"
-    fabric_devices = devices
-    if fabric_devices > 1:
-        if tpu:
-            # For multi-host TPU training, the device count for Fabric is limited to the count on a single host.
-            fabric_devices = "auto"
-            strategy = XLAStrategy(sync_module_states=False)
-        else:
-            strategy = FSDPStrategy(
-                auto_wrap_policy={Block},
-                activation_checkpointing_policy={Block},
-                state_dict_type="full",
-                limit_all_gathers=True,
-                cpu_offload=False,
-            )
+    if devices > 1:
+        strategy = FSDPStrategy(
+            auto_wrap_policy={Block},
+            activation_checkpointing_policy={Block},
+            state_dict_type="full",
+            limit_all_gathers=True,
+            cpu_offload=False,
+        )
     else:
         strategy = "auto"
 
@@ -88,7 +79,7 @@ def setup(
         out_dir.parent, out_dir.name, flush_logs_every_n_steps=log_interval
     )
     fabric = L.Fabric(
-        devices=fabric_devices, strategy=strategy, precision=precision, loggers=logger
+        devices=devices, strategy=strategy, precision=precision, loggers=logger
     )
     fabric.launch(main, data_dir, checkpoint_dir, out_dir)
 
