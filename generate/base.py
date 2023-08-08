@@ -15,7 +15,7 @@ sys.path.append(str(wd))
 
 from bistro import GPT, Tokenizer, Config
 from bistro.model import Block
-from bistro.utils import lazy_load, check_valid_checkpoint_dir, quantization
+from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir, quantization
 
 
 @torch.no_grad()
