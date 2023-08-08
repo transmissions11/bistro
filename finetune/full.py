@@ -168,10 +168,6 @@ def train(
     total_lengths = 0
     total_t0 = time.time()
 
-    if fabric.device.type == "xla":
-        import torch_xla.core.xla_model as xm
-
-        xm.mark_step()
     for iter_num in range(max_iters):
         if step_count <= warmup_steps:
             # linear warmup
@@ -201,8 +197,6 @@ def train(
             optimizer.step()
             optimizer.zero_grad()
             step_count += 1
-        elif fabric.device.type == "xla":
-            xm.mark_step()
 
         t1 = time.time()
         total_lengths += input_ids.size(1)
@@ -291,12 +285,7 @@ def get_batch(
     input_ids = [data[i]["input_ids"].type(torch.int64) for i in ix]
     labels = [data[i]["labels"].type(torch.int64) for i in ix]
 
-    # it's better to pad to a fixed seq length with XLA to avoid recompilation
-    max_len = (
-        max(len(s) for s in input_ids)
-        if fabric.device.type != "xla"
-        else longest_seq_length
-    )
+    max_len = max(len(s) for s in input_ids)
 
     def pad_right(x, pad_id):
         # pad right based on the longest sequence

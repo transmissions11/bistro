@@ -168,11 +168,6 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
     total_lengths = 0
     total_t0 = time.time()
 
-    if fabric.device.type == "xla":
-        import torch_xla.core.xla_model as xm
-
-        xm.mark_step()
-
     train_iter = iter(train_dataloader)
 
     for state["iter_num"] in range(state["iter_num"], max_iters):
@@ -196,8 +191,6 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
             optimizer.step()
             optimizer.zero_grad()
             state["step_count"] += 1
-        elif fabric.device.type == "xla":
-            xm.mark_step()
 
         t1 = time.time()
         total_lengths += input_ids.size(1)

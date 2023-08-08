@@ -17,7 +17,11 @@ sys.path.append(str(wd))
 from bistro.model import Block, GPT, Config
 from bistro.packed_dataset import PackedDataset, CombinedDataset
 from lit_gpt.utils import step_csv_logger, chunked_cross_entropy
-from lit_gpt.speed_monitor import SpeedMonitorFabric as SpeedMonitor, estimate_flops, measure_flops
+from lit_gpt.speed_monitor import (
+    SpeedMonitorFabric as SpeedMonitor,
+    estimate_flops,
+    measure_flops,
+)
 
 model_name = "pythia-70m"
 name = "redpajama"
@@ -55,7 +59,11 @@ data_config = [
     ("wikipedia", 4.5),
 ]
 
-hparams = {k: v for k, v in locals().items() if isinstance(v, (int, float, str)) and not k.startswith("_")}
+hparams = {
+    k: v
+    for k, v in locals().items()
+    if isinstance(v, (int, float, str)) and not k.startswith("_")
+}
 logger = step_csv_logger("out", name, flush_logs_every_n_steps=log_interval)
 
 
@@ -85,7 +93,9 @@ def setup(
     else:
         strategy = "auto"
 
-    fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=logger)
+    fabric = L.Fabric(
+        devices=devices, strategy=strategy, precision=precision, loggers=logger
+    )
     fabric.launch(main, train_data_dir, val_data_dir, resume)
 
 
@@ -109,7 +119,9 @@ def main(fabric, train_data_dir, val_data_dir, resume):
     if val_dataloader is None:
         train_dataloader = fabric.setup_dataloaders(train_dataloader)
     else:
-        train_dataloader, val_dataloader = fabric.setup_dataloaders(train_dataloader, val_dataloader)
+        train_dataloader, val_dataloader = fabric.setup_dataloaders(
+            train_dataloader, val_dataloader
+        )
 
     fabric.seed_everything(1337)  # same seed for every process to init model (FSDP)
 
@@ -124,11 +136,21 @@ def main(fabric, train_data_dir, val_data_dir, resume):
     fabric.print(f"Total parameters {num_total_params}")
 
     optimizer = torch.optim.AdamW(
-        model.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=(beta1, beta2), foreach=False
+        model.parameters(),
+        lr=learning_rate,
+        weight_decay=weight_decay,
+        betas=(beta1, beta2),
+        foreach=False,
     )
     model, optimizer = fabric.setup(model, optimizer)
 
-    state = {"model": model, "optimizer": optimizer, "hparams": hparams, "iter_num": 0, "step_count": 0}
+    state = {
+        "model": model,
+        "optimizer": optimizer,
+        "hparams": hparams,
+        "iter_num": 0,
+        "step_count": 0,
+    }
 
     if resume is True:
         resume = sorted(out_dir.glob("*.pth"))[-1]
@@ -152,19 +174,19 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
         meta_model = GPT(model.config)
         # estimated is too much of an optimistic estimate, left just for reference
         estimated_flops = estimate_flops(meta_model) * micro_batch_size
-        fabric.print(f"Estimated TFLOPs: {estimated_flops * fabric.world_size / 1e12:.2f}")
+        fabric.print(
+            f"Estimated TFLOPs: {estimated_flops * fabric.world_size / 1e12:.2f}"
+        )
         x = torch.randint(0, 1, (micro_batch_size, model.config.block_size))
         measured_flops = measure_flops(meta_model, x)
-        fabric.print(f"Measured TFLOPs: {measured_flops * fabric.world_size / 1e12:.2f}")
+        fabric.print(
+            f"Measured TFLOPs: {measured_flops * fabric.world_size / 1e12:.2f}"
+        )
         del meta_model, x
 
     total_lengths = 0
     total_t0 = time.time()
 
-    if fabric.device.type == "xla":
-        import torch_xla.core.xla_model as xm
-
-        xm.mark_step()
     for state["iter_num"], train_data in enumerate(train_dataloader, state["iter_num"]):
         if state["iter_num"] >= max_iters:
             break
@@ -190,8 +212,6 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
             optimizer.step()
             optimizer.zero_grad()
             state["step_count"] += 1
-        elif fabric.device.type == "xla":
-            xm.mark_step()
 
         t1 = time.time()
         total_lengths += input_ids.size(1)
@@ -209,12 +229,18 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
                 f" {(t1 - iter_t0) * 1000:.2f}ms{' (optimizer.step)' if not is_accumulating else ''}"
             )
 
-        if val_dataloader is not None and not is_accumulating and state["step_count"] % eval_interval == 0:
+        if (
+            val_dataloader is not None
+            and not is_accumulating
+            and state["step_count"] % eval_interval == 0
+        ):
             t0 = time.time()
             val_loss = validate(fabric, model, val_dataloader)
             t1 = time.time() - t0
             speed_monitor.eval_end(t1)
-            fabric.print(f"step {state['iter_num']}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms")
+            fabric.print(
+                f"step {state['iter_num']}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms"
+            )
             fabric.barrier()
         if not is_accumulating and state["step_count"] % save_interval == 0:
             checkpoint_path = out_dir / f"iter-{state['iter_num']:06d}-ckpt.pth"
@@ -223,7 +249,9 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
 
 
 @torch.no_grad()
-def validate(fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoader) -> torch.Tensor:
+def validate(
+    fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoader
+) -> torch.Tensor:
     fabric.print("Validating ...")
     model.eval()
 
@@ -241,7 +269,12 @@ def validate(fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoade
 
 
 def create_dataloader(
-    batch_size: int, block_size: int, data_dir: Path, fabric, shuffle: bool = True, seed: int = 12345
+    batch_size: int,
+    block_size: int,
+    data_dir: Path,
+    fabric,
+    shuffle: bool = True,
+    seed: int = 12345,
 ) -> DataLoader:
     datasets = []
     for prefix, _ in data_config:
@@ -268,7 +301,9 @@ def create_dataloader(
 
     combined_dataset = CombinedDataset(datasets=datasets, seed=seed, weights=weights)
 
-    return DataLoader(combined_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
+    return DataLoader(
+        combined_dataset, batch_size=batch_size, shuffle=False, pin_memory=True
+    )
 
 
 def create_dataloaders(

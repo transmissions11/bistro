@@ -16,7 +16,7 @@ sys.path.append(str(wd))
 from bistro import GPT
 from lit_gpt import Tokenizer, Config
 from bistro.model import Block
-from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir, quantization
+from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
 
 
 @torch.no_grad()
@@ -52,11 +52,6 @@ def generate(
     idx = empty
     input_pos = torch.arange(0, T, device=device)
 
-    if idx.device.type == "xla":
-        import torch_xla.core.xla_model as xm
-
-        xm.mark_step()
-
     # generate up to a fixed number of tokens
     for _ in range(max_returned_tokens - T):
         x = idx.index_select(0, input_pos).view(1, -1)
@@ -76,9 +71,6 @@ def generate(
         # advance
         input_pos = input_pos[-1:] + 1
 
-        if idx.device.type == "xla":
-            xm.mark_step()
-
         # concatenate the new generation
         idx = idx.index_copy(0, input_pos, idx_next)
 
@@ -96,12 +88,7 @@ def main(
     max_new_tokens: int = 50,
     top_k: int = 200,
     temperature: float = 0.8,
-    checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
-    quantize: Optional[
-        Literal[
-            "bnb.nf4", "bnb.nf4-dq", "bnb.fp4", "bnb.fp4-dq", "bnb.int8", "gptq.int4"
-        ]
-    ] = None,
+    checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.3"),
     strategy: str = "auto",
     devices: int = 1,
     precision: str = "bf16-true",
@@ -116,11 +103,6 @@ def main(
         temperature: A value controlling the randomness of the sampling process. Higher values result in more random
             samples.
         checkpoint_dir: The checkpoint directory to load.
-        quantize: Whether to quantize the model and using which method:
-            - bnb.nf4, bnb.nf4-dq, bnb.fp4, bnb.fp4-dq: 4-bit quantization from bitsandbytes
-            - bnb.int8: 8-bit quantization from bitsandbytes
-            - gptq.int4: 4-bit quantization from GPTQ
-            for more details, see https://github.com/Lightning-AI/lit-gpt/blob/main/tutorials/quantize.md
         strategy: Indicates the Fabric strategy setting to use.
         devices: How many devices to use.
         precision: Indicates the Fabric precision setting to use.
@@ -135,14 +117,7 @@ def main(
     with open(checkpoint_dir / "lit_config.json") as fp:
         config = Config(**json.load(fp))
 
-    if quantize is not None and devices > 1:
-        raise NotImplementedError
-    if quantize == "gptq.int4":
-        model_file = "lit_model_gptq.4bit.pth"
-        if not (checkpoint_dir / model_file).is_file():
-            raise ValueError("Please run `python quantize/gptq.py` first")
-    else:
-        model_file = "lit_model.pth"
+    model_file = "lit_model.pth"
     checkpoint_path = checkpoint_dir / model_file
 
     fabric.print(
@@ -150,7 +125,7 @@ def main(
         file=sys.stderr,
     )
     t0 = time.time()
-    with fabric.init_module(empty_init=True), quantization(quantize):
+    with fabric.init_module(empty_init=True):
         model = GPT(config)
     fabric.print(
         f"Time to instantiate model: {time.time() - t0:.02f} seconds.", file=sys.stderr
@@ -158,9 +133,7 @@ def main(
 
     t0 = time.time()
     with lazy_load(checkpoint_path) as checkpoint:
-        model.load_state_dict(
-            checkpoint.get("model", checkpoint), strict=quantize is None
-        )
+        model.load_state_dict(checkpoint.get("model", checkpoint), strict=True)
     fabric.print(
         f"Time to load the model weights: {time.time() - t0:.02f} seconds.",
         file=sys.stderr,
