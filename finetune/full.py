@@ -6,6 +6,7 @@ from typing import Optional, Tuple, Dict, List
 
 import lightning as L
 import torch
+from datasets import load_dataset, DatasetDict, Dataset
 from lightning.fabric.strategies import FSDPStrategy
 
 # support running without installing as a package
@@ -97,8 +98,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     if fabric.global_rank == 0:
         os.makedirs(out_dir, exist_ok=True)
 
-    train_data = torch.load(data_dir / "train.pt")
-    val_data = torch.load(data_dir / "test.pt")
+    dataset = load_dataset("parquet", data_dir=f"{data_dir}", field="data", num_proc=8)
 
     config = Config.from_name(name=checkpoint_dir.name)
     checkpoint_path = checkpoint_dir / "lit_model.pth"
@@ -123,8 +123,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         fabric,
         model,
         optimizer,
-        train_data,
-        val_data,
+        dataset,
         checkpoint_dir,
         out_dir,
         speed_monitor,
@@ -140,16 +139,19 @@ def train(
     fabric: L.Fabric,
     model: GPT,
     optimizer: torch.optim.Optimizer,
-    train_data: List[Dict],
-    val_data: List[Dict],
+    train_data: DatasetDict,
     checkpoint_dir: Path,
     out_dir: Path,
     speed_monitor: SpeedMonitor,
 ) -> None:
     tokenizer = Tokenizer(checkpoint_dir)
-    max_seq_length, longest_seq_length, longest_seq_ix = get_max_seq_length(train_data)
+    max_seq_length, longest_seq_length, longest_seq_ix = get_max_seq_length(
+        train_data["train"]
+    )
 
-    validate(fabric, model, val_data, tokenizer, longest_seq_length)  # sanity check
+    validate(
+        fabric, model, train_data["validation"], tokenizer, longest_seq_length
+    )  # sanity check
 
     with torch.device("meta"):
         meta_model = GPT(model.config)
@@ -180,7 +182,8 @@ def train(
 
         input_ids, targets = get_batch(
             fabric,
-            train_data,
+            train_data["train"],
+            tokenizer,
             longest_seq_length,
             longest_seq_ix if iter_num == 0 else None,
         )
@@ -217,7 +220,9 @@ def train(
 
         if not is_accumulating and step_count % eval_interval == 0:
             t0 = time.time()
-            val_loss = validate(fabric, model, val_data, tokenizer, longest_seq_length)
+            val_loss = validate(
+                fabric, model, train_data["validation"], tokenizer, longest_seq_length
+            )
             t1 = time.time() - t0
             speed_monitor.eval_end(t1)
             fabric.print(
@@ -233,7 +238,7 @@ def train(
 def validate(
     fabric: L.Fabric,
     model: GPT,
-    val_data: List[Dict],
+    val_dataset: Dataset,
     tokenizer: Tokenizer,
     longest_seq_length: int,
 ) -> torch.Tensor:
@@ -241,7 +246,9 @@ def validate(
     model.eval()
     losses = torch.zeros(eval_iters)
     for k in range(eval_iters):
-        input_ids, targets = get_batch(fabric, val_data, longest_seq_length)
+        input_ids, targets = get_batch(
+            fabric, val_dataset, tokenizer, longest_seq_length
+        )
         logits = model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
         losses[k] = loss.item()
@@ -274,17 +281,21 @@ def validate(
 
 def get_batch(
     fabric: L.Fabric,
-    data: List[Dict],
+    data: Dataset,
+    tokenizer: Tokenizer,
     longest_seq_length: int,
     longest_seq_ix: Optional[int] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     ix = torch.randint(len(data), (micro_batch_size,))
+
     if longest_seq_ix is not None:
         # force the longest sample at the beginning so potential OOMs happen right away
         ix[0] = longest_seq_ix
 
-    input_ids = [data[i]["input_ids"].type(torch.int64) for i in ix]
-    labels = [data[i]["labels"].type(torch.int64) for i in ix]
+    input_ids = [
+        tokenizer.encode(data[i]["moves"][:-1], device=fabric.device) for i in ix
+    ]
+    labels = [tokenizer.encode(data[i]["moves"][1:], device=fabric.device) for i in ix]
 
     max_len = max(len(s) for s in input_ids)
 
@@ -303,9 +314,9 @@ def get_batch(
     return x, y
 
 
-def get_max_seq_length(data: List[Dict]) -> Tuple[int, int, int]:
+def get_max_seq_length(data: Dataset) -> Tuple[int, int, int]:
     # find out the minimum max_seq_length required during fine-tuning (saves memory!)
-    lengths = [len(d["input_ids"]) for d in data]
+    lengths = [len(d["moves"]) for d in data]
     max_seq_length = max(lengths)
     longest_seq_ix = lengths.index(max_seq_length)
     # support easy override at the top of the file

@@ -7,7 +7,6 @@ build
 .vscode
 
 # data
-data
 checkpoints
 out
 wandb
