@@ -292,9 +292,6 @@ def get_batch(
         # force the longest sample at the beginning so potential OOMs happen right away
         ix[0] = longest_seq_ix
 
-    print(ix)
-    print([data[i.item()]["moves"][:-1] for i in ix])
-
     input_ids = [
         tokenizer.encode(data[i.item()]["moves"][:-1]).type(torch.int64) for i in ix
     ]
@@ -303,8 +300,6 @@ def get_batch(
     ]
 
     max_len = max(len(s) for s in input_ids)
-
-    print("max_len", max_len)
 
     def pad_right(x, pad_id):
         # pad right based on the longest sequence
