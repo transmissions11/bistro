@@ -301,6 +301,8 @@ def get_batch(
 
     max_len = max(len(s) for s in input_ids)
 
+    print("max_len", max_len)
+
     def pad_right(x, pad_id):
         # pad right based on the longest sequence
         n = max_len - len(x)
