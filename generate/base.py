@@ -107,75 +107,75 @@ def main(
         devices: How many devices to use.
         precision: Indicates the Fabric precision setting to use.
     """
-    # if strategy == "fsdp":
-    #     strategy = FSDPStrategy(auto_wrap_policy={Block}, cpu_offload=False)
-    # fabric = L.Fabric(devices=devices, precision=precision, strategy=strategy)
-    # fabric.launch()
-    #
-    # check_valid_checkpoint_dir(checkpoint_dir)
-    #
-    # with open(checkpoint_dir / "lit_config.json") as fp:
-    #     config = Config(**json.load(fp))
-    #
-    # model_file = "lit_model.pth"
-    # checkpoint_path = checkpoint_dir / model_file
-    #
-    # fabric.print(
-    #     f"Loading model {str(checkpoint_path)!r} with {config.__dict__}",
-    #     file=sys.stderr,
-    # )
-    # t0 = time.time()
-    # with fabric.init_module(empty_init=True):
-    #     model = GPT(config)
-    # fabric.print(
-    #     f"Time to instantiate model: {time.time() - t0:.02f} seconds.", file=sys.stderr
-    # )
-    #
-    # t0 = time.time()
-    # with lazy_load(checkpoint_path) as checkpoint:
-    #     model.load_state_dict(checkpoint.get("model", checkpoint), strict=True)
-    # fabric.print(
-    #     f"Time to load the model weights: {time.time() - t0:.02f} seconds.",
-    #     file=sys.stderr,
-    # )
-    #
-    # model.eval()
-    # model = fabric.setup_module(model)
-    #
-    # tokenizer = Tokenizer(checkpoint_dir)
-    # encoded = tokenizer.encode(prompt, device=fabric.device)
-    # prompt_length = encoded.size(0)
-    # max_returned_tokens = prompt_length + max_new_tokens
-    # assert max_returned_tokens <= model.config.block_size, (
-    #     max_returned_tokens,
-    #     model.config.block_size,
-    # )  # maximum rope cache length
-    #
-    # L.seed_everything(1234)
-    # for i in range(num_samples):
-    #     t0 = time.perf_counter()
-    #     y = generate(
-    #         model,
-    #         encoded,
-    #         max_returned_tokens,
-    #         max_seq_length=max_returned_tokens,
-    #         temperature=temperature,
-    #         top_k=top_k,
-    #     )
-    #     t = time.perf_counter() - t0
-    #
-    #     model.reset_cache()
-    #     fabric.print(tokenizer.decode(y))
-    #     tokens_generated = y.size(0) - prompt_length
-    #     fabric.print(
-    #         f"Time for inference {i + 1}: {t:.02f} sec total, {tokens_generated / t:.02f} tokens/sec",
-    #         file=sys.stderr,
-    #     )
-    # if fabric.device.type == "cuda":
-    #     fabric.print(
-    #         f"Memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB",
-    #         file=sys.stderr,
-    #     )
+    if strategy == "fsdp":
+        strategy = FSDPStrategy(auto_wrap_policy={Block}, cpu_offload=False)
+    fabric = L.Fabric(devices=devices, precision=precision, strategy=strategy)
+    fabric.launch()
+
+    check_valid_checkpoint_dir(checkpoint_dir)
+
+    with open(checkpoint_dir / "lit_config.json") as fp:
+        config = Config(**json.load(fp))
+
+    model_file = "lit_model.pth"
+    checkpoint_path = checkpoint_dir / model_file
+
+    fabric.print(
+        f"Loading model {str(checkpoint_path)!r} with {config.__dict__}",
+        file=sys.stderr,
+    )
+    t0 = time.time()
+    with fabric.init_module(empty_init=True):
+        model = GPT(config)
+    fabric.print(
+        f"Time to instantiate model: {time.time() - t0:.02f} seconds.", file=sys.stderr
+    )
+
+    t0 = time.time()
+    with lazy_load(checkpoint_path) as checkpoint:
+        model.load_state_dict(checkpoint.get("model", checkpoint), strict=True)
+    fabric.print(
+        f"Time to load the model weights: {time.time() - t0:.02f} seconds.",
+        file=sys.stderr,
+    )
+
+    model.eval()
+    model = fabric.setup_module(model)
+
+    tokenizer = Tokenizer(checkpoint_dir)
+    encoded = tokenizer.encode(prompt, device=fabric.device)
+    prompt_length = encoded.size(0)
+    max_returned_tokens = prompt_length + max_new_tokens
+    assert max_returned_tokens <= model.config.block_size, (
+        max_returned_tokens,
+        model.config.block_size,
+    )  # maximum rope cache length
+
+    L.seed_everything(1234)
+    for i in range(num_samples):
+        t0 = time.perf_counter()
+        y = generate(
+            model,
+            encoded,
+            max_returned_tokens,
+            max_seq_length=max_returned_tokens,
+            temperature=temperature,
+            top_k=top_k,
+        )
+        t = time.perf_counter() - t0
+
+        model.reset_cache()
+        fabric.print(tokenizer.decode(y))
+        tokens_generated = y.size(0) - prompt_length
+        fabric.print(
+            f"Time for inference {i + 1}: {t:.02f} sec total, {tokens_generated / t:.02f} tokens/sec",
+            file=sys.stderr,
+        )
+    if fabric.device.type == "cuda":
+        fabric.print(
+            f"Memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB",
+            file=sys.stderr,
+        )
 
 
 if __name__ == "__main__":
