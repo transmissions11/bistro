@@ -8,12 +8,11 @@ import lightning as L
 import torch
 from lightning.fabric.strategies import FSDPStrategy
 
-from scripts.prepare_alpaca import generate_prompt
-
 # support running without installing as a package
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
+from scripts.prepare_alpaca import generate_prompt
 from generate.base import generate
 from bistro.model import GPT, Config, Block
 from lit_gpt.tokenizer import Tokenizer
