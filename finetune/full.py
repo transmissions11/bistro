@@ -98,7 +98,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     if fabric.global_rank == 0:
         os.makedirs(out_dir, exist_ok=True)
 
-    dataset = load_dataset("parquet", data_dir=f"{data_dir}", field="data", num_proc=8)
+    dataset = load_dataset("parquet", data_dir=f"{data_dir}")
 
     config = Config.from_name(name=checkpoint_dir.name)
     checkpoint_path = checkpoint_dir / "lit_model.pth"
