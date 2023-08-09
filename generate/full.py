@@ -21,8 +21,7 @@ from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
 
 def main(
     prompt: str = "What food do lamas eat?",
-    input: str = "",
-    finetuned_path: Path = Path("out/full/alpaca/lit_model_finetuned.pth"),
+    finetuned_path: Path = Path("out/full/chess/lit_model_finetuned.pth"),
     checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
     max_new_tokens: int = 100,
     top_k: int = 200,
@@ -82,8 +81,6 @@ def main(
     model = fabric.setup(model)
 
     tokenizer = Tokenizer(checkpoint_dir)
-    sample = {"instruction": prompt, "input": input}
-    prompt = generate_prompt(sample)
     encoded = tokenizer.encode(prompt, device=model.device)
     prompt_length = encoded.size(0)
     max_returned_tokens = prompt_length + max_new_tokens
@@ -102,7 +99,6 @@ def main(
 
     model.reset_cache()
     output = tokenizer.decode(y)
-    output = output.split("### Response:")[1].strip()
     fabric.print(output)
 
     tokens_generated = y.size(0) - prompt_length
