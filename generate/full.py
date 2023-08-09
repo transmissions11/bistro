@@ -3,7 +3,6 @@ import sys
 import time
 import warnings
 from pathlib import Path
-from typing import Literal, Optional
 
 import lightning as L
 import torch

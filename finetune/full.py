@@ -60,10 +60,10 @@ hparams = {
 
 def setup(
     data_dir: Path = Path("data/alpaca"),
-    checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
+    checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.3"),
     out_dir: Path = Path("out/full/alpaca"),
     # TODO: Try precision="transformer-engine" (https://github.com/Lightning-AI/lightning/pull/17597)
-    precision: str = "bf16-mixed",
+    precision: str = "bf16-true",
 ):
     if devices > 1:
         strategy = FSDPStrategy(
