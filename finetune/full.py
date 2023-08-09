@@ -292,6 +292,8 @@ def get_batch(
         # force the longest sample at the beginning so potential OOMs happen right away
         ix[0] = longest_seq_ix
 
+    print(data[i.item()]["moves"][:-1] for i in ix)
+
     input_ids = [
         tokenizer.encode(data[i.item()]["moves"][:-1]).type(torch.int64) for i in ix
     ]
