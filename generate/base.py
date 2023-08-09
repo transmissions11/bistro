@@ -179,18 +179,13 @@ def main(
 
 
 if __name__ == "__main__":
+    from jsonargparse import CLI
+
+    torch.set_float32_matmul_precision("high")
     warnings.filterwarnings(
         # Triggered internally at ../aten/src/ATen/EmptyTensor.cpp:31
         "ignore",
         message="ComplexHalf support is experimental and many operators don't support it yet",
     )
-    warnings.filterwarnings(
-        "ignore",
-        message="UserWarning",
-    )
-
-    from jsonargparse import CLI
-
-    torch.set_float32_matmul_precision("high")
 
     CLI(main)
