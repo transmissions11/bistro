@@ -293,9 +293,11 @@ def get_batch(
         ix[0] = longest_seq_ix
 
     input_ids = [
-        tokenizer.encode(data[i]["moves"][:-1], device=fabric.device) for i in ix
+        tokenizer.encode(data[i.item()]["moves"][:-1], device=fabric.device) for i in ix
     ]
-    labels = [tokenizer.encode(data[i]["moves"][1:], device=fabric.device) for i in ix]
+    labels = [
+        tokenizer.encode(data[i.item()]["moves"][1:], device=fabric.device) for i in ix
+    ]
 
     max_len = max(len(s) for s in input_ids)
 
