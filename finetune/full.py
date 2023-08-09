@@ -295,6 +295,8 @@ def get_batch(
     input_ids = [tokenizer.encode(data[i.item()]["moves"][:-1]) for i in ix]
     labels = [tokenizer.encode(data[i.item()]["moves"][1:]) for i in ix]
 
+    print(input_ids[:10], labels[:10])
+
     max_len = max(len(s) for s in input_ids)
 
     def pad_right(x, pad_id):
