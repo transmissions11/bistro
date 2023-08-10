@@ -286,30 +286,30 @@ def validate(
             fabric, checkpoint_dir, val_dataset, tokenizer, longest_seq_length
         )
 
-        if k == 0:
-            system_prompt = (
-                "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, "
-                "detailed, and polite answers to the user's questions. USER: Generate a game of chess at the Grandmaster level. ASSISTANT: "
-            )
-            encoded = torch.cat(
-                (
-                    # todo: dont do this lmeow
-                    torch.tensor(([1] * 20), dtype=torch.int64, device=model.device),
-                    tokenizer.encode(system_prompt, device=model.device),
-                ),
-                dim=0,
-            )
-            max_returned_tokens = len(encoded) + 100
-            output = generate(
-                model,
-                idx=encoded,
-                max_returned_tokens=max_returned_tokens,
-                max_seq_length=max_returned_tokens,
-                temperature=0.7,
-            )
-            output = tokenizer.decode(output)
-            fabric.print(output)
-            fabric.print()
+        # if k == 0:
+        #     system_prompt = (
+        #         "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, "
+        #         "detailed, and polite answers to the user's questions. USER: Generate a game of chess at the Grandmaster level. ASSISTANT: "
+        #     )
+        #     encoded = torch.cat(
+        #         (
+        #             # todo: dont do this lmeow
+        #             torch.tensor(([1] * 20), dtype=torch.int64, device=model.device),
+        #             tokenizer.encode(system_prompt, device=model.device),
+        #         ),
+        #         dim=0,
+        #     )
+        #     max_returned_tokens = len(encoded) + 100
+        #     output = generate(
+        #         model,
+        #         idx=encoded,
+        #         max_returned_tokens=max_returned_tokens,
+        #         max_seq_length=max_returned_tokens,
+        #         temperature=0.7,
+        #     )
+        #     output = tokenizer.decode(output)
+        #     fabric.print(output)
+        #     fabric.print()
 
         logits = model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
