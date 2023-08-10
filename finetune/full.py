@@ -36,7 +36,7 @@ eval_interval = 3
 save_interval = 60
 eval_iters = 100
 log_interval = 1
-devices = 6
+devices = 1
 # change this value to force a maximum sequence length
 override_max_seq_length = None
 
@@ -351,7 +351,7 @@ def get_batch(
     input_ids = [
         torch.cat(
             (
-                torch.tensor(([1] * 20), dtype=torch.int64),
+                torch.tensor(([-1] * 20), dtype=torch.int64),
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
                     format_prompt(data[i.item()]["moves"][:1000][:-1])
@@ -365,7 +365,7 @@ def get_batch(
         torch.cat(
             (
                 torch.tensor(
-                    ([1] * 19), dtype=torch.int64
+                    ([-1] * 19), dtype=torch.int64
                 ),  # TODO use a token we dont count loss against
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
