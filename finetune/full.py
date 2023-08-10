@@ -75,7 +75,7 @@ def format_prompt(game: str) -> str:
     formatted = system_prompt.format(
         user_prompt="Generate a game of chess at the Grandmaster level.", game=game
     )
-    print(formatted)
+    # print(formatted)
     return formatted
 
 
