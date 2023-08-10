@@ -111,7 +111,7 @@ class GPT(nn.Module):
         # todo i think we can just use.weight lol
         batch_size = x_pre.size(0)
         soft_prompt_output = self.soft_prompt(
-            torch.arange(self.num_tokens_in_soft_prompt, device=x.device)
+            torch.arange(self.num_tokens_in_soft_prompt, device=x_pre.device)
         )
         soft_prompt_output_batched = soft_prompt_output.unsqueeze(0).expand(
             batch_size, -1, -1
