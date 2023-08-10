@@ -365,7 +365,7 @@ def get_batch(
         torch.cat(
             (
                 torch.tensor(
-                    ([-1] * 19), dtype=torch.int64
+                    ([0] * 19), dtype=torch.int64
                 ),  # TODO use a token we dont count loss against
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
