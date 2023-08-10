@@ -32,11 +32,11 @@ from lit_gpt.speed_monitor import (
 
 # from lit_gpt.scripts.prepare_alpaca import generate_prompt
 
-eval_interval = 3
+eval_interval = 60
 save_interval = 60
 eval_iters = 100
 log_interval = 1
-devices = 1
+devices = 8
 # change this value to force a maximum sequence length
 override_max_seq_length = None
 
