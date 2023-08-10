@@ -103,13 +103,13 @@ class GPT(nn.Module):
             mask = None
 
         # forward the model itself
-        x = self.transformer.wte(idx)  # token embeddings of shape (b, t, n_embd)
+        x_pre = self.transformer.wte(idx)  # token embeddings of shape (b, t, n_embd)
 
         print(self.soft_prompt.weight)
 
         # replace the first 20 embeddings of each batch with the soft prompt embeddings
         # todo i think we can just use.weight lol
-        batch_size = x.size(0)
+        batch_size = x_pre.size(0)
         soft_prompt_output = self.soft_prompt(
             torch.arange(self.num_tokens_in_soft_prompt, device=x.device)
         )
@@ -118,7 +118,7 @@ class GPT(nn.Module):
         )
 
         x = torch.cat(
-            (soft_prompt_output_batched, x[:, self.num_tokens_in_soft_prompt :, :]),
+            (soft_prompt_output_batched, x_pre[:, self.num_tokens_in_soft_prompt :, :]),
             dim=1,
         )
 
