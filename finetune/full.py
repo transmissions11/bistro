@@ -127,7 +127,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     with lazy_load(checkpoint_path) as checkpoint:
         model.load_state_dict(checkpoint, strict=False)
 
-    mark_only_soft_prompt_as_trainable(model)
+    # mark_only_soft_prompt_as_trainable(model)
 
     # todo: gigacursed code
     trainable_params = [p for p in model.parameters() if p.requires_grad]
