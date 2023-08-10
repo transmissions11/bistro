@@ -118,7 +118,20 @@ class GPT(nn.Module):
         #     batch_size, -1, -1
         # )
 
-        x = self.soft_prompt.weight + x_pre
+        x = (
+            torch.cat(
+                B
+                * [
+                    torch.unsqueeze(
+                        self.transformer.wte(
+                            torch.tensor(self.soft_prompt.weight, device=x_pre.device)
+                        ),
+                        0,
+                    )
+                ]
+            )
+            + x_pre
+        )
 
         if not use_kv_cache:
             for block in self.transformer.h:
