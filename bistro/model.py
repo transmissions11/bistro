@@ -123,9 +123,7 @@ class GPT(nn.Module):
                 B
                 * [
                     torch.unsqueeze(
-                        self.transformer.wte(
-                            torch.tensor(self.soft_prompt.weight, device=x_pre.device)
-                        ),
+                        self.soft_prompt.weight,
                         0,
                     )
                 ]
