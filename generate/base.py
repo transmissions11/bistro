@@ -54,6 +54,9 @@ def generate(
 
     # generate up to a fixed number of tokens
     for _ in range(max_returned_tokens - T):
+
+        print(idx.shape)
+        print(idx)
         x = idx.index_select(0, input_pos).view(1, -1)
 
         print(x.shape)
