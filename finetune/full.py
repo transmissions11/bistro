@@ -366,7 +366,8 @@ def get_batch(
 
 def get_max_seq_length(data: Dataset) -> Tuple[int, int, int]:
     # find out the minimum max_seq_length required during fine-tuning (saves memory!)
-    lengths = [len(d["moves"]) for d in data]
+    # todo: don't just grab the first 1k chars
+    lengths = [len(d["moves"][:1000]) for d in data]
     max_seq_length = max(lengths)
     longest_seq_ix = lengths.index(max_seq_length)
     # support easy override at the top of the file
