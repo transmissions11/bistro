@@ -130,7 +130,7 @@ class GPT(nn.Module):
                         )
                     ]
                 ),
-                pad=(0, 0, 0, 2028),
+                pad=(0, 0, 0, x_pre.size(1) - 20),
             )
             + x_pre
         )
