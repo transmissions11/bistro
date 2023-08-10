@@ -8,6 +8,7 @@ from typing import List, Optional, Tuple, Any
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from lightning_utilities.core.imports import RequirementCache
 from typing_extensions import Self
 
@@ -119,14 +120,17 @@ class GPT(nn.Module):
         # )
 
         x = (
-            torch.cat(
-                B
-                * [
-                    torch.unsqueeze(
-                        self.soft_prompt.weight,
-                        0,
-                    )
-                ]
+            F.pad(
+                torch.cat(
+                    B
+                    * [
+                        torch.unsqueeze(
+                            self.soft_prompt.weight,
+                            0,
+                        )
+                    ]
+                ),
+                pad=(0, 0, 0, 2028),
             )
             + x_pre
         )
