@@ -106,6 +106,7 @@ class GPT(nn.Module):
         x_pre = self.transformer.wte(idx)  # token embeddings of shape (b, t, n_embd)
 
         print(self.soft_prompt.weight)
+        print(self.soft_prompt.weight.grad)
 
         # replace the first 20 embeddings of each batch with the soft prompt embeddings
         # todo i think we can just use.weight lol
