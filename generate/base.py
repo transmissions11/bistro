@@ -57,6 +57,7 @@ def generate(
 
         print(idx.shape)
         print(idx)
+        print(input_pos)
         x = idx.index_select(0, input_pos).view(1, -1)
 
         print(x.shape)
