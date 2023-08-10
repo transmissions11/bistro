@@ -351,7 +351,7 @@ def get_batch(
     input_ids = [
         torch.cat(
             (
-                torch.tensor(([-1] * 20), dtype=torch.int64),
+                torch.tensor(([0] * 20), dtype=torch.int64),
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
                     format_prompt(data[i.item()]["moves"][:1000][:-1])
