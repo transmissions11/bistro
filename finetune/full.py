@@ -305,7 +305,7 @@ def validate(
                 dim=0,
             )
             print(encoded.shape)
-            max_returned_tokens = len(encoded) + 100
+            max_returned_tokens = len(encoded) + 900
             output = generate(
                 model,
                 idx=encoded,
