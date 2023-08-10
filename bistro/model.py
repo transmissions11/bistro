@@ -109,8 +109,14 @@ class GPT(nn.Module):
 
         # replace the first 20 embeddings of each batch with the soft prompt embeddings
         # todo i think we can just use.weight lol
-        x[:, : self.num_tokens_in_soft_prompt, :] = self.soft_prompt(
-            torch.arange(self.num_tokens_in_soft_prompt, device=x.device)
+        x = torch.cat(
+            (
+                self.soft_prompt(
+                    torch.arange(self.num_tokens_in_soft_prompt, device=x.device)
+                ),
+                x[:, self.num_tokens_in_soft_prompt :, :],
+            ),
+            dim=1,
         )
 
         if not use_kv_cache:
