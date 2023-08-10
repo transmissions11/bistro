@@ -294,7 +294,7 @@ def validate(
             encoded = torch.cat(
                 (
                     # todo: dont do this lmeow
-                    torch.tensor(([1] * 20), dtype=torch.int64),
+                    torch.tensor(([1] * 20), dtype=torch.int64, device=model.device),
                     tokenizer.encode(system_prompt, device=model.device),
                 ),
                 dim=0,
