@@ -336,6 +336,13 @@ def get_batch(
         # force the longest sample at the beginning so potential OOMs happen right away
         ix[0] = longest_seq_ix
 
+    # 1. e5 to d4
+    # -> 1. e5 to d
+    # -> . e5 to d4
+
+    # input: guh vicuna ur a model that is smart USER: do a chess game ASSISTANT: 1. e5 to d
+    # label: guh vicuna ur a model that is smart USER: do a chess game ASSISTANT: . e5 to d4
+
     input_ids = [
         torch.cat(
             (
@@ -353,11 +360,11 @@ def get_batch(
         torch.cat(
             (
                 torch.tensor(
-                    ([1] * 20), dtype=torch.int64
+                    ([1] * 19), dtype=torch.int64
                 ),  # TODO use a token we dont count loss against
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
-                    format_prompt(data[i.item()]["moves"][:1000][1:])
+                    format_prompt(data[i.item()]["moves"][:1000])
                 ).type(torch.int64),
             ),
             dim=0,
