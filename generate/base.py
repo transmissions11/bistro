@@ -56,6 +56,8 @@ def generate(
     for _ in range(max_returned_tokens - T):
         x = idx.index_select(0, input_pos).view(1, -1)
 
+        print(x.shape)
+
         # forward
         logits = model(x, max_seq_length, input_pos)
         logits = logits[0, -1] / temperature
