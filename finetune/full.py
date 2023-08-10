@@ -230,7 +230,7 @@ def train(
             loss = chunked_cross_entropy(
                 logits[..., :-1, :], targets[..., 1:], chunk_size=0
             )
-            fabric.backward(loss / gradient_accumulation_iters)
+            # fabric.backward(loss / gradient_accumulation_iters)
 
         if not is_accumulating:
             optimizer.step()
