@@ -44,7 +44,7 @@ override_max_seq_length = None
 learning_rate = 3e-3
 batch_size = 64 / devices
 micro_batch_size = 1
-gradient_accumulation_iters = batch_size // micro_batch_size
+gradient_accumulation_iters = 1  # todo batch_size // micro_batch_size
 assert gradient_accumulation_iters > 0
 epoch_size = 50000  # train dataset size
 num_epochs = 5
