@@ -64,7 +64,7 @@ hparams = {
 def mark_only_soft_prompt_as_trainable(model: GPT) -> None:
     """Sets `requires_grad=False` for all non-soft-prompt weights."""
     for name, param in model.named_parameters():
-        param.requires_grad = "soft_prompt" in name
+        param.requires_grad = False
 
 
 def format_prompt(game: str) -> str:
@@ -127,7 +127,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     with lazy_load(checkpoint_path) as checkpoint:
         model.load_state_dict(checkpoint, strict=False)
 
-    # mark_only_soft_prompt_as_trainable(model)
+    mark_only_soft_prompt_as_trainable(model)
 
     # todo: gigacursed code
     trainable_params = [p for p in model.parameters() if p.requires_grad]
