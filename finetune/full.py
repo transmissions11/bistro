@@ -132,7 +132,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     trainable_params = [p for p in model.parameters() if p.requires_grad]
     num_params = sum(p.numel() for p in trainable_params)
     fabric.print(f"Number of trainable parameters: {num_params:,}")
-    fabric.print(f"Trainable parameters: {trainable_params}")
+    fabric.print(f"Trainable parameter names: {[p.name for p in trainable_params]}")
     num_params = sum(p.numel() for p in model.parameters() if not p.requires_grad)
     fabric.print(f"Number of non trainable parameters: {num_params:,}")
 
