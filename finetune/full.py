@@ -322,9 +322,10 @@ def get_batch(
         torch.cat(
             (
                 torch.tensor(([1] * 20), dtype=torch.int64),
-                tokenizer.encode(format_prompt(data[i.item()]["moves"][:-1])).type(
-                    torch.int64
-                ),
+                tokenizer.encode(
+                    # TODO: dont just grab first 1k token lols
+                    format_prompt(data[i.item()]["moves"][:1000][:-1])
+                ).type(torch.int64),
             ),
             dim=0,
         )
@@ -336,9 +337,10 @@ def get_batch(
                 torch.tensor(
                     ([1] * 20), dtype=torch.int64
                 ),  # TODO use a token we dont count loss against
-                tokenizer.encode(format_prompt(data[i.item()]["moves"][1:])).type(
-                    torch.int64
-                ),
+                tokenizer.encode(
+                    # TODO: dont just grab first 1k token lols
+                    format_prompt(data[i.item()]["moves"][:1000][1:])
+                ).type(torch.int64),
             ),
             dim=0,
         )
