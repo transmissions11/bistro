@@ -104,28 +104,28 @@ class GPT(nn.Module):
             mask = None
 
         # forward the model itself
-        x_pre = self.transformer.wte(idx)  # token embeddings of shape (b, t, n_embd)
+        x = self.transformer.wte(idx)  # token embeddings of shape (b, t, n_embd)
 
-        print(self.soft_prompt.weight)
+        # print(self.soft_prompt.weight)
         # print(self.soft_prompt.weight.grad)
 
         # replace the first 20 embeddings of each batch with the soft prompt embeddings
         # todo i think we can just use.weight lol
-        x = (
-            F.pad(
-                torch.cat(
-                    B
-                    * [
-                        torch.unsqueeze(
-                            self.soft_prompt.weight,
-                            0,
-                        )
-                    ]
-                ),
-                pad=(0, 0, 0, x_pre.size(1) - 20),
-            )
-            + x_pre
-        )
+        # x = (
+        #     F.pad(
+        #         torch.cat(
+        #             B
+        #             * [
+        #                 torch.unsqueeze(
+        #                     self.soft_prompt.weight,
+        #                     0,
+        #                 )
+        #             ]
+        #         ),
+        #         pad=(0, 0, 0, x_pre.size(1) - 20),
+        #     )
+        #     + x_pre
+        # )
 
         if not use_kv_cache:
             for block in self.transformer.h:
