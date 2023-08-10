@@ -33,7 +33,7 @@ from lit_gpt.speed_monitor import (
 # from lit_gpt.scripts.prepare_alpaca import generate_prompt
 
 eval_interval = 3
-save_interval = 60
+save_interval = 600
 eval_iters = 100
 log_interval = 1
 devices = 1
