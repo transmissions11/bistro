@@ -36,7 +36,7 @@ eval_interval = 3
 save_interval = 60
 eval_iters = 100
 log_interval = 1
-devices = 1
+devices = 6
 # change this value to force a maximum sequence length
 override_max_seq_length = None
 
@@ -129,6 +129,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     mark_only_soft_prompt_as_trainable(model)
 
+    # todo: gigacursed code
     trainable_params = [p for p in model.parameters() if p.requires_grad]
     num_params = sum(p.numel() for p in trainable_params)
     fabric.print(f"Number of trainable parameters: {num_params:,}")
