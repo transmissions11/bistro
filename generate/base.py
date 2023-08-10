@@ -75,7 +75,7 @@ def generate(
         idx_next = torch.multinomial(probs, num_samples=1).to(dtype=dtype)
 
         # advance
-        input_pos = torch.cat((input_pos, input_pos[-1:] + 1))
+        input_pos = input_pos[-1:] + 1
 
         # concatenate the new generation
         idx = idx.index_copy(0, input_pos, idx_next)
