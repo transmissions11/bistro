@@ -323,15 +323,29 @@ def get_batch(
         ix[0] = longest_seq_ix
 
     input_ids = [
-        ([1] * 20)
-        + tokenizer.encode(format_prompt(data[i.item()]["moves"][:-1])).type(
-            torch.int64
+        torch.cat(
+            (
+                torch.tensor(([1] * 20), dtype=torch.int64),
+                tokenizer.encode(format_prompt(data[i.item()]["moves"][:-1])).type(
+                    torch.int64
+                ),
+            ),
+            dim=0,
         )
         for i in ix
     ]
     labels = [
-        ([1] * 20)  # TODO use a token we dont count loss against
-        + tokenizer.encode(format_prompt(data[i.item()]["moves"][1:])).type(torch.int64)
+        torch.cat(
+            (
+                torch.tensor(
+                    ([1] * 20), dtype=torch.int64
+                ),  # TODO use a token we dont count loss against
+                tokenizer.encode(format_prompt(data[i.item()]["moves"][1:])).type(
+                    torch.int64
+                ),
+            ),
+            dim=0,
+        )
         for i in ix
     ]
 
