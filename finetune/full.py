@@ -9,6 +9,8 @@ import torch
 from datasets import load_dataset, DatasetDict, Dataset
 from lightning.fabric.strategies import FSDPStrategy
 
+from bistro.chat import prompt_config
+
 # support running without installing as a package
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
@@ -60,9 +62,27 @@ hparams = {
 }
 
 
+def mark_only_soft_prompt_as_trainable(model: GPT) -> None:
+    """Sets `requires_grad=False` for all non-soft-prompt weights."""
+    for name, param in model.named_parameters():
+        param.requires_grad = "soft_prompt" in name
+
+
+def format_prompt(game: str) -> str:
+    system_prompt = (
+        "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, "
+        "detailed, and polite answers to the user's questions. USER: {user_prompt} ASSISTANT: {game}"
+    )
+    formatted = system_prompt.format(
+        user_prompt="Generate a game of chess at the Grandmaster level.", game=game
+    )
+    print(formatted)
+    return formatted
+
+
 def setup(
     data_dir: Path = Path("data/chess"),
-    checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
+    checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-13b-v1.3"),
     out_dir: Path = Path("out/full/chess"),
     # TODO: Try precision="transformer-engine" (https://github.com/Lightning-AI/lightning/pull/17597)
     precision: str = "bf16-true",
@@ -108,8 +128,13 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     with lazy_load(checkpoint_path) as checkpoint:
         model.load_state_dict(checkpoint)
 
-    num_params = sum(p.numel() for p in model.parameters())
+    mark_only_soft_prompt_as_trainable(model)
+
+    trainable_params = [p for p in model.parameters() if p.requires_grad]
+    num_params = sum(p.numel() for p in trainable_params)
     fabric.print(f"Number of trainable parameters: {num_params:,}")
+    num_params = sum(p.numel() for p in model.parameters() if not p.requires_grad)
+    fabric.print(f"Number of non trainable parameters: {num_params:,}")
 
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=learning_rate, weight_decay=weight_decay
@@ -150,7 +175,12 @@ def train(
     )
 
     validate(
-        fabric, model, train_data["validation"], tokenizer, longest_seq_length
+        fabric,
+        checkpoint_dir,
+        model,
+        train_data["validation"],
+        tokenizer,
+        longest_seq_length,
     )  # sanity check
 
     with torch.device("meta"):
@@ -182,6 +212,7 @@ def train(
 
         input_ids, targets = get_batch(
             fabric,
+            checkpoint_dir,
             train_data["train"],
             tokenizer,
             longest_seq_length,
@@ -221,7 +252,12 @@ def train(
         if not is_accumulating and step_count % eval_interval == 0:
             t0 = time.time()
             val_loss = validate(
-                fabric, model, train_data["validation"], tokenizer, longest_seq_length
+                fabric,
+                checkpoint_dir,
+                model,
+                train_data["validation"],
+                tokenizer,
+                longest_seq_length,
             )
             t1 = time.time() - t0
             speed_monitor.eval_end(t1)
@@ -237,6 +273,7 @@ def train(
 @torch.no_grad()
 def validate(
     fabric: L.Fabric,
+    checkpoint_dir: Path,
     model: GPT,
     val_dataset: Dataset,
     tokenizer: Tokenizer,
@@ -247,7 +284,7 @@ def validate(
     losses = torch.zeros(eval_iters)
     for k in range(eval_iters):
         input_ids, targets = get_batch(
-            fabric, val_dataset, tokenizer, longest_seq_length
+            fabric, checkpoint_dir, val_dataset, tokenizer, longest_seq_length
         )
         logits = model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
@@ -281,6 +318,7 @@ def validate(
 
 def get_batch(
     fabric: L.Fabric,
+    checkpoint_dir: Path,
     data: Dataset,
     tokenizer: Tokenizer,
     longest_seq_length: int,
@@ -293,10 +331,16 @@ def get_batch(
         ix[0] = longest_seq_ix
 
     input_ids = [
-        tokenizer.encode(data[i.item()]["moves"][:-1]).type(torch.int64) for i in ix
+        ([1] * 20)
+        + tokenizer.encode(format_prompt(data[i.item()]["moves"][:-1])).type(
+            torch.int64
+        )
+        for i in ix
     ]
     labels = [
-        tokenizer.encode(data[i.item()]["moves"][1:]).type(torch.int64) for i in ix
+        ([1] * 20)  # TODO use a token we dont count loss against
+        + tokenizer.encode(format_prompt(data[i.item()]["moves"][1:])).type(torch.int64)
+        for i in ix
     ]
 
     max_len = max(len(s) for s in input_ids)
