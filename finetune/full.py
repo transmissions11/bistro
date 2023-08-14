@@ -10,6 +10,7 @@ from datasets import load_dataset, DatasetDict, Dataset
 from lightning.fabric.strategies import FSDPStrategy
 
 # support running without installing as a package
+# REMEMBER TO IMPORT ALL LOCAL DEPS AFTER THIS
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
