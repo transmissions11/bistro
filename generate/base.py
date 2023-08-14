@@ -31,7 +31,7 @@ def generate(
     eos_id: Optional[int] = None,
 ) -> torch.Tensor:
     print(
-        f"{model=}{idx.shape=}{max_returned_tokens=}{max_seq_length=}{temperature=}{top_k=}{eos_id=}"
+        f"{model=}, {idx.shape=}, {max_returned_tokens=}, {max_seq_length=}, {temperature=}, {top_k=}, {eos_id=}"
     )
 
     """Takes a conditioning sequence (prompt) as input and continues to generate as many tokens as requested.
