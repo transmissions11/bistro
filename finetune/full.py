@@ -298,6 +298,7 @@ def validate(
                 ),
                 dim=0,
             )
+            print(f"ENCODED TOKEN INPUT: {encoded}")
             max_returned_tokens = len(encoded) + 900
             output = generate(
                 model,
@@ -306,9 +307,13 @@ def validate(
                 max_seq_length=max_returned_tokens,
                 temperature=0.7,
             )
+            print(f"ENCODED OUTPUT: {output}")
             output = tokenizer.decode(output)
-            fabric.print(output)
-            fabric.print()
+            print(f"DECODED OUTPUT: {output}")
+            # fabric.print(output)
+            # fabric.print()
+
+            raise Exception("stop here")
 
         logits = model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
