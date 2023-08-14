@@ -223,13 +223,9 @@ def train(
         is_accumulating = (iter_num + 1) % gradient_accumulation_iters != 0
         with fabric.no_backward_sync(model, enabled=is_accumulating):
             logits = model(input_ids, max_seq_length=max_seq_length)
-            # shift the targets such that output n predicts token n+1
-            print(torch.argmax(logits, dim=-1))
-            print(targets)
-            loss = chunked_cross_entropy(
-                logits[..., :-1, :], targets[..., 1:], chunk_size=0
-            )
-            # fabric.backward(loss / gradient_accumulation_iters)
+            loss = chunked_cross_entropy(logits, targets, chunk_size=0)
+
+            fabric.backward(loss / gradient_accumulation_iters)
 
         if not is_accumulating:
             optimizer.step()
@@ -358,6 +354,7 @@ def get_batch(
         for i in ix
     ]
 
+    # TODO: THIS DOESN'T MASK OUT THE SOFT PROMPT, WE SHOULD ADD AN EXTRA DS FIELD FOR THAT???
     input_ids = [seq[:-1] for seq in raw_seqs]
     labels = [seq[1:] for seq in raw_seqs]
 
