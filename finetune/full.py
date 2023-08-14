@@ -345,7 +345,7 @@ def get_batch(
     raw_seqs = [
         torch.cat(
             (
-                torch.tensor(([0] * 20), dtype=torch.int64),
+                # torch.tensor(([0] * 20), dtype=torch.int64),
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
                     format_prompt(data[i.item()]["moves"][:1000])
