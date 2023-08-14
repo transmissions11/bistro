@@ -297,7 +297,7 @@ def validate(
                 idx=encoded,
                 max_returned_tokens=max_returned_tokens,
                 max_seq_length=max_returned_tokens,
-                temperature=0.7,
+                temperature=0.01,
             )
             print(f"ENCODED OUTPUT: {output}")
             output = tokenizer.decode(output)
@@ -340,7 +340,7 @@ def get_batch(
     raw_seqs = [
         torch.cat(
             (
-                # torch.tensor(([0] * 20), dtype=torch.int64),
+                torch.tensor(([0] * 20), dtype=torch.int64),
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
                     format_prompt(data[i.item()]["moves"][:1000])
