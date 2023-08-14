@@ -221,8 +221,6 @@ def train(
         with fabric.no_backward_sync(model, enabled=is_accumulating):
             logits = model(input_ids, max_seq_length=max_seq_length)
             # print(logits)
-            print(f"logit argmax: {torch.argmax(logits, dim=-1)}")
-            print(f"targets: {targets}")
             loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
             fabric.backward(loss / gradient_accumulation_iters)
@@ -280,6 +278,10 @@ def validate(
     for k in range(eval_iters):
         input_ids, targets = get_batch(fabric, val_dataset, tokenizer)
 
+        logits = model(input_ids)
+        loss = chunked_cross_entropy(logits, targets, chunk_size=0)
+        losses[k] = loss.item()
+
         if k == 0:
             system_prompt = (
                 "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, "
@@ -308,11 +310,8 @@ def validate(
             # fabric.print(output)
             # fabric.print()
 
-            # raise Exception("stop here")
-
-        logits = model(input_ids)
-        loss = chunked_cross_entropy(logits, targets, chunk_size=0)
-        losses[k] = loss.item()
+            print(f"logit argmax: {torch.argmax(logits, dim=-1)}")
+            print(f"targets: {targets}")
     val_loss = losses.mean()
 
     model.reset_cache()
