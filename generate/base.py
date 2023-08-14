@@ -30,6 +30,10 @@ def generate(
     top_k: Optional[int] = None,
     eos_id: Optional[int] = None,
 ) -> torch.Tensor:
+    print(
+        f"{model=}{idx.shape=}{max_returned_tokens=}{max_seq_length=}{temperature=}{top_k=}{eos_id=}"
+    )
+
     """Takes a conditioning sequence (prompt) as input and continues to generate as many tokens as requested.
 
     The implementation of this function is modified from A. Karpathy's nanoGPT.
@@ -54,13 +58,7 @@ def generate(
 
     # generate up to a fixed number of tokens
     for _ in range(max_returned_tokens - T):
-
-        print(idx.shape)
-        print(idx)
-        print(input_pos)
         x = idx.index_select(0, input_pos).view(1, -1)
-
-        print(x.shape)
 
         # forward
         logits = model(x, max_seq_length, input_pos)

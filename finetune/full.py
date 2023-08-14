@@ -2,7 +2,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Optional, Tuple, Dict, List
+from typing import Optional, Tuple
 
 import lightning as L
 import torch
@@ -14,8 +14,7 @@ from lightning.fabric.strategies import FSDPStrategy
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from scripts.prepare_alpaca import generate_prompt
-from generate.base import generate
+
 from bistro.model import GPT, Config, Block
 from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.utils import (
@@ -331,10 +330,8 @@ def validate(
 
 def get_batch(
     fabric: L.Fabric,
-    checkpoint_dir: Path,
     data: Dataset,
     tokenizer: Tokenizer,
-    longest_seq_length: int,
     longest_seq_ix: Optional[int] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     ix = torch.randint(len(data), (micro_batch_size,))
