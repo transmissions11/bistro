@@ -220,6 +220,9 @@ def train(
         is_accumulating = (iter_num + 1) % gradient_accumulation_iters != 0
         with fabric.no_backward_sync(model, enabled=is_accumulating):
             logits = model(input_ids, max_seq_length=max_seq_length)
+            # print(logits)
+            print(f"logit argmax: torch.argmax(logits)")
+            print(f"targets: {targets}")
             loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
             fabric.backward(loss / gradient_accumulation_iters)
