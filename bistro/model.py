@@ -27,9 +27,9 @@ class GPT(nn.Module):
         assert config.padded_vocab_size is not None
         self.config = config
 
-        self.num_tokens_in_soft_prompt = 20
-
-        self.soft_prompt = nn.Embedding(self.num_tokens_in_soft_prompt, config.n_embd)
+        # self.num_tokens_in_soft_prompt = 20
+        #
+        # self.soft_prompt = nn.Embedding(self.num_tokens_in_soft_prompt, config.n_embd)
 
         self.lm_head = nn.Linear(config.n_embd, config.padded_vocab_size, bias=False)
         self.transformer = nn.ModuleDict(
@@ -104,25 +104,25 @@ class GPT(nn.Module):
             mask = None
 
         # forward the model itself
-        x_pre = self.transformer.wte(idx)  # token embeddings of shape (b, t, n_embd)
+        x = self.transformer.wte(idx)  # token embeddings of shape (b, t, n_embd)
 
         # replace the first 20 embeddings of each batch with the soft prompt embeddings
         # todo i think we can just use.weight lol
-        x = (
-            F.pad(
-                torch.cat(
-                    B
-                    * [
-                        torch.unsqueeze(
-                            self.soft_prompt.weight,
-                            0,
-                        )
-                    ]
-                ),
-                pad=(0, 0, 0, x_pre.size(1) - 20),
-            )
-            + x_pre
-        )
+        # x = (
+        #     F.pad(
+        #         torch.cat(
+        #             B
+        #             * [
+        #                 torch.unsqueeze(
+        #                     self.soft_prompt.weight,
+        #                     0,
+        #                 )
+        #             ]
+        #         ),
+        #         pad=(0, 0, 0, x_pre.size(1) - 20),
+        #     )
+        #     + x_pre
+        # )
 
         if not use_kv_cache:
             for block in self.transformer.h:
