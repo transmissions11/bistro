@@ -251,21 +251,18 @@ def train(
             )
 
         if not is_accumulating and step_count % eval_interval == 0:
-            # t0 = time.time()
-            # val_loss = validate(
-            #     fabric,
-            #     checkpoint_dir,
-            #     model,
-            #     train_data["validation"],
-            #     tokenizer,
-            #     longest_seq_length,
-            # )
-            # t1 = time.time() - t0
-            # speed_monitor.eval_end(t1)
-            # fabric.print(
-            #     f"step {iter_num}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms"
-            # )
-            fabric.print("would be evaling here")
+            t0 = time.time()
+            val_loss = validate(
+                fabric,
+                model,
+                train_data["validation"],
+                tokenizer,
+            )
+            t1 = time.time() - t0
+            speed_monitor.eval_end(t1)
+            fabric.print(
+                f"step {iter_num}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms"
+            )
             fabric.barrier()
         if not is_accumulating and step_count % save_interval == 0:
             checkpoint_path = out_dir / f"iter-{iter_num:06d}-ckpt.pth"
