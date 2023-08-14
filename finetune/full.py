@@ -280,7 +280,7 @@ def validate(
         if k == 0:
             system_prompt = (
                 "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, "
-                "detailed, and polite answers to the user's questions. USER: Generate a game of chess at the Grandmaster level. ASSISTANT: "
+                "detailed, and polite answers to the user's questions. USER: Generate a game of chess at the Grandmaster level. ASSISTANT: 1. e"
             )
             encoded = torch.cat(
                 (
@@ -329,13 +329,6 @@ def get_batch(
     if longest_seq_ix is not None:
         # force the longest sample at the beginning so potential OOMs happen right away
         ix[0] = longest_seq_ix
-
-    # 1. e5 to d4
-    # -> 1. e5 to d
-    # -> . e5 to d4
-
-    # input: guh vicuna ur a model that is smart USER: do a chess game ASSISTANT: 1. e5 to d
-    # label: guh vicuna ur a model that is smart USER: do a chess game ASSISTANT: . e5 to d4
 
     raw_seqs = [
         torch.cat(
