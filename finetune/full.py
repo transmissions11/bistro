@@ -287,7 +287,7 @@ def validate(
                 "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, "
                 "detailed, and polite answers to the user's questions. "
                 "USER: Generate a game of chess at the Grandmaster level. "
-                "ASSISTANT: 1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3 Bc5 5. Bxc6 dxc6 6. O-O Nd7 7."
+                "ASSISTANT: 1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3 Bc5 5. Bxc6 dxc6 6. O-O Nd7 7."  # TODO OH I THINK WE CANT HAVE A TRAILING SPACE LOL
             )
             encoded = torch.cat(
                 (
