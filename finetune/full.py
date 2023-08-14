@@ -9,11 +9,11 @@ import torch
 from datasets import load_dataset, DatasetDict, Dataset
 from lightning.fabric.strategies import FSDPStrategy
 
-from generate.base import generate
-
 # support running without installing as a package
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
+
+from generate.base import generate
 
 
 from bistro.model import GPT, Config, Block
