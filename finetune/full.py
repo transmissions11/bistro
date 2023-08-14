@@ -354,7 +354,7 @@ def get_batch(
     labels = [seq[1:] for seq in raw_seqs]
     # replace the first 70 tokens in the label with -1
     labels = [
-        torch.cat((torch.full((70,), -1, dtype=torch.int64), label[19:]))
+        torch.cat((torch.full((70,), -1, dtype=torch.int64), label[70:]))
         for label in labels
     ]
 
