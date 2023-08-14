@@ -299,7 +299,7 @@ def validate(
                 dim=0,
             )
             print(f"ENCODED TOKEN INPUT: {encoded}")
-            max_returned_tokens = len(encoded) + 900
+            max_returned_tokens = len(encoded) + 40
             output = generate(
                 model,
                 idx=encoded,
