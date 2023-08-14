@@ -178,14 +178,12 @@ def train(
         train_data["train"]
     )
 
-    # validate(
-    #     fabric,
-    #     checkpoint_dir,
-    #     model,
-    #     train_data["validation"],
-    #     tokenizer,
-    #     longest_seq_length,
-    # )  # sanity check
+    validate(
+        fabric,
+        model,
+        train_data["validation"],
+        tokenizer,
+    )  # sanity check
 
     with torch.device("meta"):
         meta_model = GPT(model.config)
@@ -216,10 +214,8 @@ def train(
 
         input_ids, targets = get_batch(
             fabric,
-            checkpoint_dir,
             train_data["train"],
             tokenizer,
-            longest_seq_length,
             longest_seq_ix if iter_num == 0 else None,
         )
 
@@ -278,19 +274,15 @@ def train(
 @torch.no_grad()
 def validate(
     fabric: L.Fabric,
-    checkpoint_dir: Path,
     model: GPT,
     val_dataset: Dataset,
     tokenizer: Tokenizer,
-    longest_seq_length: int,
 ) -> torch.Tensor:
     fabric.print("Validating ...")
     model.eval()
     losses = torch.zeros(eval_iters)
     for k in range(eval_iters):
-        input_ids, targets = get_batch(
-            fabric, checkpoint_dir, val_dataset, tokenizer, longest_seq_length
-        )
+        input_ids, targets = get_batch(fabric, val_dataset, tokenizer)
 
         if k == 0:
             system_prompt = (
@@ -305,7 +297,6 @@ def validate(
                 ),
                 dim=0,
             )
-            print(encoded.shape)
             max_returned_tokens = len(encoded) + 900
             output = generate(
                 model,
