@@ -345,25 +345,10 @@ def get_batch(
     # input: guh vicuna ur a model that is smart USER: do a chess game ASSISTANT: 1. e5 to d
     # label: guh vicuna ur a model that is smart USER: do a chess game ASSISTANT: . e5 to d4
 
-    input_ids = [
+    raw_seqs = [
         torch.cat(
             (
                 # torch.tensor(([0] * 20), dtype=torch.int64),
-                tokenizer.encode(
-                    # TODO: dont just grab first 1k token lols
-                    format_prompt(data[i.item()]["moves"][:1000][:-1])
-                ).type(torch.int64),
-            ),
-            dim=0,
-        )
-        for i in ix
-    ]
-    labels = [
-        torch.cat(
-            (
-                # torch.tensor(
-                #     ([-1] * 19), dtype=torch.int64
-                # ),  # TODO use a token we dont count loss against
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
                     format_prompt(data[i.item()]["moves"][:1000])
@@ -374,15 +359,14 @@ def get_batch(
         for i in ix
     ]
 
+    input_ids = [seq[:-1] for seq in raw_seqs]
+    labels = [seq[1:] for seq in raw_seqs]
+
     max_len = max(len(s) for s in input_ids)
 
     def pad_right(x, pad_id):
         # pad right based on the longest sequence
         n = max_len - len(x)
-        print(x.shape)
-        print(max_len)
-        print(n)
-        print(pad_id)
         return torch.cat((x, torch.full((n,), pad_id, dtype=x.dtype)))
 
     x = torch.stack([pad_right(x, pad_id=0) for x in input_ids])
