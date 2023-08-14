@@ -179,14 +179,9 @@ def train(
         train_data["train"]
     )
 
-    print(
-        validate(
-            fabric,
-            model,
-            train_data["validation"],
-            tokenizer,
-        )
-    )  # sanity check
+    fabric.print(
+        f"starting val loss: {validate(fabric, model, train_data['validation'], tokenizer):.4f}"
+    )
 
     with torch.device("meta"):
         meta_model = GPT(model.config)
