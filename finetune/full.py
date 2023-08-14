@@ -179,11 +179,13 @@ def train(
         train_data["train"]
     )
 
-    validate(
-        fabric,
-        model,
-        train_data["validation"],
-        tokenizer,
+    print(
+        validate(
+            fabric,
+            model,
+            train_data["validation"],
+            tokenizer,
+        )
     )  # sanity check
 
     with torch.device("meta"):
