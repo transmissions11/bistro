@@ -224,7 +224,7 @@ def train(
         with fabric.no_backward_sync(model, enabled=is_accumulating):
             logits = model(input_ids, max_seq_length=max_seq_length)
             # shift the targets such that output n predicts token n+1
-            print(logits)
+            print(torch.argmax(logits))
             print(targets)
             loss = chunked_cross_entropy(
                 logits[..., :-1, :], targets[..., 1:], chunk_size=0
