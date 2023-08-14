@@ -346,12 +346,15 @@ def get_batch(
         for i in ix
     ]
 
+    # TODO: mask the vicuna prompt
+
     # TODO: THIS DOESN'T MASK OUT THE SOFT PROMPT, WE SHOULD ADD AN EXTRA DS FIELD FOR THAT???
+
     input_ids = [seq[:-1] for seq in raw_seqs]
     labels = [seq[1:] for seq in raw_seqs]
-    # replace the first 19 tokens in the label with -1
+    # replace the first 70 tokens in the label with -1
     labels = [
-        torch.cat((torch.full((19,), -1, dtype=torch.int64), label[19:]))
+        torch.cat((torch.full((70,), -1, dtype=torch.int64), label[19:]))
         for label in labels
     ]
 
