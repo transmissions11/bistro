@@ -285,7 +285,7 @@ def validate(
         if k == 0:
             system_prompt = (
                 "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, "
-                "detailed, and polite answers to the user's questions. USER: Generate a game of chess at the Grandmaster level. ASSISTANT: 1. e"
+                "detailed, and polite answers to the user's questions. USER: Generate a game of chess at the Grandmaster level. ASSISTANT: 1. e4 e5 2. "
             )
             encoded = torch.cat(
                 (
