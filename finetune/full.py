@@ -313,7 +313,7 @@ def validate(
             # fabric.print(output)
             # fabric.print()
 
-            raise Exception("stop here")
+            # raise Exception("stop here")
 
         logits = model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
