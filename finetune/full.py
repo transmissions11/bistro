@@ -377,6 +377,7 @@ def get_batch(
     max_len = max(len(s) for s in input_ids)
 
     def pad_right(x, pad_id):
+        print(x)
         # pad right based on the longest sequence
         n = max_len - len(x)
         return torch.cat((x, torch.full((n,), pad_id, dtype=x.dtype)))
