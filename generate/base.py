@@ -148,6 +148,7 @@ def main(
 
     tokenizer = Tokenizer(checkpoint_dir)
     encoded = tokenizer.encode(prompt, device=fabric.device)
+    print(f"ENCODED TOKENS: {encoded}")
     prompt_length = encoded.size(0)
     max_returned_tokens = prompt_length + max_new_tokens
     assert max_returned_tokens <= model.config.block_size, (
