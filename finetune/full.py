@@ -221,7 +221,7 @@ def train(
         with fabric.no_backward_sync(model, enabled=is_accumulating):
             logits = model(input_ids, max_seq_length=max_seq_length)
             # print(logits)
-            print(f"logit argmax: torch.argmax(logits)")
+            print(f"logit argmax: {torch.argmax(logits)}")
             print(f"targets: {targets}")
             loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
