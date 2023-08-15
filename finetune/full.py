@@ -23,7 +23,6 @@ from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.utils import (
     lazy_load,
     check_valid_checkpoint_dir,
-    step_csv_logger,
     chunked_cross_entropy,
 )
 from lit_gpt.speed_monitor import (
@@ -236,6 +235,7 @@ def train(
             lengths=total_lengths,
         )
         if iter_num % log_interval == 0:
+            fabric.log("train/loss", loss.item())
             fabric.print(
                 f"iter {iter_num} step {step_count}: loss {loss.item():.4f}, iter time:"
                 f" {(t1 - iter_t0) * 1000:.2f}ms{' (optimizer.step)' if not is_accumulating else ''}"
@@ -251,6 +251,7 @@ def train(
             )
             t1 = time.time() - t0
             speed_monitor.eval_end(t1)
+            fabric.log("val/loss", val_loss)
             fabric.print(
                 f"step {iter_num}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms"
             )
