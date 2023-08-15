@@ -297,11 +297,12 @@ def validate(
             #     ),
             #     dim=0,
             # )
-            print(f"ENCODED TOKEN INPUT: {input_ids}")
-            max_returned_tokens = len(input_ids) + 40
+            sample = input_ids[0]
+            print(f"ENCODED TOKEN INPUT: {sample}")
+            max_returned_tokens = len(sample) + 40
             output = generate(
                 model,
-                idx=input_ids,
+                idx=sample,
                 max_returned_tokens=max_returned_tokens,
                 max_seq_length=max_returned_tokens,
                 temperature=0.01,
