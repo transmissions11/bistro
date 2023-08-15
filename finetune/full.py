@@ -288,8 +288,9 @@ def validate(
 
             for i in reversed(range(1, 70)):
                 sample = og_sample[:-i]
+                target = og_target[: -(i + 1)]
                 print(f"DECODED SAMPLE: |{tokenizer.decode(sample)}|")
-                max_returned_tokens = len(sample) + 1
+                max_returned_tokens = len(sample) + 5
                 output = generate(
                     model,
                     idx=sample,
@@ -297,11 +298,12 @@ def validate(
                     max_seq_length=max_returned_tokens,
                     temperature=0.01,
                 )
+                # output includes the input
                 print(
-                    f"PREDICTED TOKEN: |{tokenizer.decode(output[-1])}| ({output[-1]})"
+                    f"PREDICTED TOKENS: |{tokenizer.decode(output[:-5])}| ({output[:-5]})"
                 )
                 print(
-                    f"TARGET TOKEN: |{tokenizer.decode(og_target[-(i+1)])}| ({og_target[-(i+1)]})"
+                    f"TARGET TOKENS: |{tokenizer.decode(target[:-5])}| ({target[:-5]})"
                 )
                 model.reset_cache()
 
