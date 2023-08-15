@@ -303,13 +303,18 @@ def validate(
                     max_returned_tokens=max_returned_tokens,
                     max_seq_length=max_returned_tokens,
                     temperature=0.01,
+                    # top_k=1,
                 )
-                print(f"OUTPUT:", tokenizer.decode(torch.tensor(output[-5:])))
                 print(
-                    f"TARGET:",
+                    f"OUTPUT (decoded, tkns):",
+                    tokenizer.decode(torch.tensor(output[-5:])),
+                ), output[-5:]
+                print(
+                    f"TARGET (decoded, tkns):",
                     tokenizer.decode(
                         torch.tensor(get_relative_items(og_target, i + 1, 5))
                     ),
+                    get_relative_items(og_target, i + 1, 5),
                 )
                 print("\n\n")
                 model.reset_cache()
