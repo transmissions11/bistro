@@ -286,6 +286,13 @@ def validate(
             og_sample = input_ids[0]
             og_target = targets[0]
 
+            def get_relative_items(arr, index_from_end, num_items):
+                return (
+                    arr[-index_from_end : -index_from_end + num_items]
+                    if index_from_end > num_items
+                    else arr[-index_from_end:]
+                )
+
             for i in reversed(range(1, 10)):
                 sample = og_sample[:-i]
                 print(f"DECODED SAMPLE: |{tokenizer.decode(sample)}|")
@@ -302,7 +309,7 @@ def validate(
                     f"PREDICTED TOKENS: |{tokenizer.decode(output[-5:])}| ({output[-5:]})"
                 )
                 print(
-                    f"TARGET TOKENS: |{tokenizer.decode(og_target[:-(i + 5)])}| ({og_target[:-(i + 5)]})"
+                    f"TARGET TOKENS: |{tokenizer.decode(get_relative_items(og_target, i, 5))}| ({get_relative_items(og_target, i, 5)})"
                 )
                 model.reset_cache()
 
