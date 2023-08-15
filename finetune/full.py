@@ -283,25 +283,25 @@ def validate(
         losses[k] = loss.item()
 
         if k == 0:
-            system_prompt = (
-                "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, "
-                "detailed, and polite answers to the user's questions. "
-                "USER: Generate a game of chess at the Grandmaster level. "
-                "ASSISTANT: 1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3 Bc5 5. Bxc6 dxc6 6. O-O Nd7 7."  # TODO OH I THINK WE CANT HAVE A TRAILING SPACE LOL
-            )
-            encoded = torch.cat(
-                (
-                    # todo: dont do this lmeow
-                    torch.tensor(([0] * 20), dtype=torch.int64, device=model.device),
-                    tokenizer.encode(system_prompt, device=model.device),
-                ),
-                dim=0,
-            )
-            print(f"ENCODED TOKEN INPUT: {encoded}")
-            max_returned_tokens = len(encoded) + 40
+            # system_prompt = (
+            #     "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, "
+            #     "detailed, and polite answers to the user's questions. "
+            #     "USER: Generate a game of chess at the Grandmaster level. "
+            #     "ASSISTANT: 1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3 Bc5 5. Bxc6 dxc6 6. O-O Nd7 7."  # TODO OH I THINK WE CANT HAVE A TRAILING SPACE LOL
+            # )
+            # encoded = torch.cat(
+            #     (
+            #         # todo: dont do this lmeow
+            #         torch.tensor(([0] * 20), dtype=torch.int64, device=model.device),
+            #         tokenizer.encode(system_prompt, device=model.device),
+            #     ),
+            #     dim=0,
+            # )
+            print(f"ENCODED TOKEN INPUT: {input_ids}")
+            max_returned_tokens = len(input_ids) + 40
             output = generate(
                 model,
-                idx=encoded,
+                idx=input_ids,
                 max_returned_tokens=max_returned_tokens,
                 max_seq_length=max_returned_tokens,
                 temperature=0.01,
