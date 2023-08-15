@@ -31,7 +31,6 @@ from lit_gpt.speed_monitor import (
     estimate_flops,
 )
 
-# from lit_gpt.scripts.prepare_alpaca import generate_prompt
 
 eval_interval = 50
 save_interval = 600
@@ -185,11 +184,6 @@ def train(
 
     with torch.device("meta"):
         meta_model = GPT(model.config)
-        # estimated is too much of an optimistic estimate, left just for reference
-        estimated_flops = estimate_flops(meta_model) * micro_batch_size
-        fabric.print(
-            f"Estimated TFLOPs: {estimated_flops * fabric.world_size / 1e12:.2f}"
-        )
         x = torch.randint(0, 1, (micro_batch_size, model.config.block_size))
         measured_flops = measure_flops(meta_model, x)
         fabric.print(
