@@ -55,7 +55,7 @@ def generate(
     for i in range(max_new_tokens):
         # Forward pass through the model.
         logits, _ = model(
-            torch.cat((idx, decoded_tkns)),
+            torch.cat((idx, decoded_tkns)).unsqueeze(0),
             max_seq_length,  # TODO: Do we need to specify this?
         )
 
