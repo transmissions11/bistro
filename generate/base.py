@@ -155,7 +155,7 @@ def main(
 
         model.reset_cache()
         fabric.print(tokenizer.decode(y))
-        tokens_generated = y.size(0) - prompt_length
+        tokens_generated = y.size(0)
         fabric.print(
             f"Time for inference {i + 1}: {t:.02f} sec total, {tokens_generated / t:.02f} tokens/sec",
             file=sys.stderr,

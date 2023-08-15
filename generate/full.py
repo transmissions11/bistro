@@ -96,7 +96,7 @@ def main(
     output = tokenizer.decode(y)
     fabric.print(output)
 
-    tokens_generated = y.size(0) - prompt_length
+    tokens_generated = y.size(0)
     fabric.print(
         f"\n\nTime for inference: {t:.02f} sec total, {tokens_generated / t:.02f} tokens/sec",
         file=sys.stderr,
