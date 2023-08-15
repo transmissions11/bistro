@@ -92,7 +92,6 @@ def main(
     )
     t = time.perf_counter() - t0
 
-    model.reset_cache()
     output = tokenizer.decode(y)
     fabric.print(output)
 

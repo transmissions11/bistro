@@ -153,7 +153,6 @@ def main(
         )
         t = time.perf_counter() - t0
 
-        model.reset_cache()
         fabric.print(tokenizer.decode(y))
         tokens_generated = y.size(0)
         fabric.print(

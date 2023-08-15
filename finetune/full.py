@@ -315,11 +315,8 @@ def validate(
                     get_relative_items(og_target, i + 1, 5),
                 )
                 print("\n\n")
-                model.reset_cache()
 
     val_loss = losses.mean()
-
-    model.reset_cache()
 
     model.train()
     return val_loss.item()
