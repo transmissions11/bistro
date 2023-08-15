@@ -286,7 +286,7 @@ def validate(
             og_sample = input_ids[0]
             og_target = targets[0]
 
-            for i in reversed(range(1, 70)):
+            for i in reversed(range(1, 10)):
                 sample = og_sample[:-i]
                 target = og_target[: -(i + 1)]
                 print(f"DECODED SAMPLE: |{tokenizer.decode(sample)}|")
@@ -300,10 +300,10 @@ def validate(
                 )
                 # output includes the input
                 print(
-                    f"PREDICTED TOKENS: |{tokenizer.decode(output[:-5])}| ({output[:-5]})"
+                    f"PREDICTED TOKENS: |{tokenizer.decode(output[-5:])}| ({output[-5:]})"
                 )
                 print(
-                    f"TARGET TOKENS: |{tokenizer.decode(target[:-5])}| ({target[:-5]})"
+                    f"TARGET TOKENS: |{tokenizer.decode(target[-5:])}| ({target[-5:]})"
                 )
                 model.reset_cache()
 
