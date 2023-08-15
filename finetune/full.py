@@ -102,7 +102,7 @@ def setup(
         devices=devices,
         strategy=strategy,
         precision=precision,
-        loggers=WandbLogger(project="bistro", log_freq=log_interval),
+        loggers=WandbLogger(project="bistro"),
     )
     fabric.launch(main, data_dir, checkpoint_dir, out_dir)
 
