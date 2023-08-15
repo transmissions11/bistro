@@ -26,14 +26,10 @@ def generate(
     model: torch.nn.Module,
     idx: torch.Tensor,
     max_new_tokens: int,
-    max_seq_length: int,
     *,
     temperature: float = 1.0,
     eos_id: Optional[int] = None,
 ) -> torch.Tensor:
-    print(
-        f"[GENERATING], {idx.shape=}, {max_new_tokens=}, {max_seq_length=}, {temperature=}, {eos_id=}"
-    )
 
     """Takes a conditioning sequence (prompt) as input and continues to generate as many tokens as requested.
 
@@ -43,7 +39,6 @@ def generate(
         model: The model to use.
         idx: Tensor of shape (T) with indices of the prompt sequence.
         max_new_tokens: The maximum number of tokens to generate.
-        max_seq_length: The maximum sequence length allowed. Should be less or equal than the block size.
         temperature: Scales the predicted logits by 1 / temperature.
         eos_id: If specified, stop generating any more token once the <eos> token is triggered.
     """
@@ -55,10 +50,7 @@ def generate(
     for i in range(max_new_tokens):
 
         # Forward pass through the model.
-        logits = model(
-            torch.cat((idx, decoded_tkns)).unsqueeze(0),
-            max_seq_length,  # TODO: Do we need to specify this?
-        )
+        logits = model(torch.cat((idx, decoded_tkns)).unsqueeze(0))
 
         # Pluck the logits at the final step and scale by desired temperature.
         logits = logits[:, -1, :] / (
@@ -159,7 +151,6 @@ def main(
             model,
             encoded,
             max_new_tokens=max_new_tokens,
-            max_seq_length=max_returned_tokens,
             temperature=temperature,
             top_k=top_k,
         )

@@ -296,12 +296,10 @@ def validate(
             for i in reversed(range(1, 10)):
                 sample = og_sample[:-i]
                 print(f"{i} INPUT: {tokenizer.decode(torch.tensor(sample))}")
-                max_returned_tokens = len(sample) + 5
                 output = generate(
                     model,
                     idx=sample,
                     max_new_tokens=5,
-                    max_seq_length=max_returned_tokens,
                     temperature=0.01,
                 )
                 print(

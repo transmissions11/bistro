@@ -24,7 +24,6 @@ def main(
     finetuned_path: Path = Path("out/full/chess/lit_model_finetuned.pth"),
     checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
     max_new_tokens: int = 100,
-    top_k: int = 200,
     temperature: float = 0.8,
     strategy: str = "auto",
     devices: int = 1,
@@ -41,7 +40,6 @@ def main(
             `finetune/full.py`.
         checkpoint_dir: The path to the checkpoint folder with pretrained GPT weights.
         max_new_tokens: The number of generation steps to take.
-        top_k: The number of top most probable tokens to consider in the sampling process.
         temperature: A value controlling the randomness of the sampling process. Higher values result in more random
             samples.
         strategy: Indicates the Fabric strategy setting to use.
@@ -83,16 +81,13 @@ def main(
     tokenizer = Tokenizer(checkpoint_dir)
     encoded = tokenizer.encode(prompt, device=model.device)
     prompt_length = encoded.size(0)
-    max_returned_tokens = prompt_length + max_new_tokens
 
     t0 = time.perf_counter()
     y = generate(
         model,
         encoded,
         max_new_tokens=max_new_tokens,
-        max_seq_length=max_returned_tokens,
         temperature=temperature,
-        top_k=top_k,
         eos_id=tokenizer.eos_id,
     )
     t = time.perf_counter() - t0
