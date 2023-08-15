@@ -288,7 +288,7 @@ def validate(
 
             for i in range(0, 5):
                 sample = og_sample[:-i]
-                print(f"DECODED SAMPLE: {tokenizer.decode(sample)}")
+                print(f"DECODED SAMPLE: |{tokenizer.decode(sample)}|")
                 max_returned_tokens = len(sample) + 1
                 output = generate(
                     model,
@@ -297,8 +297,8 @@ def validate(
                     max_seq_length=max_returned_tokens,
                     temperature=0.01,
                 )
-                print(f"PREDICTED TOKEN: {tokenizer.decode(output[-1])}")
-                print(f"TARGET TOKEN: {tokenizer.decode(og_target[-i])}")
+                print(f"PREDICTED TOKEN: |{tokenizer.decode(output[-1])}|")
+                print(f"TARGET TOKEN: |{tokenizer.decode(og_target[-i])}|")
 
     val_loss = losses.mean()
 
