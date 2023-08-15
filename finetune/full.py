@@ -223,7 +223,7 @@ def train(
             # print(logits)
             loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
-            # fabric.backward(loss / gradient_accumulation_iters)
+            fabric.backward(loss / gradient_accumulation_iters)
 
         if not is_accumulating:
             optimizer.step()
@@ -337,7 +337,7 @@ def get_batch(
     raw_seqs = [
         torch.cat(
             (
-                # torch.tensor(([0] * 20), dtype=torch.int64),
+                torch.tensor(([0] * 20), dtype=torch.int64),
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
                     format_prompt(data[i.item()]["moves"][:1000])
@@ -356,7 +356,7 @@ def get_batch(
     labels = [seq[1:] for seq in raw_seqs]
     # replace the first 70 tokens in the label with -1
     labels = [
-        torch.cat((torch.full((51,), -1, dtype=torch.int64), label[51:]))
+        torch.cat((torch.full((70,), -1, dtype=torch.int64), label[70:]))
         for label in labels
     ]
 
