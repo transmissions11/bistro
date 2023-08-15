@@ -303,6 +303,7 @@ def validate(
                 print(
                     f"TARGET TOKEN: |{tokenizer.decode(og_target[-i])}| ({og_target[-i]})"
                 )
+                model.reset_cache()
 
     val_loss = losses.mean()
 
