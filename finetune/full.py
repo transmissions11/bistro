@@ -308,7 +308,8 @@ def validate(
                 print(
                     f"OUTPUT (decoded, tkns):",
                     tokenizer.decode(torch.tensor(output[-5:])),
-                ), output[-5:]
+                    output[-5:],
+                )
                 print(
                     f"TARGET (decoded, tkns):",
                     tokenizer.decode(
