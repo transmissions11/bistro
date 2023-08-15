@@ -304,8 +304,8 @@ def validate(
                     max_seq_length=max_returned_tokens,
                     temperature=0.01,
                 )
-                print(f"OUTPUT:", output)
-                print(f"TARGET:", og_target)
+                print(f"OUTPUT:", output[-5:])
+                print(f"TARGET:", get_relative_items(og_target, i + 1, 5))
                 model.reset_cache()
 
     val_loss = losses.mean()
