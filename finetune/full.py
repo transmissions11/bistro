@@ -301,7 +301,7 @@ def validate(
                     f"PREDICTED TOKEN: |{tokenizer.decode(output[-1])}| ({output[-1]})"
                 )
                 print(
-                    f"TARGET TOKEN: |{tokenizer.decode(og_target[-i])}| ({og_target[-i]})"
+                    f"TARGET TOKEN: |{tokenizer.decode(og_target[-(i+1)])}| ({og_target[-(i+1)]})"
                 )
                 model.reset_cache()
 
