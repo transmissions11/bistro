@@ -295,7 +295,7 @@ def validate(
 
             for i in reversed(range(1, 10)):
                 sample = og_sample[:-i]
-                print(f"{i} INPUT: {sample}")
+                print(f"{i} INPUT: {tokenizer.decode(torch.tensor(sample))}")
                 max_returned_tokens = len(sample) + 5
                 output = generate(
                     model,
@@ -304,8 +304,14 @@ def validate(
                     max_seq_length=max_returned_tokens,
                     temperature=0.01,
                 )
-                print(f"OUTPUT:", output[-5:])
-                print(f"TARGET:", get_relative_items(og_target, i + 1, 5))
+                print(f"OUTPUT:", tokenizer.decode(torch.tensor(output[-5:])))
+                print(
+                    f"TARGET:",
+                    tokenizer.decode(
+                        torch.tensor(get_relative_items(og_target, i + 1, 5))
+                    ),
+                )
+                print("\n\n")
                 model.reset_cache()
 
     val_loss = losses.mean()
