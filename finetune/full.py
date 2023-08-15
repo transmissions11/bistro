@@ -295,7 +295,7 @@ def validate(
 
             for i in reversed(range(1, 10)):
                 sample = og_sample[:-i]
-                print(f"INPUT: {sample}")
+                print(f"{i} INPUT: {sample}")
                 max_returned_tokens = len(sample) + 5
                 output = generate(
                     model,
