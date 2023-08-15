@@ -78,7 +78,6 @@ def main(
     *,
     num_samples: int = 1,
     max_new_tokens: int = 50,
-    top_k: int = 200,
     temperature: float = 0.8,
     checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.3"),
     strategy: str = "auto",
@@ -91,7 +90,6 @@ def main(
         prompt: The prompt string to use for generating the samples.
         num_samples: The number of text samples to generate.
         max_new_tokens: The number of generation steps to take.
-        top_k: The number of top most probable tokens to consider in the sampling process.
         temperature: A value controlling the randomness of the sampling process. Higher values result in more random
             samples.
         checkpoint_dir: The checkpoint directory to load.
@@ -152,7 +150,6 @@ def main(
             encoded,
             max_new_tokens=max_new_tokens,
             temperature=temperature,
-            top_k=top_k,
         )
         t = time.perf_counter() - t0
 
