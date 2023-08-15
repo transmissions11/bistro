@@ -89,7 +89,7 @@ def main(
     y = generate(
         model,
         encoded,
-        max_returned_tokens,
+        max_new_tokens=max_new_tokens,
         max_seq_length=max_returned_tokens,
         temperature=temperature,
         top_k=top_k,

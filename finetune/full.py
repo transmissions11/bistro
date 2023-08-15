@@ -300,10 +300,9 @@ def validate(
                 output = generate(
                     model,
                     idx=sample,
-                    max_returned_tokens=max_returned_tokens,
+                    max_new_tokens=5,
                     max_seq_length=max_returned_tokens,
                     temperature=0.01,
-                    top_k=1,
                 )
                 print(
                     f"OUTPUT (decoded, tkns):",

@@ -13,6 +13,8 @@ from lightning.fabric.strategies import FSDPStrategy
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
+import torch.nn.functional as F
+
 from bistro import GPT
 from lit_gpt import Tokenizer, Config
 from bistro.model import Block
@@ -23,15 +25,14 @@ from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
 def generate(
     model: torch.nn.Module,
     idx: torch.Tensor,
-    max_returned_tokens: int,
+    max_new_tokens: int,
     max_seq_length: int,
     *,
     temperature: float = 1.0,
-    top_k: Optional[int] = None,
     eos_id: Optional[int] = None,
 ) -> torch.Tensor:
     print(
-        f"[MODEL], {idx.shape=}, {max_returned_tokens=}, {max_seq_length=}, {temperature=}, {top_k=}, {eos_id=}"
+        f"[GENERATING], {idx.shape=}, {max_new_tokens=}, {max_seq_length=}, {temperature=}, {eos_id=}"
     )
 
     """Takes a conditioning sequence (prompt) as input and continues to generate as many tokens as requested.
@@ -41,48 +42,42 @@ def generate(
     Args:
         model: The model to use.
         idx: Tensor of shape (T) with indices of the prompt sequence.
-        max_returned_tokens: The maximum number of tokens to return (given plus generated).
+        max_new_tokens: The maximum number of tokens to generate.
         max_seq_length: The maximum sequence length allowed. Should be less or equal than the block size.
         temperature: Scales the predicted logits by 1 / temperature.
-        top_k: If specified, only sample among the tokens with the k highest probabilities.
         eos_id: If specified, stop generating any more token once the <eos> token is triggered.
     """
-    T = idx.size(0)
-    assert max_returned_tokens > T
     device, dtype = idx.device, idx.dtype
-    # create an empty tensor of the expected final shape and fill in the current tokens
-    empty = torch.empty(max_returned_tokens, dtype=dtype, device=device)
-    empty[:T] = idx
-    idx = empty
-    input_pos = torch.arange(0, T, device=device)
 
-    # generate up to a fixed number of tokens
-    for _ in range(max_returned_tokens - T):
-        x = idx.index_select(0, input_pos).view(1, -1)
+    # Create a tensor to hold the decoded tokens as we sample.
+    decoded_tkns = torch.empty(0, device=device, dtype=dtype)
 
-        # forward
-        logits = model(x, max_seq_length, input_pos)
-        logits = logits[0, -1] / temperature
+    for i in range(max_new_tokens):
+        # Forward pass through the model.
+        logits, _ = model(
+            torch.cat((idx, decoded_tkns)),
+            max_seq_length,  # TODO: Do we need to specify this?
+        )
 
-        # optionally crop the logits to only the top k options
-        if top_k is not None:
-            v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
-            logits = torch.where(logits < v[[-1]], -float("Inf"), logits)
+        # Pluck the logits at the final step and scale by desired temperature.
+        logits = logits[:, -1, :] / (
+            temperature + 1e-10
+        )  # +1e-10 as eps to avoid divide by zero
 
-        probs = torch.nn.functional.softmax(logits, dim=-1)
-        idx_next = torch.multinomial(probs, num_samples=1).to(dtype=dtype)
+        # Apply softmax to convert logits to (normalized) probabilities.
+        probs = F.softmax(logits, dim=-1)
 
-        # advance
-        input_pos = input_pos[-1:] + 1
+        # Sample the next token.
+        next_tkn = torch.multinomial(probs, num_samples=1)
 
-        # concatenate the new generation
-        idx = idx.index_copy(0, input_pos, idx_next)
+        # Append the token to the running decoded sequence.
+        decoded_tkns = torch.cat((decoded_tkns, next_tkn))
 
-        # if <eos> token is triggered, return the output (stop generation)
-        if idx_next == eos_id:
-            return idx[:input_pos]  # include the EOS token
+        # If the token is <|endoftext|>, we're done.
+        if next_tkn.item() == eos_id:
+            break
 
-    return idx
+    return decoded_tkns
 
 
 def main(
@@ -162,7 +157,7 @@ def main(
         y = generate(
             model,
             encoded,
-            max_returned_tokens,
+            max_new_tokens=max_new_tokens,
             max_seq_length=max_returned_tokens,
             temperature=temperature,
             top_k=top_k,
