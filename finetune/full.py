@@ -297,8 +297,12 @@ def validate(
                     max_seq_length=max_returned_tokens,
                     temperature=0.01,
                 )
-                print(f"PREDICTED TOKEN: |{tokenizer.decode(output[-1])}|")
-                print(f"TARGET TOKEN: |{tokenizer.decode(og_target[-i])}|")
+                print(
+                    f"PREDICTED TOKEN: |{tokenizer.decode(output[-1])}| ({output[-1]})"
+                )
+                print(
+                    f"TARGET TOKEN: |{tokenizer.decode(og_target[-i])}| ({og_target[-i]})"
+                )
 
     val_loss = losses.mean()
 
