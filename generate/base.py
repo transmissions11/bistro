@@ -53,7 +53,6 @@ def generate(
     decoded_tkns = torch.empty(0, device=device, dtype=dtype)
 
     for i in range(max_new_tokens):
-        print(f"{decoded_tkns.shape=}")
 
         # Forward pass through the model.
         logits = model(
@@ -61,29 +60,19 @@ def generate(
             max_seq_length,  # TODO: Do we need to specify this?
         )
 
-        print(f"{logits.shape=}")
-
         # Pluck the logits at the final step and scale by desired temperature.
         logits = logits[:, -1, :] / (
             temperature + 1e-10
         )  # +1e-10 as eps to avoid divide by zero
 
-        print(f"{logits.shape=}")
-
         # Apply softmax to convert logits to (normalized) probabilities.
         probs = F.softmax(logits, dim=-1)
 
-        print(f"{probs.shape=}")
-
-        # Sample the next token.
-        next_tkn = torch.multinomial(probs, num_samples=1)
-
-        print(f"{next_tkn.shape=}")
+        # Sample the next token, using [0] to remove the batch dim.
+        next_tkn = torch.multinomial(probs, num_samples=1)[0]
 
         # Append the token to the running decoded sequence.
         decoded_tkns = torch.cat((decoded_tkns, next_tkn))
-
-        print(f"{decoded_tkns.shape=}")
 
         # If the token is <|endoftext|>, we're done.
         if next_tkn.item() == eos_id:
