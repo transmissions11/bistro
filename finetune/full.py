@@ -8,6 +8,7 @@ import lightning as L
 import torch
 from datasets import load_dataset, DatasetDict, Dataset
 from lightning.fabric.strategies import FSDPStrategy
+from lightning.pytorch.loggers import WandbLogger
 
 # support running without installing as a package
 # REMEMBER TO IMPORT ALL LOCAL DEPS AFTER THIS
@@ -28,15 +29,15 @@ from lit_gpt.utils import (
 from lit_gpt.speed_monitor import (
     SpeedMonitorFabric as SpeedMonitor,
     measure_flops,
-    estimate_flops,
 )
 
 
-eval_interval = 50
-save_interval = 600
-eval_iters = 100
 log_interval = 1
+eval_interval, eval_iters = 50, 100
+save_interval = 600
+
 devices = 1
+
 # change this value to force a maximum sequence length
 override_max_seq_length = None
 
@@ -46,8 +47,10 @@ batch_size = 64 / devices
 micro_batch_size = 1
 gradient_accumulation_iters = 3  # todo batch_size // micro_batch_size
 assert gradient_accumulation_iters > 0
+
 epoch_size = 50000  # train dataset size
 num_epochs = 5
+
 max_iters = num_epochs * (epoch_size // micro_batch_size) // devices
 weight_decay = 0.02
 warmup_steps = (
@@ -72,11 +75,9 @@ def format_prompt(game: str) -> str:
         "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, "
         "detailed, and polite answers to the user's questions. USER: {user_prompt} ASSISTANT: {game}"
     )
-    formatted = system_prompt.format(
+    return system_prompt.format(
         user_prompt="Generate a game of chess at the Grandmaster level.", game=game
     )
-    # print(formatted)
-    return formatted
 
 
 def setup(
