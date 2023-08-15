@@ -297,7 +297,7 @@ def validate(
             #     ),
             #     dim=0,
             # )
-            sample = input_ids[0]
+            sample = input_ids[0][:-80]
             print(f"ENCODED TOKEN INPUT: {sample}")
             max_returned_tokens = len(sample) + 40
             output = generate(
