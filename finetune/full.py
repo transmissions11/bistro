@@ -98,11 +98,11 @@ def setup(
     else:
         strategy = "auto"
 
-    logger = step_csv_logger(
-        out_dir.parent, out_dir.name, flush_logs_every_n_steps=log_interval
-    )
     fabric = L.Fabric(
-        devices=devices, strategy=strategy, precision=precision, loggers=logger
+        devices=devices,
+        strategy=strategy,
+        precision=precision,
+        loggers=WandbLogger(project="bistro", log_freq=log_interval),
     )
     fabric.launch(main, data_dir, checkpoint_dir, out_dir)
 
