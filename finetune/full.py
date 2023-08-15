@@ -286,7 +286,7 @@ def validate(
             og_sample = input_ids[0]
             og_target = targets[0]
 
-            for i in range(1, 5):
+            for i in reversed(range(1, 70)):
                 sample = og_sample[:-i]
                 print(f"DECODED SAMPLE: |{tokenizer.decode(sample)}|")
                 max_returned_tokens = len(sample) + 1
