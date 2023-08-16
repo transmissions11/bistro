@@ -11,14 +11,6 @@ from datasets import load_dataset, DatasetDict, Dataset
 from lightning.fabric.strategies import FSDPStrategy
 from lightning.pytorch.loggers import WandbLogger
 
-# Support running without installing as a package.
-# ! REMEMBER TO IMPORT ALL LOCAL DEPS AFTER THIS !
-wd = Path(__file__).parent.parent.resolve()
-sys.path.append(str(wd))
-
-from sample import sample_model
-from model import GPT, Config, Block
-
 from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.utils import (
     lazy_load,
@@ -29,6 +21,14 @@ from lit_gpt.speed_monitor import (
     SpeedMonitorFabric as SpeedMonitor,
     measure_flops,
 )
+
+# Support running without installing as a package.
+# ! REMEMBER TO IMPORT ALL LOCAL DEPS AFTER THIS !
+wd = Path(__file__).parent.parent.resolve()
+sys.path.append(str(wd))
+
+from sample import sample_model
+from model import GPT, Config, Block
 
 
 log_interval = 1
@@ -84,7 +84,7 @@ def format_prompt(game: str) -> str:
 
 def setup(
     data_dir: Path = Path("data/chess"),
-    checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-13b-v1.3"),
+    checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
     out_dir: Path = Path("out/full/chess"),
     # TODO: Try precision="transformer-engine" (https://github.com/Lightning-AI/lightning/pull/17597)
     precision: str = "bf16-true",
