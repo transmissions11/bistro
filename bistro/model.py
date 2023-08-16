@@ -22,14 +22,12 @@ FlashAttention2Available = RequirementCache("flash-attn>=2.0.0.post1")
 
 
 class GPT(nn.Module):
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: Config, num_tokens_in_soft_prompt) -> None:
         super().__init__()
         assert config.padded_vocab_size is not None
         self.config = config
 
-        self.num_tokens_in_soft_prompt = 20
-
-        self.soft_prompt = nn.Embedding(self.num_tokens_in_soft_prompt, config.n_embd)
+        self.soft_prompt = nn.Embedding(num_tokens_in_soft_prompt, config.n_embd)
 
         self.lm_head = nn.Linear(config.n_embd, config.padded_vocab_size, bias=False)
         self.transformer = nn.ModuleDict(

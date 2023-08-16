@@ -40,6 +40,9 @@ devices = 1
 # change this value to force a maximum sequence length
 override_max_seq_length = None
 
+# TODO: BETTER WAY TO DO THIS
+num_tokens_in_soft_prompt = 20
+
 # Hyperparameters
 learning_rate = 1
 batch_size = 64 / devices
@@ -123,7 +126,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}")
     with fabric.init_module(empty_init=False):
-        model = GPT(config)
+        model = GPT(config, num_tokens_in_soft_prompt)
     with lazy_load(checkpoint_path) as checkpoint:
         model.load_state_dict(checkpoint, strict=False)
 
@@ -323,7 +326,7 @@ def get_batch(
     raw_seqs = [
         torch.cat(
             (
-                torch.tensor(([0] * 20), dtype=torch.int64),
+                torch.tensor(([0] * num_tokens_in_soft_prompt), dtype=torch.int64),
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
                     format_prompt(data[i.item()]["moves"][:1000])
@@ -340,9 +343,15 @@ def get_batch(
 
     input_ids = [seq[:-1] for seq in raw_seqs]
     labels = [seq[1:] for seq in raw_seqs]
-    # replace the first 70 tokens in the label with -1
     labels = [
-        torch.cat((torch.full((70,), -1, dtype=torch.int64), label[70:]))
+        torch.cat(
+            (
+                torch.full(
+                    (51 + (num_tokens_in_soft_prompt - 1),), -1, dtype=torch.int64
+                ),
+                label[70:],
+            )
+        )
         for label in labels
     ]
 
