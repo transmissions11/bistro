@@ -285,7 +285,7 @@ def validate(
 
             max_new_tokens = 40
 
-            print(f"INPUT: {tokenizer.decode(sample)}")
+            print(f"INPUT: {tokenizer.decode(sample[:-max_new_tokens])}")
             output = generate(
                 model,
                 idx=sample[:-max_new_tokens],
