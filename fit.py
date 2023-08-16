@@ -292,6 +292,7 @@ def validate(
                 f"OUTPUT (decoded, tkns):",
                 tokenizer.decode(output[-max_new_tokens:]),
             )
+            print(target[-(max_new_tokens + 1) :])
             print(
                 f"TARGET (decoded, tkns):",
                 tokenizer.decode(target[-(max_new_tokens + 1) :]),
