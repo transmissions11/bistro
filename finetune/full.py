@@ -314,9 +314,14 @@ def validate(
                 + x_pre
             )
 
-            logits = model.lm_head(x)  # (b, t, vocab_size)
+            predicted_tkns = torch.argmax(
+                # (b, t, vocab_size)
+                model.lm_head(x),
+                dim=-1,
+            )
 
-            print(logits)
+            print(predicted_tkns)
+            print(predicted_tkns.shape)
 
             # print(tokenizer.decode(model.transformer.ln_f().squeeze(0)))
 
