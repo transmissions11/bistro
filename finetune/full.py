@@ -10,6 +10,8 @@ from datasets import load_dataset, DatasetDict, Dataset
 from lightning.fabric.strategies import FSDPStrategy
 from lightning.pytorch.loggers import WandbLogger
 
+import torch.nn.functional as F
+
 # support running without installing as a package
 # REMEMBER TO IMPORT ALL LOCAL DEPS AFTER THIS
 wd = Path(__file__).parent.parent.resolve()
@@ -288,18 +290,35 @@ def validate(
 
             max_new_tokens = 40
 
-            print(
-                tokenizer.decode(
-                    model.transformer.ln_f(
-                        model.transformer.wte(
-                            torch.tensor(
-                                [0] * num_tokens_in_soft_prompt, device=fabric.device
-                            ).unsqueeze(0)
-                        )
-                        + model.soft_prompt.weight.unsqueeze(0),
-                    ).squeeze(0)
+            x_pre = model.transformer.wte(
+                torch.tensor(
+                    [0] * num_tokens_in_soft_prompt, device=fabric.device
+                ).unsqueeze(0)
+            )  # token embeddings of shape (b, t, n_embd)
+
+            # replace the first 20 embeddings of each batch with the soft prompt embeddings
+            # todo i think we can just use.weight lol
+            x = (
+                F.pad(
+                    torch.cat(
+                        1
+                        * [
+                            torch.unsqueeze(
+                                model.soft_prompt.weight,
+                                0,
+                            )
+                        ]
+                    ),
+                    pad=(0, 0, 0, x_pre.size(1) - model.num_tokens_in_soft_prompt),
                 )
+                + x_pre
             )
+
+            logits = model.lm_head(x)  # (b, t, vocab_size)
+
+            print(logits)
+
+            # print(tokenizer.decode(model.transformer.ln_f().squeeze(0)))
 
             print(f"INPUT: {tokenizer.decode(sample[:-max_new_tokens])}")
             output = generate(
