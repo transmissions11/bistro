@@ -104,7 +104,7 @@ class GPT(nn.Module):
             sin = sin[:T]
             mask = None
 
-        # forward the model itself
+        # forward the token indexes through the embedding layer
         x = self.transformer.wte(idx)  # token embeddings of shape (b, t, n_embd)
 
         # replace the first num_tokens_in_soft_prompt embs of each batch with the soft prompt embs

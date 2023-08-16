@@ -288,7 +288,7 @@ def validate(
             sample = input_ids[0]
             target = targets[0]
 
-            max_new_tokens = 40
+            max_new_tokens = 70
 
             print(f"INPUT: {tokenizer.decode(sample[:-max_new_tokens])}")
             output = generate(
@@ -297,33 +297,6 @@ def validate(
                 max_new_tokens=max_new_tokens,
                 temperature=0.01,
             )
-            print(
-                f"OUTPUT (decoded, tkns):",
-                tokenizer.decode(output[-max_new_tokens:]),
-            )
-            print(
-                f"TARGET (decoded, tkns):",
-                tokenizer.decode(target[-(max_new_tokens + 1) :]),
-            )
-            print("\n\n")
-
-            soft_prompt_tkns = torch.argmax(
-                # (b, t, emb_dim) -> (b, t, vocab_size)
-                model.lm_head(model.soft_prompt),
-                dim=-1,
-            )
-
-            sample[:num_tokens_in_soft_prompt] = soft_prompt_tkns
-
-            print(f"INPUT: {tokenizer.decode(sample[:-max_new_tokens])}")
-
-            output = generate(
-                model,
-                idx=sample[:-max_new_tokens],
-                max_new_tokens=max_new_tokens,
-                temperature=0.01,
-            )
-
             print(
                 f"OUTPUT (decoded, tkns):",
                 tokenizer.decode(output[-max_new_tokens:]),
