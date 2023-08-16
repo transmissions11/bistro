@@ -43,7 +43,7 @@ devices = 1
 override_max_seq_length = None
 
 # TODO: BETTER WAY TO DO THIS
-num_tokens_in_soft_prompt = 100
+num_tokens_in_soft_prompt = 20
 
 # Hyperparameters
 learning_rate = 1
@@ -290,35 +290,11 @@ def validate(
 
             max_new_tokens = 40
 
-            x_pre = model.transformer.wte(
-                torch.tensor(
-                    [0] * num_tokens_in_soft_prompt, device=fabric.device
-                ).unsqueeze(0)
-            )  # token embeddings of shape (b, t, n_embd)
-
-            # replace the first 20 embeddings of each batch with the soft prompt embeddings
-            # todo i think we can just use.weight lol
-            x = (
-                F.pad(
-                    torch.cat(
-                        1
-                        * [
-                            torch.unsqueeze(
-                                model.soft_prompt.weight,
-                                0,
-                            )
-                        ]
-                    ),
-                    pad=(0, 0, 0, x_pre.size(1) - model.num_tokens_in_soft_prompt),
-                )
-                + x_pre
-            )
-
             predicted_tkns = torch.argmax(
-                # (b, t, vocab_size)
-                model.lm_head(x),
+                # (b, t, emb_dim) -> (b, t, vocab_size)
+                model.lm_head(model.soft_prompt),
                 dim=-1,
-            ).squeeze(0)
+            )
 
             print(predicted_tkns)
             print(predicted_tkns.shape)
