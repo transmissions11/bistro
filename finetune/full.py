@@ -288,6 +288,19 @@ def validate(
 
             max_new_tokens = 40
 
+            print(
+                tokenizer.decode(
+                    model.transformer.ln_f(
+                        model.transformer.wte(
+                            torch.tensor(
+                                [0] * num_tokens_in_soft_prompt, device=fabric.device
+                            ).unsqueeze(0)
+                        )
+                        + model.soft_prompt.weight.unsqueeze(0),
+                    ).shape.squeeze(0)
+                )
+            )
+
             print(f"INPUT: {tokenizer.decode(sample[:-max_new_tokens])}")
             output = generate(
                 model,
