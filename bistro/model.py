@@ -2,11 +2,12 @@ from typing import Optional, Tuple, Any
 
 import torch
 import torch.nn as nn
-from lit_gpt.model import Block, build_rope_cache
+
 from typing_extensions import Self
 
 from lit_gpt.config import Config
 from lit_gpt.rmsnorm import RMSNorm
+from lit_gpt.model import Block, build_rope_cache
 
 RoPECache = Tuple[torch.Tensor, torch.Tensor]
 

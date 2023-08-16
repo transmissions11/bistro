@@ -218,7 +218,7 @@ def train(
 
         is_accumulating = (iter_num + 1) % gradient_accumulation_iters != 0
         with fabric.no_backward_sync(model, enabled=is_accumulating):
-            logits = model(input_ids, max_seq_length=max_seq_length)
+            logits = model(input_ids)
             # print(logits)
             loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
