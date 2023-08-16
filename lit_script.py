@@ -1,6 +1,8 @@
 import sys
 import requests
 
+# See: https://github.com/Lightning-AI/lit-gpt/tree/main/scripts
+
 print(f"Loading {sys.argv[1]}.py from GitHub...")
 
 script = requests.get(
