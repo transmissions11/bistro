@@ -1,6 +1,6 @@
 # bistro
 
-Opinionated LLaMA implementation and finetuning harness.
+Opinionated GPT implementation and finetuning harness.
 
 ## Acknowledgements
 

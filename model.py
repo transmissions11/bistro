@@ -38,13 +38,19 @@ class GPT(nn.Module):
         self,
         idx: torch.Tensor,
     ) -> torch.Tensor:
-        B, T = idx.size()
+        (B, T), block_size = idx.shape, self.config.block_size
 
-        block_size = self.config.block_size
+        assert block_size >= T, f"[!] seq of len {T} exceeds block_size of {block_size}"
 
-        assert (
-            block_size >= T
-        ), f"Cannot forward sequence of length {T}, block size is only {block_size}"
+        # pass input tokens through the embedding layer
+        x = self.transformer.wte(idx)  # (b, t, n_embd)
+
+        #############################################################################
+
+        # swap the first num_tokens_in_soft_prompt embs of each batch for soft_prompt
+        x[:, : self.num_tokens_in_soft_prompt] = self.soft_prompt  # (b, t, n_embd)
+
+        #############################################################################
 
         if self.rope_cache is None:
             self.rope_cache = build_rope_cache(
@@ -58,16 +64,6 @@ class GPT(nn.Module):
         cos, sin = self.rope_cache
         cos = cos[:T]
         sin = sin[:T]
-
-        # forward the token indexes through the embedding layer
-        x = self.transformer.wte(idx)  # (b, t, n_embd)
-
-        #############################################################################
-
-        # swap the first num_tokens_in_soft_prompt embs of each batch for soft_prompt
-        x[:, : self.num_tokens_in_soft_prompt] = self.soft_prompt  # (b, t, n_embd)
-
-        #############################################################################
 
         for block in self.transformer.h:
             x, *_ = block(x, (cos, sin), block_size)  # (b, t, n_embd)

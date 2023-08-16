@@ -3,7 +3,7 @@ import sys
 import time
 import warnings
 from pathlib import Path
-from typing import Optional, Literal
+from typing import Optional
 
 import lightning as L
 import torch
@@ -15,9 +15,8 @@ sys.path.append(str(wd))
 
 import torch.nn.functional as F
 
-from bistro import GPT
 from lit_gpt import Tokenizer, Config
-from bistro.model import Block
+from model import GPT, Block
 from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
 
 

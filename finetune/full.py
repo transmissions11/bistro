@@ -4,23 +4,21 @@ import time
 from pathlib import Path
 from typing import Optional, Tuple
 
-import lightning as L
 import torch
+import lightning as L
+
 from datasets import load_dataset, DatasetDict, Dataset
 from lightning.fabric.strategies import FSDPStrategy
 from lightning.pytorch.loggers import WandbLogger
 
-import torch.nn.functional as F
-
-# support running without installing as a package
-# REMEMBER TO IMPORT ALL LOCAL DEPS AFTER THIS
+# Support running without installing as a package.
+# ! REMEMBER TO IMPORT ALL LOCAL DEPS AFTER THIS !
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
 from generate.base import generate
+from model import GPT, Config, Block
 
-
-from bistro.model import GPT, Config, Block
 from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.utils import (
     lazy_load,
@@ -219,7 +217,6 @@ def train(
         is_accumulating = (iter_num + 1) % gradient_accumulation_iters != 0
         with fabric.no_backward_sync(model, enabled=is_accumulating):
             logits = model(input_ids)
-            # print(logits)
             loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
             fabric.backward(loss / gradient_accumulation_iters)

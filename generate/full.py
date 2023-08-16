@@ -15,7 +15,7 @@ sys.path.append(str(wd))
 from generate.base import generate
 from bistro import GPT
 from lit_gpt import Tokenizer, Config
-from bistro.model import Block
+from model import Block
 from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
 
 
