@@ -186,7 +186,7 @@ def train(
     )
 
     with torch.device("meta"):
-        meta_model = GPT(model.config)
+        meta_model = GPT(model.config, num_tokens_in_soft_prompt)
         x = torch.randint(0, 1, (micro_batch_size, model.config.block_size))
         measured_flops = measure_flops(meta_model, x)
         fabric.print(
