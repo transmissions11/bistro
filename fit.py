@@ -276,8 +276,8 @@ def validate(
 
         # Target generating 5 examples.
         if k % (eval_iters // 5) == 0:
-            sample = input_ids[0]
-            target = targets[0]
+            sample = strip_right_pad(input_ids[0])
+            target = strip_right_pad(targets[0])
 
             max_new_tokens = 70
 
@@ -292,11 +292,7 @@ def validate(
                 f"OUTPUT (decoded, tkns):",
                 tokenizer.decode(output[-max_new_tokens:]),
             )
-            print(
-                f"{input_ids.shape=}, {targets.shape=}, "
-                f"{target.shape=}, {sample.shape=}, {target=}, "
-                f"{sample=}, {strip_right_pad(target)=}, {strip_right_pad(sample)=}"
-            )
+
             print(
                 f"TARGET (decoded, tkns):",
                 tokenizer.decode(target[-(max_new_tokens + 1) :]),
