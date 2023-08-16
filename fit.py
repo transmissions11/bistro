@@ -311,6 +311,7 @@ def get_batch(
     tokenizer: Tokenizer,
     longest_seq_ix: Optional[int] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
+    # TODO: This currently doesn't work with micro_batch_size > 1
     ix = torch.randint(len(data), (micro_batch_size,))
 
     if longest_seq_ix is not None:
