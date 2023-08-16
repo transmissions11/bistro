@@ -184,14 +184,16 @@ def train(
         f"starting val loss: {validate(fabric, model, train_data['validation'], tokenizer):.4f}"
     )
 
-    with torch.device("meta"):
-        meta_model = GPT(model.config, num_tokens_in_soft_prompt)
-        x = torch.randint(0, 1, (micro_batch_size, model.config.block_size))
-        measured_flops = measure_flops(meta_model, x)
-        fabric.print(
-            f"Measured TFLOPs: {measured_flops * fabric.world_size / 1e12:.2f}"
-        )
-        del meta_model, x
+    # with torch.device("meta"):
+    #     meta_model = GPT(model.config, num_tokens_in_soft_prompt)
+    #     x = torch.randint(0, 1, (micro_batch_size, model.config.block_size))
+    #     measured_flops = measure_flops(meta_model, x)
+    #     fabric.print(
+    #         f"Measured TFLOPs: {measured_flops * fabric.world_size / 1e12:.2f}"
+    #     )
+    #     del meta_model, x
+
+    measured_flops = 69696969.0
 
     step_count = 0
     total_lengths = 0
