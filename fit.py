@@ -48,7 +48,7 @@ epoch_size = 50000  # train dataset size
 num_epochs = 5
 
 max_iters = num_epochs * (epoch_size // micro_batch_size) // devices
-weight_decay = 0.02
+weight_decay = 0.02  # TODO maybe dont use this lol
 warmup_steps = (
     2 * (epoch_size // micro_batch_size) // devices // gradient_accumulation_iters
 )  # 2 epochs
