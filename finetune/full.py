@@ -344,7 +344,7 @@ def get_batch(
     input_ids = [seq[:-1] for seq in raw_seqs]
     labels = [seq[1:] for seq in raw_seqs]
 
-    num_masked_tokens = 51 + (num_tokens_in_soft_prompt - 1)
+    num_masked_tokens = (num_tokens_in_soft_prompt - 1) + 51
 
     labels = [
         torch.cat(

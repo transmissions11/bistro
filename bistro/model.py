@@ -27,6 +27,7 @@ class GPT(nn.Module):
         assert config.padded_vocab_size is not None
         self.config = config
 
+        self.num_tokens_in_soft_prompt = num_tokens_in_soft_prompt
         self.soft_prompt = nn.Embedding(num_tokens_in_soft_prompt, config.n_embd)
 
         self.lm_head = nn.Linear(config.n_embd, config.padded_vocab_size, bias=False)
@@ -117,7 +118,7 @@ class GPT(nn.Module):
                         )
                     ]
                 ),
-                pad=(0, 0, 0, x_pre.size(1) - 20),
+                pad=(0, 0, 0, x_pre.size(1) - self.num_tokens_in_soft_prompt),
             )
             + x_pre
         )
