@@ -16,7 +16,7 @@ from lightning.pytorch.loggers import WandbLogger
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from generate.base import generate
+from sample import sample_model
 from model import GPT, Config, Block
 
 from lit_gpt.tokenizer import Tokenizer
@@ -288,7 +288,7 @@ def validate(
             max_new_tokens = 70
 
             print(f"INPUT: {tokenizer.decode(sample[:-max_new_tokens])}")
-            output = generate(
+            output = sample_model(
                 model,
                 idx=sample[:-max_new_tokens],
                 max_new_tokens=max_new_tokens,
@@ -394,9 +394,6 @@ def save_checkpoint(fabric, model, file_path: Path):
 
 
 if __name__ == "__main__":
-    # Uncomment this line if you see an error:
-    # "Expected is_sm80 to be true, but got false"
-    # torch.backends.cuda.enable_flash_sdp(False)
     torch.set_float32_matmul_precision("high")
 
     from jsonargparse import CLI
