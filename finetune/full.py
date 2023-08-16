@@ -285,7 +285,7 @@ def validate(
 
             max_new_tokens = 40
 
-            print(f"INPUT: {tokenizer.decode(torch.tensor(sample))}")
+            print(f"INPUT: {tokenizer.decode(sample)}")
             output = generate(
                 model,
                 idx=sample[:-max_new_tokens],
@@ -294,11 +294,11 @@ def validate(
             )
             print(
                 f"OUTPUT (decoded, tkns):",
-                tokenizer.decode(torch.tensor(output[-max_new_tokens:])),
+                tokenizer.decode(output[-max_new_tokens:]),
             )
             print(
                 f"TARGET (decoded, tkns):",
-                tokenizer.decode(torch.tensor(target[-(max_new_tokens + 1) :])),
+                tokenizer.decode(target[-(max_new_tokens + 1) :]),
             )
             print("\n\n")
 
