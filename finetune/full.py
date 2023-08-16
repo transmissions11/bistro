@@ -297,7 +297,7 @@ def validate(
                             ).unsqueeze(0)
                         )
                         + model.soft_prompt.weight.unsqueeze(0),
-                    ).shape.squeeze(0)
+                    ).squeeze(0)
                 )
             )
 
