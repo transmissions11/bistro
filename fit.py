@@ -23,7 +23,7 @@ from lit_gpt.speed_monitor import (
 
 from sample import sample_model
 from model import GPT, Config, Block
-
+from utils.padding import ignored_tkn, pad_tkn, pad_right, strip_right_pad
 
 log_interval = 1
 eval_interval, eval_iters = 50, 100
@@ -293,7 +293,9 @@ def validate(
                 tokenizer.decode(output[-max_new_tokens:]),
             )
             print(
-                f"{input_ids.shape=}, {targets.shape=}, {target.shape=}, {sample.shape=}, {target=}, {sample=}"
+                f"{input_ids.shape=}, {targets.shape=}, "
+                f"{target.shape=}, {sample.shape=}, {target=}, "
+                f"{sample=}, {strip_right_pad(target)=}, {strip_right_pad(sample)=}"
             )
             print(
                 f"TARGET (decoded, tkns):",
@@ -355,13 +357,8 @@ def get_batch(
 
     max_len = max(len(s) for s in input_ids)
 
-    def pad_right(x, pad_id):
-        # pad right based on the longest sequence
-        n = max_len - len(x)
-        return torch.cat((x, torch.full((n,), pad_id, dtype=x.dtype)))
-
-    x = torch.stack([pad_right(x, pad_id=0) for x in input_ids])
-    y = torch.stack([pad_right(x, pad_id=-1) for x in labels])
+    x = torch.stack([pad_right(x, pad_id=pad_tkn, pad_to=max_len) for x in input_ids])
+    y = torch.stack([pad_right(x, pad_id=ignored_tkn, pad_to=max_len) for x in labels])
 
     if fabric.device.type == "cuda" and x.device.type == "cpu":
         x, y = fabric.to_device((x.pin_memory(), y.pin_memory()))
