@@ -68,11 +68,16 @@ def mark_only_soft_prompt_as_trainable(model: GPT) -> None:
 
 def format_prompt(game: str) -> str:
     system_prompt = (
-        "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, "
-        "detailed, and polite answers to the user's questions. USER: {user_prompt} ASSISTANT: {game}"
+        "{soft_prompt_tkns}A chat between a curious user and an artificial intelligence assistant. "
+        "The assistant gives helpful, detailed, and polite answers to the user's questions. "
+        "USER: {user_prompt} ASSISTANT: {game}"
     )
     return system_prompt.format(
-        user_prompt="Generate a game of chess at the Grandmaster level.", game=game
+        user_prompt="Generate a game of chess at the Grandmaster level.",
+        soft_prompt_tkns=(
+            "✅" * num_tokens_in_soft_prompt
+        ),  # TODO: figure out how to add custom tkns
+        game=game,
     )
 
 
@@ -320,7 +325,6 @@ def get_batch(
     raw_seqs = [
         torch.cat(
             (
-                torch.tensor(([0] * num_tokens_in_soft_prompt), dtype=torch.int64),
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
                     format_prompt(data[i.item()]["moves"][:1000])
@@ -338,6 +342,7 @@ def get_batch(
     input_ids = [seq[:-1] for seq in raw_seqs]
     labels = [seq[1:] for seq in raw_seqs]
 
+    # TODO can compute this number from base system prompt along with the other template items!!!
     num_masked_tokens = (num_tokens_in_soft_prompt - 1) + 51
 
     labels = [

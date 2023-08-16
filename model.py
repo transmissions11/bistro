@@ -47,8 +47,15 @@ class GPT(nn.Module):
 
         #############################################################################
 
-        # swap the first num_tokens_in_soft_prompt embs of each batch for soft_prompt
-        x[:, : self.num_tokens_in_soft_prompt] = self.soft_prompt  # (b, t, n_embd)
+        # find the position of the first occurrence of the 31681 (✅) token in idx
+        soft_prompt_start_pos = torch.where(idx == 31681)[1][0]
+
+        # starting at soft_prompt_start_pos, replace num_tokens_in_soft_prompt tokens with the soft prompt
+        x[
+            :,
+            soft_prompt_start_pos : soft_prompt_start_pos
+            + self.num_tokens_in_soft_prompt,
+        ] = self.soft_prompt
 
         #############################################################################
 
