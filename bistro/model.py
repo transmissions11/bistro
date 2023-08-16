@@ -4,7 +4,6 @@ import torch
 import torch.nn as nn
 
 from lit_gpt.config import Config
-from lit_gpt.rmsnorm import RMSNorm
 from lit_gpt.model import Block, build_rope_cache
 
 
@@ -34,21 +33,6 @@ class GPT(nn.Module):
         )
 
         self.rope_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
-
-    def _init_weights(self, module: nn.Module) -> None:
-        if isinstance(module, nn.Linear):
-            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
-            if module.bias is not None:
-                torch.nn.init.zeros_(module.bias)
-        elif isinstance(module, nn.Embedding):
-            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
-        elif isinstance(module, nn.LayerNorm):
-            torch.nn.init.ones_(module.weight)
-            torch.nn.init.zeros_(module.bias)
-            module.eps = self.config.norm_eps
-        elif isinstance(module, RMSNorm):
-            torch.nn.init.ones_(module.weight)
-            module.eps = self.config.norm_eps
 
     def forward(
         self,
