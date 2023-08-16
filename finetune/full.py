@@ -41,7 +41,7 @@ devices = 1
 override_max_seq_length = None
 
 # TODO: BETTER WAY TO DO THIS
-num_tokens_in_soft_prompt = 20
+num_tokens_in_soft_prompt = 100
 
 # Hyperparameters
 learning_rate = 1
