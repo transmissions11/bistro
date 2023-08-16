@@ -33,7 +33,7 @@ from lit_gpt.speed_monitor import (
 
 log_interval = 1
 eval_interval, eval_iters = 50, 100
-save_interval = 600
+save_interval = 9999999999  # 600
 
 devices = 1
 
