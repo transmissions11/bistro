@@ -278,39 +278,29 @@ def validate(
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
         losses[k] = loss.item()
 
-        if k == 0:
-            og_sample = input_ids[0]
-            og_target = targets[0]
+        # Target generating 5 examples.
+        if k % (eval_iters // 5) == 0:
+            sample = input_ids[0]
+            target = targets[0]
 
-            def get_relative_items(arr, index_from_end, num_items):
-                return (
-                    arr[-index_from_end : -index_from_end + num_items]
-                    if index_from_end > num_items
-                    else arr[-index_from_end:]
-                )
+            max_new_tokens = 40
 
-            for i in reversed(range(1, 10)):
-                sample = og_sample[:-i]
-                print(f"{i} INPUT: {tokenizer.decode(torch.tensor(sample))}")
-                output = generate(
-                    model,
-                    idx=sample,
-                    max_new_tokens=5,
-                    temperature=0.01,
-                )
-                print(
-                    f"OUTPUT (decoded, tkns):",
-                    tokenizer.decode(torch.tensor(output[-5:])),
-                    output[-5:],
-                )
-                print(
-                    f"TARGET (decoded, tkns):",
-                    tokenizer.decode(
-                        torch.tensor(get_relative_items(og_target, i + 1, 5))
-                    ),
-                    get_relative_items(og_target, i + 1, 5),
-                )
-                print("\n\n")
+            print(f"INPUT: {tokenizer.decode(torch.tensor(sample))}")
+            output = generate(
+                model,
+                idx=sample[:-max_new_tokens],
+                max_new_tokens=max_new_tokens,
+                temperature=0.01,
+            )
+            print(
+                f"OUTPUT (decoded, tkns):",
+                tokenizer.decode(torch.tensor(output[-max_new_tokens:])),
+            )
+            print(
+                f"TARGET (decoded, tkns):",
+                tokenizer.decode(torch.tensor(target[-(max_new_tokens + 1) :])),
+            )
+            print("\n\n")
 
     val_loss = losses.mean()
 
