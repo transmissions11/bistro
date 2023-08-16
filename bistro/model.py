@@ -8,7 +8,6 @@ from typing import List, Optional, Tuple, Any
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from lightning_utilities.core.imports import RequirementCache
 from typing_extensions import Self
 
