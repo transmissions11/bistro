@@ -318,12 +318,12 @@ def validate(
                 # (b, t, vocab_size)
                 model.lm_head(x),
                 dim=-1,
-            )
+            ).squeeze(0)
 
             print(predicted_tkns)
             print(predicted_tkns.shape)
 
-            # print(tokenizer.decode(model.transformer.ln_f().squeeze(0)))
+            print(f"EMB DECODED:", tokenizer.decode(predicted_tkns))
 
             print(f"INPUT: {tokenizer.decode(sample[:-max_new_tokens])}")
             output = generate(
