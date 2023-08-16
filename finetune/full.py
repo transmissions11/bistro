@@ -43,8 +43,8 @@ override_max_seq_length = None
 # Hyperparameters
 learning_rate = 0.3
 batch_size = 64 / devices
-micro_batch_size = 1
-gradient_accumulation_iters = 3  # todo batch_size // micro_batch_size
+micro_batch_size = 1  # TODO: wtf is going on here
+gradient_accumulation_iters = batch_size // micro_batch_size
 assert gradient_accumulation_iters > 0
 
 epoch_size = 50000  # train dataset size
