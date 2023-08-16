@@ -41,7 +41,7 @@ devices = 1
 override_max_seq_length = None
 
 # Hyperparameters
-learning_rate = 0.3
+learning_rate = 1
 batch_size = 64 / devices
 micro_batch_size = 1  # TODO: wtf is going on here
 gradient_accumulation_iters = batch_size // micro_batch_size
