@@ -11,11 +11,6 @@ from datasets import load_dataset, DatasetDict, Dataset
 from lightning.fabric.strategies import FSDPStrategy
 from lightning.pytorch.loggers import WandbLogger
 
-# Support running without installing as a package.
-# ! REMEMBER TO IMPORT ALL LOCAL DEPS AFTER THIS !
-wd = Path(__file__).parent.parent.resolve()
-sys.path.append(str(wd))
-
 from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.utils import (
     lazy_load,
