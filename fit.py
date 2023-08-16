@@ -68,9 +68,9 @@ def mark_only_soft_prompt_as_trainable(model: GPT) -> None:
 
 def format_prompt(game: str) -> str:
     system_prompt = (
-        "{soft_prompt_tkns}A chat between a curious user and an artificial intelligence assistant. "
+        "A chat between a curious user and an artificial intelligence assistant. "
         "The assistant gives helpful, detailed, and polite answers to the user's questions. "
-        "USER: {user_prompt} ASSISTANT: {game}"
+        "USER: {user_prompt}{soft_prompt_tkns} ASSISTANT: {game}"
     )
     return system_prompt.format(
         user_prompt="Generate a game of chess at the Grandmaster level.",
