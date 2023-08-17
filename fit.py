@@ -286,7 +286,7 @@ def validate(
             sample = strip_right_pad(input_ids[0])
             target = strip_right_pad(targets[0])
 
-            max_new_tokens = 70
+            max_new_tokens = 10
 
             print(f"INPUT: {tokenizer.decode(sample[:-max_new_tokens])}")
             output = sample_model(
