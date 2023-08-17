@@ -286,12 +286,17 @@ def validate(
             sample = strip_right_pad(input_ids[0])
             target = strip_right_pad(targets[0])
 
+            colons = torch.nonzero(sample == 29901, as_tuple=False).squeeze()
+
+            # Get the second occurrence index, if it exists
+            second_index = colons[1] + 1 if len(colons) > 1 else None
+
             max_new_tokens = 10
 
-            print(f"INPUT: {tokenizer.decode(sample[:-max_new_tokens])}")
+            print(f"INPUT: {tokenizer.decode(sample[:second_index])}")
             output = sample_model(
                 model,
-                idx=sample[:-max_new_tokens],
+                idx=sample[:second_index],
                 max_new_tokens=max_new_tokens,
                 temperature=0.01,
             )
@@ -299,9 +304,12 @@ def validate(
                 f"OUTPUT (decoded, tkns):",
                 tokenizer.decode(output[-max_new_tokens:]),
             )
+
+            target[target == -1] = 0
+
             print(
                 f"TARGET (decoded, tkns):",
-                tokenizer.decode(target[-(max_new_tokens + 1) :]),
+                tokenizer.decode(target),
             )
             print("\n\n")
 
