@@ -66,18 +66,18 @@ def mark_only_soft_prompt_as_trainable(model: GPT) -> None:
         param.requires_grad = "soft_prompt" in name
 
 
-def format_prompt(game: str) -> str:
+def format_prompt(problem: str, resp: str) -> str:
     system_prompt = (
         "A chat between a curious user and an artificial intelligence assistant. "
         "The assistant gives helpful, detailed, and polite answers to the user's questions. "
-        "USER: {user_prompt}{soft_prompt_tkns} ASSISTANT: {game}"
+        "USER: {soft_prompt_tkns} {problem} = ASSISTANT: {resp}"
     )
     return system_prompt.format(
-        user_prompt="Generate a game of chess at the Grandmaster level.",
+        problem=problem,
+        resp=resp,
         soft_prompt_tkns=(
             "✅" * num_tokens_in_soft_prompt
         ),  # TODO: figure out how to add custom tkns
-        game=game,
     )
 
 
@@ -329,7 +329,9 @@ def get_batch(
             (
                 tokenizer.encode(
                     # TODO: dont just grab first 1k token lols
-                    format_prompt(data[i.item()]["moves"][:1000])
+                    format_prompt(
+                        data[i.item()]["Problem"], data[i.item()]["Solution"]
+                    ),
                 ).type(torch.int64),
             ),
             dim=0,
@@ -345,7 +347,9 @@ def get_batch(
     labels = [seq[1:] for seq in raw_seqs]
 
     # TODO can compute this number from base system prompt along with the other template items!!!
-    num_masked_tokens = (num_tokens_in_soft_prompt - 1) + 51
+    num_masked_tokens = (
+        num_tokens_in_soft_prompt + 52  # todo: double check this number lol
+    )  # assumes soft prompt is not the first thing, otherwise u'd have to sub 1
 
     labels = [
         torch.cat(
@@ -372,7 +376,7 @@ def get_batch(
 def get_max_seq_length(data: Dataset) -> Tuple[int, int, int]:
     # find out the minimum max_seq_length required during fine-tuning (saves memory!)
     # todo: don't just grab the first 1k chars
-    lengths = [len(d["moves"][:1000]) for d in data]
+    lengths = [len(format_prompt(d["Problem"], d["Solution"])) for d in data]
     max_seq_length = max(lengths)
     longest_seq_ix = lengths.index(max_seq_length)
     # support easy override at the top of the file
