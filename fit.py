@@ -183,9 +183,11 @@ def train(
 ) -> None:
     fabric.print("hi0")
     tokenizer = Tokenizer(checkpoint_dir)
+    fabric.print("hi0.5")
     max_seq_length, longest_seq_length, longest_seq_ix = get_max_seq_length(
         train_data["train"]
     )
+    fabric.print("hi0.75")
 
     fabric.print("hi1")
 
