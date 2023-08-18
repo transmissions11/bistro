@@ -209,7 +209,7 @@ def train(
     total_lengths = 0
     total_t0 = time.time()
 
-    for iter_num in range(max_iters):
+    for iter_num in tqdm(range(max_iters)):
         if step_count <= warmup_steps:
             # linear warmup
             lr = learning_rate * step_count / warmup_steps
