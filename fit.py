@@ -30,7 +30,7 @@ log_interval = 1
 eval_interval, eval_iters = 50, 100
 save_interval = 9999999999  # 600
 
-devices = 4
+devices = 1
 
 # change this value to force a maximum sequence length
 override_max_seq_length = None
