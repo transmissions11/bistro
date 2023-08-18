@@ -398,9 +398,13 @@ def get_batch(
 def get_max_seq_length(data: Dataset) -> Tuple[int, int, int]:
     # find out the minimum max_seq_length required during fine-tuning (saves memory!)
     # todo: don't just grab the first 1k chars
+    print("hey")
     lengths = [len(format_prompt(d["Problem"], d["Solution"])) for d in data]
+    print("hey2")
     max_seq_length = max(lengths)
+    print("hey3")
     longest_seq_ix = lengths.index(max_seq_length)
+    print("hey4")
     # support easy override at the top of the file
     return (
         override_max_seq_length
