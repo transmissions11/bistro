@@ -400,10 +400,15 @@ def get_max_seq_length(data: Dataset) -> Tuple[int, int, int]:
     # todo: don't just grab the first 1k chars
     print("hey")
     # lengths = [len(format_prompt(d["Problem"], d["Solution"])) for d in data]
+    lengths = []
+    for d in data:
+        print("hey1")
+        lengths.append(len(format_prompt(d["Problem"], d["Solution"])))
+
     print("hey2")
-    max_seq_length = 2048  # max(lengths)
+    max_seq_length = max(lengths)
     print("hey3")
-    longest_seq_ix = 0  # lengths.index(max_seq_length)
+    longest_seq_ix = lengths.index(max_seq_length)
     print("hey4")
     # support easy override at the top of the file
     return (
