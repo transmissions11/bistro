@@ -405,6 +405,7 @@ def get_max_seq_length(data: Dataset) -> Tuple[int, int, int]:
     i = 0
     for d in data:
         print(f"i: {i}/{len_data}")
+        i += 1
         lengths.append(len(format_prompt(d["Problem"], d["Solution"])))
 
     print("hey2")
