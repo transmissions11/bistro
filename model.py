@@ -8,6 +8,8 @@ from lit_gpt.model import Block, build_rope_cache
 
 
 class GPT(nn.Module):
+    # TODO: make the soft prompt token configurable lol, or pass indexes
+    # cuz otherwise we can't test across pythia and stuff
     def __init__(self, config: Config, num_tokens_in_soft_prompt) -> None:
         super().__init__()
 
