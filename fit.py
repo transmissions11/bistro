@@ -145,7 +145,10 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=learning_rate, weight_decay=weight_decay
     )
+    fabric.print("hi-4")
     model, optimizer = fabric.setup(model, optimizer)
+
+    fabric.print("hi-3")
 
     fabric.seed_everything(1337 + fabric.global_rank)
 
