@@ -149,7 +149,10 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     fabric.seed_everything(1337 + fabric.global_rank)
 
+    fabric.print("hi-2")
+
     train_time = time.time()
+    fabric.print("hi-1")
     train(
         fabric,
         model,
@@ -175,10 +178,13 @@ def train(
     out_dir: Path,
     speed_monitor: SpeedMonitor,
 ) -> None:
+    fabric.print("hi0")
     tokenizer = Tokenizer(checkpoint_dir)
     max_seq_length, longest_seq_length, longest_seq_ix = get_max_seq_length(
         train_data["train"]
     )
+
+    fabric.print("hi1")
 
     fabric.print(
         f"starting val loss: {validate(fabric, model, train_data['validation'], tokenizer):.4f}"
@@ -331,6 +337,9 @@ def get_batch(
     if longest_seq_ix is not None:
         # force the longest sample at the beginning so potential OOMs happen right away
         ix[0] = longest_seq_ix
+
+    # TODO: make it so that this can handle <MASK></MASK> system and <SOFT_PROMPT> (can we do via the model's tokenizer?)
+    # TODO: preinit soft prompt
 
     raw_seqs = [
         torch.cat(
