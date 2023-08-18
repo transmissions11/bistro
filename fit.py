@@ -20,6 +20,7 @@ from lit_gpt.speed_monitor import (
     SpeedMonitorFabric as SpeedMonitor,
     measure_flops,
 )
+from tqdm import tqdm
 
 from sample import sample_model
 from model import GPT, Config, Block
@@ -401,11 +402,7 @@ def get_max_seq_length(data: Dataset) -> Tuple[int, int, int]:
     print("hey")
     # lengths = [len(format_prompt(d["Problem"], d["Solution"])) for d in data]
     lengths = []
-    len_data = len(data)
-    i = 0
-    for d in data:
-        print(f"i: {i}/{len_data}")
-        i += 1
+    for d in tqdm(data):
         lengths.append(len(format_prompt(d["Problem"], d["Solution"])))
 
     print("hey2")
