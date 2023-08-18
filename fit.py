@@ -102,7 +102,7 @@ def setup(
 
     fabric = L.Fabric(
         devices=devices,
-        strategy=strategy,
+        strategy="auto",
         precision=precision,
         loggers=WandbLogger(project="bistro"),
     )
