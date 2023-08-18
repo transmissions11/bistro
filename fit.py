@@ -185,9 +185,7 @@ def train(
     fabric.print("hi0")
     tokenizer = Tokenizer(checkpoint_dir)
     fabric.print("hi0.5")
-    max_seq_length, longest_seq_length, longest_seq_ix = get_max_seq_length(
-        train_data["train"]
-    )
+
     fabric.print("hi0.75")
 
     fabric.print("hi1")
@@ -224,7 +222,6 @@ def train(
             fabric,
             train_data["train"],
             tokenizer,
-            longest_seq_ix if iter_num == 0 else None,
         )
 
         is_accumulating = (iter_num + 1) % gradient_accumulation_iters != 0
@@ -335,14 +332,9 @@ def get_batch(
     fabric: L.Fabric,
     data: Dataset,
     tokenizer: Tokenizer,
-    longest_seq_ix: Optional[int] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     # TODO: This currently doesn't work with micro_batch_size > 1
     ix = torch.randint(len(data), (micro_batch_size,))
-
-    if longest_seq_ix is not None:
-        # force the longest sample at the beginning so potential OOMs happen right away
-        ix[0] = longest_seq_ix
 
     # TODO: make it so that this can handle <MASK></MASK> system and <SOFT_PROMPT> (can we do via the model's tokenizer?)
     # TODO: preinit soft prompt
@@ -394,30 +386,6 @@ def get_batch(
     else:
         x, y = fabric.to_device((x, y))
     return x, y
-
-
-def get_max_seq_length(data: Dataset) -> Tuple[int, int, int]:
-    # find out the minimum max_seq_length required during fine-tuning (saves memory!)
-    # todo: don't just grab the first 1k chars
-    print("hey")
-    # lengths = [len(format_prompt(d["Problem"], d["Solution"])) for d in data]
-    lengths = []
-    for d in tqdm(data):
-        lengths.append(len(format_prompt(d["Problem"], d["Solution"])))
-
-    print("hey2")
-    max_seq_length = max(lengths)
-    print("hey3")
-    longest_seq_ix = lengths.index(max_seq_length)
-    print("hey4")
-    # support easy override at the top of the file
-    return (
-        override_max_seq_length
-        if isinstance(override_max_seq_length, int)
-        else max_seq_length,
-        max_seq_length,
-        longest_seq_ix,
-    )
 
 
 def save_checkpoint(fabric, model, file_path: Path):
