@@ -68,7 +68,6 @@ def train(
     out_dir: Path,
     speed_monitor: SpeedMonitor,
 ) -> None:
-
     fabric.print(
         f"starting val loss: {validate(fabric, model, datasets['validation'], tokenizer):.4f}"
     )
@@ -268,7 +267,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         model,
         optimizer,
         datasets,
-        checkpoint_dir,
+        tokenizer,
         out_dir,
         speed_monitor,
     )
