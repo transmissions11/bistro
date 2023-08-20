@@ -182,7 +182,9 @@ def validate(
             prompt_end_idx = find_subtensor_end(
                 sample,
                 tokenizer.encode(
-                    VICUNA_END_OF_USER_PROMPT_SEQUENCE, device=fabric.device
+                    # TODO: Why did I have to do device=fabric.device here, and not in other places?
+                    VICUNA_END_OF_USER_PROMPT_SEQUENCE,
+                    device=fabric.device,
                 ),
             )
 
