@@ -45,9 +45,7 @@ def get_batch(
 def mask_before_inclusive(
     delimiter: str, seq: torch.Tensor, tokenizer: Tokenizer
 ) -> torch.Tensor:
-    """
-    Replace all tokens before delimiter with ignored_tkn.
-    """
+    """Replace all tokens before delimiter with ignored_tkn."""
 
     # Find the last instance of delimiter in the sequence.
     idx = find_subtensor_end(seq, tokenizer.encode(delimiter))
