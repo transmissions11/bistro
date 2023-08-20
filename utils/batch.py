@@ -10,6 +10,7 @@ from utils.tensors import find_subtensor_end
 from utils.vicuna import fmt_vicuna_input, VICUNA_END_OF_USER_PROMPT_SEQUENCE
 
 
+# TODO: Shouldn't just randomly sample, should use a DataLoader, etc.
 def get_batch(
     fabric: L.Fabric,
     data: Dataset,
@@ -27,6 +28,8 @@ def get_batch(
     input_ids = [seq[:-1] for seq in full_seqs]
     labels = [
         # Mask everything before the assistant response.
+        # TODO: Shouldn't rely on finding the end of the user prompt, maybe split
+        # prompt/response strings and use the len of first half to find the end of the prompt?
         mask_before_inclusive(VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], tokenizer)
         for seq in full_seqs
     ]
