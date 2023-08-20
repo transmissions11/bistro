@@ -236,6 +236,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     # Add soft prompt to the beginning of each input's prompt.
     # TODO: Should we just tokenize and Vicuna format here vs later?
+    # TODO: Why does this map over the 20,000,000 inputs twice (each split only has 10m)?
     datasets = datasets.map(
         lambda x: {
             "prompt": f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
