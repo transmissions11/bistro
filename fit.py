@@ -241,6 +241,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
             "prompt": f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
             "response": x["response"],
         },
+        num_proc=8,
     )
 
     print(datasets["train"][0])
