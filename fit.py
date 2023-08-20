@@ -41,7 +41,7 @@ gradient_accumulation_iters = 3  # batch_size // micro_batch_size
 assert gradient_accumulation_iters > 0
 
 num_soft_prompt_tkns = 20
-soft_prompt_tkn = "################"  # Longest shared token between GPT-NeoX and Llama.
+soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
 
 epoch_size = 10_000_000  # TODO: Set this based on the actual dataset dynamically.
 num_epochs = 4
