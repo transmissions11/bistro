@@ -224,8 +224,8 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     with fabric.init_module(empty_init=False):
         model = GPT(
             config,
-            num_soft_prompt_tkns=num_soft_prompt_tkns,
             soft_prompt_tkn=tokenizer.encode(soft_prompt_tkn).item(),
+            num_soft_prompt_tkns=num_soft_prompt_tkns,
         )
     with lazy_load(checkpoint_path) as checkpoint:
         model.load_state_dict(checkpoint, strict=False)

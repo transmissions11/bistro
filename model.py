@@ -11,7 +11,7 @@ from lit_gpt.model import Block, build_rope_cache
 
 
 class GPT(nn.Module):
-    def __init__(self, config: Config, num_soft_prompt_tkns, soft_prompt_tkn) -> None:
+    def __init__(self, config: Config, soft_prompt_tkn, num_soft_prompt_tkns) -> None:
         super().__init__()
 
         assert config.padded_vocab_size is not None
