@@ -6,12 +6,12 @@ from lit_gpt.config import Config
 from lit_gpt.model import Block, build_rope_cache
 
 
-# TODO: Split the forward pass into some sub functions to override, or a hook (to enable soft prompt)
+# TODO: Split the forward pass into some sub functions
+#     or some sort of hook system for flexibility.
+
 
 class GPT(nn.Module):
-    # TODO: make the soft prompt token configurable lol, or pass indexes
-    # cuz otherwise we can't test across pythia and stuff
-    def __init__(self, config: Config, num_tokens_in_soft_prompt) -> None:
+    def __init__(self, config: Config, num_soft_prompt_tkns, soft_prompt_tkn) -> None:
         super().__init__()
 
         assert config.padded_vocab_size is not None
@@ -19,9 +19,10 @@ class GPT(nn.Module):
 
         #############################################################################
 
-        self.num_tokens_in_soft_prompt = num_tokens_in_soft_prompt
+        self.soft_prompt_tkn = soft_prompt_tkn
+        self.num_soft_prompt_tkns = num_soft_prompt_tkns
         self.soft_prompt = nn.Parameter(
-            torch.randn(num_tokens_in_soft_prompt, config.n_embd)
+            torch.randn(num_soft_prompt_tkns, config.n_embd)
         )
 
         #############################################################################
@@ -50,14 +51,13 @@ class GPT(nn.Module):
 
         #############################################################################
 
-        # find the position of the first occurrence of the 31681 (✅) token in idx
-        soft_prompt_start_pos = torch.where(idx == 31681)[1][0]
+        # find the position of the first occurrence of the soft_prompt_tkn in idx
+        soft_prompt_start_pos = torch.where(idx == self.soft_prompt_tkn)[1][0]
 
         # starting at soft_prompt_start_pos, replace num_tokens_in_soft_prompt tokens with the soft prompt
         x[
             :,
-            soft_prompt_start_pos : soft_prompt_start_pos
-            + self.num_tokens_in_soft_prompt,
+            soft_prompt_start_pos : soft_prompt_start_pos + self.num_soft_prompt_tkns,
         ] = self.soft_prompt
 
         #############################################################################

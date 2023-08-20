@@ -17,6 +17,7 @@ def get_batch(
     micro_batch_size: int,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     full_seqs = [
+        # TODO: Can do this upfront via HuggingFace Dataset.map()?
         tokenizer.encode(
             fmt_vicuna_input(data[i.item()]["prompt"], data[i.item()]["response"]),
         )

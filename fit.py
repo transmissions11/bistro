@@ -40,7 +40,8 @@ micro_batch_size = 1  # TODO: Set a larger value for this.
 gradient_accumulation_iters = 3  # batch_size // micro_batch_size
 assert gradient_accumulation_iters > 0
 
-num_tokens_in_soft_prompt = 20
+num_soft_prompt_tkns = 20
+soft_prompt_tkn = "################"  # Longest shared token between GPT-NeoX and Llama.
 
 epoch_size = 10_000_000  # TODO: Set this based on the actual dataset dynamically.
 num_epochs = 4
@@ -63,18 +64,16 @@ def train(
     model: GPT,
     optimizer: torch.optim.Optimizer,
     datasets: DatasetDict,
-    checkpoint_dir: Path,
+    tokenizer: Tokenizer,
     out_dir: Path,
     speed_monitor: SpeedMonitor,
 ) -> None:
-    tokenizer = Tokenizer(checkpoint_dir)
 
     fabric.print(
-        f"starting val loss: {validate(fabric, model, train_data['validation'], tokenizer):.4f}"
+        f"starting val loss: {validate(fabric, model, datasets['validation'], tokenizer):.4f}"
     )
 
-    # TODO: Should get this working again.
-    measured_flops = 69696969.0
+    measured_flops = 0.0  # TODO: Should get this working again.
     # with torch.device("meta"):
     #     meta_model = GPT(model.config, num_tokens_in_soft_prompt)
     #     x = torch.randint(0, 1, (micro_batch_size, model.config.block_size))
@@ -215,17 +214,40 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     if fabric.global_rank == 0:
         os.makedirs(out_dir, exist_ok=True)
 
+    tokenizer = Tokenizer(checkpoint_dir)
+
     datasets = load_dataset("parquet", data_dir=f"{data_dir}")
 
     config = Config.from_name(name=checkpoint_dir.name)
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
     with fabric.init_module(empty_init=False):
-        model = GPT(config, num_tokens_in_soft_prompt)
+        model = GPT(
+            config,
+            num_soft_prompt_tkns=num_soft_prompt_tkns,
+            soft_prompt_tkn=tokenizer.encode(soft_prompt_tkn).item(),
+        )
     with lazy_load(checkpoint_path) as checkpoint:
         model.load_state_dict(checkpoint, strict=False)
 
+    #################################################################
+
+    print(datasets["train"][0])
+
+    # Add soft prompt to the beginning of each input's prompt.
+    # TODO: Should we just tokenize and Vicuna format here vs later?
+    datasets.map(
+        lambda x: {
+            "prompt": f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
+            "response": x["response"],
+        },
+    )
+
+    print(datasets["train"][0])
+
     mark_only_soft_prompt_as_trainable(model)
+
+    #################################################################
 
     param_breakdown = get_param_breakdown(model)
     fabric.print(
