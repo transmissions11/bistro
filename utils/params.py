@@ -16,9 +16,7 @@ def get_param_breakdown(model: nn.Module) -> Dict[str, List[Tuple[str, int]] or 
         "trainable_param_names": [name for name, _ in trainable_param_info],
         "num_trainable_params": sum(numel for _, numel in trainable_param_info),
         "non_trainable_param_names": [name for name, _ in non_trainable_param_info],
-        "non_trainable_params_count": sum(
-            numel for _, numel in non_trainable_param_info
-        ),
+        "num_non_trainable_params": sum(numel for _, numel in non_trainable_param_info),
     }
 
 
