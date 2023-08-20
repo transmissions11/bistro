@@ -221,6 +221,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
     with fabric.init_module(empty_init=False):
+        print(tokenizer.encode(soft_prompt_tkn))
         model = GPT(
             config,
             soft_prompt_tkn=tokenizer.encode(soft_prompt_tkn).item(),
