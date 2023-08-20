@@ -20,7 +20,7 @@ def get_batch(
         # TODO: Can do this upfront via HuggingFace Dataset.map()?
         tokenizer.encode(
             fmt_vicuna_input(data[i.item()]["prompt"], data[i.item()]["response"]),
-        )
+        ).type(torch.int64)
         for i in torch.randint(len(data), (micro_batch_size,))
     ]
 
