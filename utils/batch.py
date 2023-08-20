@@ -1,7 +1,7 @@
 from typing import Tuple
 
-import torch
 import lightning as L
+import torch
 from datasets import Dataset
 from lit_gpt import Tokenizer
 

@@ -2,12 +2,11 @@ from typing import Optional, Tuple
 
 import torch
 import torch.nn as nn
-
 from lit_gpt.config import Config
 from lit_gpt.model import Block, build_rope_cache
 
-# TODO: Split the forward pass into some sub functions to override, or a hook (to enable soft prompt)
 
+# TODO: Split the forward pass into some sub functions to override, or a hook (to enable soft prompt)
 
 class GPT(nn.Module):
     # TODO: make the soft prompt token configurable lol, or pass indexes

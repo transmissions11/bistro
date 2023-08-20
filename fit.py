@@ -2,33 +2,30 @@ import os
 import time
 from pathlib import Path
 
-import torch
 import lightning as L
-
+import torch
 from datasets import load_dataset, DatasetDict, Dataset
 from lightning.fabric.strategies import FSDPStrategy
 from lightning.pytorch.loggers import WandbLogger
-
+from lit_gpt.speed_monitor import (
+    SpeedMonitorFabric as SpeedMonitor,
+)
 from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.utils import (
     lazy_load,
     check_valid_checkpoint_dir,
     chunked_cross_entropy,
 )
-from lit_gpt.speed_monitor import (
-    SpeedMonitorFabric as SpeedMonitor,
-    measure_flops,
-)
 from tqdm import tqdm
 
-from sample import sample_model
 from model import GPT, Config, Block
+from sample import sample_model
 from utils.batch import get_batch
 from utils.padding import strip_right_pad
+from utils.params import get_param_breakdown, mark_only_soft_prompt_as_trainable
 from utils.save import save_checkpoint
 from utils.tensors import find_subtensor_end
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
-from utils.params import get_param_breakdown, mark_only_soft_prompt_as_trainable
 
 log_interval = 1
 eval_interval, eval_iters = 50, 100

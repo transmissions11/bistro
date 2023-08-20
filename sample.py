@@ -1,7 +1,7 @@
+from typing import Optional
+
 import torch
 import torch.nn.functional as F
-
-from typing import Optional
 
 
 @torch.no_grad()

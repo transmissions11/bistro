@@ -1,5 +1,6 @@
-import torch
 from typing import Optional
+
+import torch
 
 
 def find_subtensor_end(tensor: torch.Tensor, subset: torch.Tensor) -> Optional[int]:
