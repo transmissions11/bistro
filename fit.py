@@ -170,6 +170,7 @@ def validate(
         input_ids, targets = get_batch(fabric, val_dataset, tokenizer, micro_batch_size)
 
         logits = model(input_ids)
+        print(logits, targets)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
         losses[k] = loss.item()
 
