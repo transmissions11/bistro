@@ -16,7 +16,6 @@ from lit_gpt.utils import (
     check_valid_checkpoint_dir,
     chunked_cross_entropy,
 )
-from tqdm import tqdm
 
 from model import GPT, Config, Block
 from sample import sample_model
@@ -86,7 +85,7 @@ def train(
     total_lengths = 0
     total_t0 = time.time()
 
-    for iter_num in tqdm(range(max_iters)):
+    for iter_num in range(max_iters):
         # Linear warmup stage.
         if step_count <= warmup_steps:
             lr = learning_rate * step_count / warmup_steps
