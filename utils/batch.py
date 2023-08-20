@@ -48,8 +48,6 @@ def mask_before_inclusive(
 ) -> torch.Tensor:
     """Replace all tokens before delimiter with ignored_tkn."""
 
-    print(delimiter, tokenizer.encode(delimiter), tokenizer.decode(seq), seq)
-
     # Find the last instance of delimiter in the sequence.
     idx = find_subtensor_end(seq, tokenizer.encode(delimiter))
 

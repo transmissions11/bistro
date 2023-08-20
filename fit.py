@@ -170,7 +170,6 @@ def validate(
         input_ids, targets = get_batch(fabric, val_dataset, tokenizer, micro_batch_size)
 
         logits = model(input_ids)
-        print(logits, targets)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
         losses[k] = loss.item()
 
@@ -225,7 +224,6 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
     with fabric.init_module(empty_init=False):
-        print(tokenizer.token_to_id(soft_prompt_tkn))
         model = GPT(
             config,
             soft_prompt_tkn=tokenizer.token_to_id(soft_prompt_tkn),
@@ -235,8 +233,6 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         model.load_state_dict(checkpoint, strict=False)
 
     #################################################################
-
-    print(datasets["train"][0])
 
     # Add soft prompt to the beginning of each input's prompt.
     # TODO: Should we just tokenize and Vicuna format here vs later?
@@ -248,8 +244,6 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         },
         num_proc=8,
     )
-
-    print(datasets["train"][0])
 
     mark_only_soft_prompt_as_trainable(model)
 
