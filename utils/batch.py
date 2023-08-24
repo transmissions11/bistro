@@ -17,13 +17,19 @@ def get_batch(
     tokenizer: Tokenizer,
     micro_batch_size: int,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
-    full_seqs = [
-        # TODO: Can do this upfront via HuggingFace Dataset.map()?
-        tokenizer.encode(
-            fmt_vicuna_input(data[i.item()]["prompt"], data[i.item()]["response"]),
-        ).type(torch.int64)
-        for i in torch.randint(len(data), (micro_batch_size,))
+    """Randomly sample a batch of data from the dataset."""
+    prompts, responses = zip(
+        *[
+            (data[i.item()]["prompt"], data[i.item()]["response"])
+            for i in torch.randint(len(data), (micro_batch_size,))
+        ]
+    )
+    inputs = [
+        fmt_vicuna_input(prompt, response)
+        for prompt, response in zip(prompts, responses)
     ]
+    # TODO: Can do this upfront via HuggingFace Dataset.map()?
+    full_seqs = [tokenizer.encode(inpt).type(torch.int64) for inpt in inputs]
 
     input_ids = [seq[:-1] for seq in full_seqs]
     labels = [
@@ -53,6 +59,7 @@ def mask_before_inclusive(
 
     # Find the last instance of delimiter in the sequence.
     idx = find_subtensor_end(seq, tokenizer.encode(delimiter))
+    assert idx, f"[!] delimiter {delimiter} not found in sequence"
 
     # Replace all tokens before and including the last instance of delimiter with ignored_tkn.
     return torch.cat(

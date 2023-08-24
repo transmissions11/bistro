@@ -2,9 +2,9 @@ import os
 import time
 from pathlib import Path
 
-import lightning as L
-import torch
 from datasets import load_dataset, DatasetDict, Dataset
+import torch
+import lightning as L
 from lightning.fabric.strategies import FSDPStrategy
 from lightning.pytorch.loggers import WandbLogger
 from lit_gpt.speed_monitor import (
@@ -19,7 +19,7 @@ from lit_gpt.utils import (
 
 from model import GPT, Config, Block
 from sample import sample_model
-from utils.batch import get_batch
+from utils import batch
 from utils.padding import strip_right_pad
 from utils.params import get_param_breakdown, mark_only_soft_prompt_as_trainable
 from utils.save import save_checkpoint
@@ -30,26 +30,27 @@ log_interval = 1
 eval_interval, eval_iters = 50, 100
 save_interval = 9999999999  # 600
 
-devices = 1
+devices = 2
 
 # Hyperparameters.
 learning_rate = 1
 batch_size = 64 / devices  # TODO: Configure this better.
 micro_batch_size = 1  # TODO: Set a larger value for this.
-gradient_accumulation_iters = 3  # batch_size // micro_batch_size
+gradient_accumulation_iters = (
+    1  # batch_size // micro_batch_size
+)
 assert gradient_accumulation_iters > 0
 
 num_soft_prompt_tkns = 20
-soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
 
 epoch_size = 10_000_000  # TODO: Set this based on the actual dataset dynamically.
 num_epochs = 4
 
-max_iters = num_epochs * (epoch_size // micro_batch_size) // devices
+max_iters = 1  # num_epochs * (epoch_size // micro_batch_size) // devices
 weight_decay = 0.02  # TODO: Should we be using this for finetuning?
 warmup_steps = (
     2 * (epoch_size // micro_batch_size) // devices // gradient_accumulation_iters
-)  # 2 epochs — TODO: Set this to some industry standard (5%?)
+)  # 2 epochs — # TODO: Set this to some industry standard (5%?)
 
 hparams = {
     k: v
@@ -94,7 +95,7 @@ def train(
 
         iter_t0 = time.time()
 
-        input_ids, targets = get_batch(
+        input_ids, targets = batch.get_batch(
             fabric,
             datasets["train"],
             tokenizer,
@@ -166,27 +167,26 @@ def validate(
     losses = torch.zeros(eval_iters)
 
     for k in range(eval_iters):
-        input_ids, targets = get_batch(fabric, val_dataset, tokenizer, micro_batch_size)
+        input_ids, targets = batch.get_batch(fabric, val_dataset, tokenizer, micro_batch_size)
 
         logits = model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
         losses[k] = loss.item()
 
         # Target generating 5 examples.
-        if k % (eval_iters // 5) == 0:
+        if (eval_iters <= 5) or (k % (eval_iters // 5) == 0):
             tokens_out = 10
 
             sample = strip_right_pad(input_ids[0])
             target = strip_right_pad(targets[0])
 
-            prompt_end_idx = find_subtensor_end(
-                sample,
-                tokenizer.encode(
-                    # TODO: Why did I have to do device=fabric.device here, and not in other places?
-                    VICUNA_END_OF_USER_PROMPT_SEQUENCE,
-                    device=fabric.device,
-                ),
-            )
+            delimiter_str = VICUNA_END_OF_USER_PROMPT_SEQUENCE
+            # TODO: Why did I have to do device=fabric.device here, and not in other places?
+            delimiter = tokenizer.encode(delimiter_str, device=fabric.device)
+            prompt_end_idx = find_subtensor_end(sample, delimiter)
+            assert (
+                prompt_end_idx
+            ), f"[!] delimiter {delimiter_str} not found in sequence"
 
             print(f"Input: {tokenizer.decode(sample[:prompt_end_idx + 1])}")
             output = sample_model(
@@ -222,12 +222,19 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     datasets = load_dataset("parquet", data_dir=f"{data_dir}")
 
     config = Config.from_name(name=checkpoint_dir.name)
+    if config.name == "pythia-70m":
+        global VICUNA_END_OF_USER_PROMPT_SEQUENCE  # haram, but temporary during refactor
+        soft_prompt_tkn = "¶"
+        VICUNA_END_OF_USER_PROMPT_SEQUENCE = " = " + VICUNA_END_OF_USER_PROMPT_SEQUENCE
+        batch.VICUNA_END_OF_USER_PROMPT_SEQUENCE = VICUNA_END_OF_USER_PROMPT_SEQUENCE
+    else:
+        soft_prompt_tkn = "✅"
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
     with fabric.init_module(empty_init=False):
         model = GPT(
             config,
-            soft_prompt_tkn=tokenizer.token_to_id(soft_prompt_tkn),
+            soft_prompt_tkn=tokenizer.encode(soft_prompt_tkn)[-1].item(),
             num_soft_prompt_tkns=num_soft_prompt_tkns,
         )
     with lazy_load(checkpoint_path) as checkpoint:
@@ -302,7 +309,7 @@ def setup(
         loggers=WandbLogger(project="bistro"),
     )
 
-    fabric.launch(main, data_dir, checkpoint_dir, out_dir)
+    fabric.launch(main, Path(data_dir), Path(checkpoint_dir), Path(out_dir))
 
 
 if __name__ == "__main__":
