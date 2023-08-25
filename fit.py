@@ -302,7 +302,7 @@ def setup(
         devices=devices,
         strategy=strategy,
         precision=precision,
-        plugins=TransformerEnginePrecision(dtype=torch.bfloat16),
+        plugins=TransformerEnginePrecision(dtype=torch.bfloat16, replace_layers=True),
         loggers=WandbLogger(project="bistro"),
     )
 
