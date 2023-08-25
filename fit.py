@@ -282,6 +282,7 @@ def setup(
     checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
     out_dir: Path = Path("out/full/chess"),
     # TODO: Try "transformer-engine" (https://github.com/Lightning-AI/lightning/pull/17597)
+    # TODO: Make this a W&B sweep param.
     precision: str = "16-mixed",
 ):
     if devices > 1:
