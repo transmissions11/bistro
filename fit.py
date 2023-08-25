@@ -282,7 +282,7 @@ def setup(
     checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
     out_dir: Path = Path("out/full/chess"),
     # TODO: Try "transformer-engine" (https://github.com/Lightning-AI/lightning/pull/17597)
-    precision: str = "bf16-mixed",
+    precision: str = "32",
 ):
     if devices > 1:
         strategy = FSDPStrategy(
