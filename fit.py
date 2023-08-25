@@ -142,6 +142,7 @@ def train(
             )
             t1 = time.time() - t0
             speed_monitor.eval_end(t1)
+            # TODO: W&B table to show examples.
             fabric.log("val/loss", val_loss)
             fabric.print(
                 f"step {iter_num}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms"
