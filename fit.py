@@ -284,7 +284,7 @@ def setup(
     out_dir: Path = Path("out/full/chess"),
     # TODO: Try "transformer-engine" (https://github.com/Lightning-AI/lightning/pull/17597)
     # TODO: Make this a W&B sweep param (bf16-true, bf16-mixed, 16-true, 16-mixed, fp8, 64, 32)
-    precision: str = "bf16-mixed",
+    precision: str = "transformer-engine",
 ):
     if devices > 1:
         strategy = FSDPStrategy(
