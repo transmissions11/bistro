@@ -9,18 +9,20 @@ from lit_gpt.utils import (
 )
 
 
-class LitModel(L.LightningModule, GPT):
+class LitModel(L.LightningModule):
     def __init__(
         self,
+        model: GPT,
     ):
         super().__init__()
+        self.model = model
         # TODO: Try FusedCrossEntropyLoss from TinyLlama.
         self.loss_fn = chunked_cross_entropy
 
     def training_step(self, batch, batch_idx):
         input_ids, targets = batch
 
-        logits = self(input_ids)
+        logits = self.model(input_ids)
         loss = self.loss_fn(logits, targets)
 
         return loss
@@ -28,7 +30,7 @@ class LitModel(L.LightningModule, GPT):
     def validation_step(self, batch, batch_idx):
         input_ids, targets = batch
 
-        logits = self(input_ids)
+        logits = self.model(input_ids)
         loss = self.loss_fn(logits, targets)
 
         return loss
