@@ -6,10 +6,6 @@ from lit_gpt.config import Config
 from lit_gpt.model import Block, build_rope_cache
 
 
-# TODO: Split the forward pass into some sub functions
-#     or some sort of hook system for flexibility.
-
-
 class GPT(nn.Module):
     def __init__(self, config: Config, soft_prompt_tkn, num_soft_prompt_tkns) -> None:
         super().__init__()

@@ -11,11 +11,9 @@ from lit_gpt.speed_monitor import (
     SpeedMonitorFabric as SpeedMonitor,
 )
 from lit_gpt.tokenizer import Tokenizer
-from lit_gpt.utils import (
-    lazy_load,
-    check_valid_checkpoint_dir,
-    chunked_cross_entropy,
-)
+from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
+
+from lit_model import LitModel
 
 from model import GPT, Config, Block
 from sample import sample_model
@@ -33,7 +31,7 @@ save_interval = 9999999999  # 600
 devices = 1
 
 # Hyperparameters.
-learning_rate = 1
+learning_rate = 1  # TODO :This is duplicated in lit_model!
 batch_size = 64 / devices  # TODO: Configure this better.
 micro_batch_size = 1  # TODO: Set a larger value for this.
 gradient_accumulation_iters = 3  # batch_size // micro_batch_size
@@ -46,7 +44,7 @@ epoch_size = 10_000_000  # TODO: Set this based on the actual dataset dynamicall
 num_epochs = 4
 
 max_iters = num_epochs * (epoch_size // micro_batch_size) // devices
-weight_decay = 0.02  # TODO: Should we be using this for finetuning?
+
 warmup_steps = (
     2 * (epoch_size // micro_batch_size) // devices // gradient_accumulation_iters
 )  # 2 epochs — TODO: Set this to some industry standard (5%?)
@@ -60,7 +58,7 @@ hparams = {
 
 def train(
     fabric: L.Fabric,
-    model: GPT,
+    model: LitModel,
     optimizer: torch.optim.Optimizer,
     datasets: DatasetDict,
     tokenizer: Tokenizer,
@@ -104,8 +102,7 @@ def train(
         is_accumulating = (iter_num + 1) % gradient_accumulation_iters != 0
 
         with fabric.no_backward_sync(model, enabled=is_accumulating):
-            logits = model(input_ids)
-            loss = chunked_cross_entropy(logits, targets, chunk_size=0)
+            loss = model.training_step((input_ids, targets), iter_num)
 
             fabric.backward(loss / gradient_accumulation_iters)
 
@@ -156,7 +153,7 @@ def train(
 @torch.no_grad()
 def validate(
     fabric: L.Fabric,
-    model: GPT,
+    model: LitModel,
     val_dataset: Dataset,
     tokenizer: Tokenizer,
 ) -> torch.Tensor:
@@ -169,8 +166,7 @@ def validate(
     for k in range(eval_iters):
         input_ids, targets = get_batch(fabric, val_dataset, tokenizer, micro_batch_size)
 
-        logits = model(input_ids)
-        loss = chunked_cross_entropy(logits, targets, chunk_size=0)
+        loss = model.validation_step((input_ids, targets), k)
         losses[k] = loss.item()
 
         # Target generating 5 examples.
@@ -226,11 +222,12 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
     with fabric.init_module(empty_init=False):
-        model = GPT(
+        gpt = GPT(
             config,
             soft_prompt_tkn=tokenizer.token_to_id(soft_prompt_tkn),
             num_soft_prompt_tkns=num_soft_prompt_tkns,
         )
+        model = LitModel(gpt)
     with lazy_load(checkpoint_path) as checkpoint:
         model.load_state_dict(checkpoint, strict=False)
 
@@ -258,9 +255,8 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     )
     fabric.print(f"Trainable parameters: {param_breakdown['trainable_param_names']}")
 
-    optimizer = torch.optim.AdamW(
-        model.parameters(), lr=learning_rate, weight_decay=weight_decay
-    )
+    optimizer = model.configure_optimizers()
+
     model, optimizer = fabric.setup(model, optimizer)
 
     fabric.seed_everything(1337 + fabric.global_rank)
@@ -284,7 +280,7 @@ def setup(
     out_dir: Path = Path("out/full/chess"),
     # TODO: Try "transformer-engine" (https://github.com/Lightning-AI/lightning/pull/17597)
     # TODO: Make this a W&B sweep param (bf16-true, bf16-mixed, 16-true, 16-mixed, fp8, 64, 32)
-    precision: str = "transformer-engine",
+    precision: str = "bf16-true",
 ):
     if devices > 1:
         strategy = FSDPStrategy(
