@@ -4,6 +4,10 @@ import torch
 
 from model import GPT
 
+from lit_gpt.utils import (
+    chunked_cross_entropy,
+)
+
 
 class LitModel(L.LightningModule):
     def __init__(
@@ -13,7 +17,7 @@ class LitModel(L.LightningModule):
         super().__init__()
         self.model = model
         # TODO: Try FusedCrossEntropyLoss from TinyLlama.
-        self.loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-1)
+        self.loss_fn = chunked_cross_entropy
 
     def training_step(self, batch, batch_idx):
         input_ids, targets = batch
