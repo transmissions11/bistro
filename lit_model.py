@@ -18,6 +18,7 @@ class LitModel(L.LightningModule):
         self.model = model
 
         # TODO: Try FusedCrossEntropyLoss from TinyLlama.
+        # Also, anything other than chunk_size=0 is broken.
 
     def forward(self, x):
         return self.model(x)
