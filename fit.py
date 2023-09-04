@@ -227,9 +227,10 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
             soft_prompt_tkn=tokenizer.token_to_id(soft_prompt_tkn),
             num_soft_prompt_tkns=num_soft_prompt_tkns,
         )
-        model = LitModel(gpt)
     with lazy_load(checkpoint_path) as checkpoint:
-        model.load_state_dict(checkpoint, strict=False)
+        gpt.load_state_dict(checkpoint, strict=False)
+
+    model = LitModel(gpt)
 
     #################################################################
 
