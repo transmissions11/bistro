@@ -16,8 +16,8 @@ class LitModel(L.LightningModule):
     ):
         super().__init__()
         self.model = model
+
         # TODO: Try FusedCrossEntropyLoss from TinyLlama.
-        self.loss_fn = chunked_cross_entropy
 
     def forward(self, x):
         return self.model(x)
@@ -26,7 +26,7 @@ class LitModel(L.LightningModule):
         input_ids, targets = batch
 
         logits = self.model(input_ids)
-        loss = self.loss_fn(logits, targets)
+        loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
         return loss
 
@@ -34,7 +34,7 @@ class LitModel(L.LightningModule):
         input_ids, targets = batch
 
         logits = self.model(input_ids)
-        loss = self.loss_fn(logits, targets)
+        loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
         return loss
 
