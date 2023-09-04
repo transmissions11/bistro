@@ -18,9 +18,8 @@ def sample_model(
     # Create a tensor to hold the decoded tokens as we sample.
     decoded_tkns = torch.empty(0, device=device, dtype=dtype)
 
-    for i in range(max_new_tokens):
-
-        # Forward pass through the model.
+    for _ in range(max_new_tokens):
+        # Forward pass through the model .
         logits = model(torch.cat((idx, decoded_tkns)).unsqueeze(0))
 
         # Pluck the logits at the final step and scale by desired temperature.
