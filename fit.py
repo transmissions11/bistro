@@ -256,7 +256,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         fabric,
         model,
         optimizer,
-        datasets,
+        datamodule,
         tokenizer,
         out_dir,
         speed_monitor,
