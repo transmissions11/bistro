@@ -17,7 +17,6 @@ from lit_model import LitModel
 
 from model import GPT, Config, Block
 from sample import sample_model
-from utils.batch import get_batch
 from utils.padding import strip_right_pad
 from utils.params import get_param_breakdown, mark_only_soft_prompt_as_trainable
 from utils.save import save_checkpoint
@@ -31,7 +30,7 @@ save_interval = 9999999999  # 600
 devices = 1
 
 # Hyperparameters.
-learning_rate = 1  # TODO :This is duplicated in lit_model!
+learning_rate = 1  # TODO: This is duplicated in lit_model!
 batch_size = 64 / devices  # TODO: Configure this better.
 micro_batch_size = 1  # TODO: Set a larger value for this.
 gradient_accumulation_iters = 3  # batch_size // micro_batch_size
@@ -40,9 +39,10 @@ assert gradient_accumulation_iters > 0
 num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
 
-epoch_size = 10_000_000  # TODO: Set this based on the actual dataset dynamically.
+# TODO: ALl of this logic is fucked. We currently do (1 * num_devices) epochs I think.
+# We should fix this at some point !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+epoch_size = 10_000_000
 num_epochs = 4
-
 max_iters = num_epochs * (epoch_size // micro_batch_size) // devices
 
 warmup_steps = (
@@ -60,13 +60,12 @@ def train(
     fabric: L.Fabric,
     model: LitModel,
     optimizer: torch.optim.Optimizer,
-    datasets: DatasetDict,
-    tokenizer: Tokenizer,
+    datamodule: LitDataModule,
     out_dir: Path,
     speed_monitor: SpeedMonitor,
 ) -> None:
     fabric.print(
-        f"starting val loss: {validate(fabric, model, datasets['validation'], tokenizer):.4f}"
+        f"starting val loss: {validate(fabric, model, datamodule.val_dataloader()):.4f}"
     )
 
     measured_flops = 0.0  # TODO: Should get this working again.
@@ -83,7 +82,7 @@ def train(
     total_lengths = 0
     total_t0 = time.time()
 
-    for iter_num in range(max_iters):
+    for iter_num, (input_ids, targets) in enumerate(datamodule.train_dataloader()):
         # Linear warmup stage.
         if step_count <= warmup_steps:
             lr = learning_rate * step_count / warmup_steps
@@ -91,13 +90,6 @@ def train(
                 param_group["lr"] = lr
 
         iter_t0 = time.time()
-
-        input_ids, targets = get_batch(
-            fabric,
-            datasets["train"],
-            tokenizer,
-            micro_batch_size,
-        )
 
         is_accumulating = (iter_num + 1) % gradient_accumulation_iters != 0
 
@@ -134,8 +126,7 @@ def train(
             val_loss = validate(
                 fabric,
                 model,
-                datasets["validation"],
-                tokenizer,
+                datamodule.val_dataloader(),
             )
             t1 = time.time() - t0
             speed_monitor.eval_end(t1)
@@ -154,7 +145,7 @@ def train(
 def validate(
     fabric: L.Fabric,
     model: LitModel,
-    val_dataset: Dataset,
+    val_dataloader: torch.utils.data.DataLoader,
     tokenizer: Tokenizer,
 ) -> torch.Tensor:
     fabric.print("Validating ...")
@@ -163,9 +154,7 @@ def validate(
 
     losses = torch.zeros(eval_iters)
 
-    for k in range(eval_iters):
-        input_ids, targets = get_batch(fabric, val_dataset, tokenizer, micro_batch_size)
-
+    for k, (input_ids, targets) in enumerate(val_dataloader):
         loss = model.validation_step((input_ids, targets), k)
         losses[k] = loss.item()
 
@@ -233,17 +222,6 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     model = LitModel(gpt)
 
     #################################################################
-
-    # Add soft prompt to the beginning of each input's prompt.
-    # TODO: Should we just tokenize and Vicuna format here vs later?
-    # TODO: Why does this map over the 20,000,000 inputs twice (each split only has 10m)?
-    datasets = datasets.map(
-        lambda x: {
-            "prompt": f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
-            "response": x["response"],
-        },
-        num_proc=8,
-    )
 
     mark_only_soft_prompt_as_trainable(model)
 
