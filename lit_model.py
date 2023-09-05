@@ -23,16 +23,16 @@ class LitModel(L.LightningModule):
     def forward(self, x):
         return self.model(x)
 
-    def training_step(self, batch, batch_idx):
-        input_ids, targets = batch
+    def training_step(self, batch: dict, batch_idx):
+        input_ids, targets = batch["input_ids"], batch["targets"]
 
         logits = self.model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
         return loss
 
-    def validation_step(self, batch, batch_idx):
-        input_ids, targets = batch
+    def validation_step(self, batch: dict, batch_idx):
+        input_ids, targets = batch["input_ids"], batch["targets"]
 
         logits = self.model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
