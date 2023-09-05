@@ -172,6 +172,8 @@ def validate(
                 ),
             )
 
+            # TODO: Print and compare to a baseline w/o the soft prompt.
+
             print(f"Input: {tokenizer.decode(sample[:prompt_end_idx + 1])}")
             output = sample_model(
                 model,

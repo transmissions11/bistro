@@ -46,7 +46,7 @@ class LitDataModule(L.LightningDataModule):
                 # Mask everything before the assistant response.
                 # TODO: Shouldn't rely on finding the end of the user prompt, maybe split
                 # prompt/response strings and use the len of first half to find the end of the prompt?
-                "labels": mask_before_inclusive(
+                "targets": mask_before_inclusive(
                     VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], self.tokenizer
                 ),
             }
