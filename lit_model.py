@@ -24,6 +24,8 @@ class LitModel(L.LightningModule):
         return self.model(x)
 
     def training_step(self, batch: dict, batch_idx):
+        print(batch)
+        print(batch.shape)
         input_ids, targets = batch["input_ids"], batch["targets"]
 
         logits = self.model(input_ids)
