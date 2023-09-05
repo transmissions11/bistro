@@ -228,7 +228,7 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     param_breakdown = get_param_breakdown(model)
     fabric.print(
         f"Number of trainable and non-trainable parameters: "
-        f"{param_breakdown['num_trainable_params'],} | {param_breakdown['num_non_trainable_params'],}"
+        f"{param_breakdown['num_trainable_params']} | {param_breakdown['num_non_trainable_params']}"
     )
     fabric.print(f"Trainable parameters: {param_breakdown['trainable_param_names']}")
 
