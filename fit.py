@@ -62,11 +62,12 @@ def train(
     model: LitModel,
     optimizer: torch.optim.Optimizer,
     datamodule: LitDataModule,
+    tokenizer: Tokenizer,
     out_dir: Path,
     speed_monitor: SpeedMonitor,
 ) -> None:
     fabric.print(
-        f"starting val loss: {validate(fabric, model, datamodule.val_dataloader()):.4f}"
+        f"starting val loss: {validate(fabric, model, datamodule.val_dataloader(), tokenizer):.4f}"
     )
 
     measured_flops = 0.0  # TODO: Should get this working again.
@@ -124,11 +125,7 @@ def train(
 
         if not is_accumulating and step_count % eval_interval == 0:
             t0 = time.time()
-            val_loss = validate(
-                fabric,
-                model,
-                datamodule.val_dataloader(),
-            )
+            val_loss = validate(fabric, model, datamodule.val_dataloader(), tokenizer)
             t1 = time.time() - t0
             speed_monitor.eval_end(t1)
             # TODO: W&B table to show examples.
@@ -238,6 +235,20 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     optimizer = model.configure_optimizers()
 
     model, optimizer = fabric.setup(model, optimizer)
+
+    ################################################################
+
+    datamodule = LitDataModule(
+        data_dir=data_dir,
+        batch_size=batch_size,
+        tokenizer=tokenizer,
+        num_soft_prompt_tkns=num_soft_prompt_tkns,
+        soft_prompt_tkn=soft_prompt_tkn,
+    )
+    datamodule.prepare_data()
+    datamodule.setup("fit")
+
+    ################################################################
 
     fabric.seed_everything(1337 + fabric.global_rank)
 
