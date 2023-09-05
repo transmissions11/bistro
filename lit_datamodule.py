@@ -53,7 +53,7 @@ class LitDataModule(L.LightningDataModule):
 
         return load_dataset("parquet", data_dir=self.data_dir).map(
             transform,
-            num_proc=96,
+            num_proc=64,
         )
 
     def prepare_data(self):
