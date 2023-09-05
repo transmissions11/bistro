@@ -4,7 +4,7 @@ from pathlib import Path
 
 import lightning as L
 import torch
-from datasets import load_dataset, DatasetDict, Dataset
+from datasets import load_dataset
 from lightning.fabric.strategies import FSDPStrategy
 from lightning.pytorch.loggers import WandbLogger
 from lit_gpt.speed_monitor import (
@@ -12,6 +12,7 @@ from lit_gpt.speed_monitor import (
 )
 from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
+from lit_datamodule import LitDataModule
 
 from lit_model import LitModel
 
