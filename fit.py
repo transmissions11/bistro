@@ -240,7 +240,8 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     datamodule = LitDataModule(
         data_dir=data_dir,
-        batch_size=batch_size,
+        # TODO: Should this be batch_size or micro_batch_size?
+        batch_size=micro_batch_size,
         tokenizer=tokenizer,
         num_soft_prompt_tkns=num_soft_prompt_tkns,
         soft_prompt_tkn=soft_prompt_tkn,
