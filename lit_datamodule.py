@@ -41,16 +41,15 @@ class LitDataModule(L.LightningDataModule):
                 torch.int64
             )
 
-            # (input_ids, labels)
-            return (
-                seq[:-1],
+            return {
+                "input_ids": seq[:-1],
                 # Mask everything before the assistant response.
                 # TODO: Shouldn't rely on finding the end of the user prompt, maybe split
                 # prompt/response strings and use the len of first half to find the end of the prompt?
-                mask_before_inclusive(
+                "labels": mask_before_inclusive(
                     VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], self.tokenizer
                 ),
-            )
+            }
 
         return load_dataset("parquet", data_dir=self.data_dir).map(
             transform,

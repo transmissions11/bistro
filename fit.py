@@ -84,7 +84,7 @@ def train(
     total_lengths = 0
     total_t0 = time.time()
 
-    for iter_num, (input_ids, targets) in enumerate(datamodule.train_dataloader()):
+    for iter_num, batch in enumerate(datamodule.train_dataloader()):
         # Linear warmup stage.
         if step_count <= warmup_steps:
             lr = learning_rate * step_count / warmup_steps
@@ -96,7 +96,7 @@ def train(
         is_accumulating = (iter_num + 1) % gradient_accumulation_iters != 0
 
         with fabric.no_backward_sync(model, enabled=is_accumulating):
-            loss = model.training_step((input_ids, targets), iter_num)
+            loss = model.training_step(batch, iter_num)
 
             fabric.backward(loss / gradient_accumulation_iters)
 
@@ -152,16 +152,16 @@ def validate(
 
     losses = torch.zeros(eval_iters)
 
-    for k, (input_ids, targets) in enumerate(val_dataloader):
-        loss = model.validation_step((input_ids, targets), k)
+    for k, batch in enumerate(val_dataloader):
+        loss = model.validation_step(batch, k)
         losses[k] = loss.item()
 
         # Target generating 5 examples.
         if k % (eval_iters // 5) == 0:
             tokens_out = 10
 
-            sample = strip_right_pad(input_ids[0])
-            target = strip_right_pad(targets[0])
+            sample = strip_right_pad(batch[0]["input_ids"])
+            target = strip_right_pad(batch[0]["targets"])
 
             prompt_end_idx = find_subtensor_end(
                 sample,
