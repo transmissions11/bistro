@@ -75,8 +75,13 @@ class LitDataModule(L.LightningDataModule):
 
     def train_dataloader(self):
         return DataLoader(
-            self.hf_dataset["train"], batch_size=self.batch_size, shuffle=True
+            self.hf_dataset["train"],
+            batch_size=self.batch_size,
+            shuffle=True,
+            pin_memory=True,
         )
 
     def val_dataloader(self):
-        return DataLoader(self.hf_dataset["validation"], batch_size=self.batch_size)
+        return DataLoader(
+            self.hf_dataset["validation"], batch_size=self.batch_size, pin_memory=True
+        )
