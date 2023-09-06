@@ -67,6 +67,8 @@ class LitDataModule(L.LightningDataModule):
         # Load the dataset on each process, from cache.
         self.hf_dataset = self.download_and_transform()
 
+        print(self.hf_dataset["train"][0])
+
     def train_dataloader(self):
         return DataLoader(
             self.hf_dataset["train"], batch_size=self.batch_size, shuffle=True
