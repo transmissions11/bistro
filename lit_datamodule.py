@@ -59,7 +59,7 @@ class LitDataModule(L.LightningDataModule):
                 transform,
                 num_proc=64,
             )
-            .with_format("torch")
+            .with_format("torch", device=self.device)
         )
 
     def prepare_data(self):
