@@ -41,6 +41,8 @@ class LitDataModule(L.LightningDataModule):
                 torch.int64
             )
 
+            print("seq", seq)
+
             # TODO: Why are prompt and response still included?
             return {
                 "input_ids": seq[:-1],
