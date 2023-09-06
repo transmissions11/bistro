@@ -41,6 +41,7 @@ class LitDataModule(L.LightningDataModule):
                 torch.int64
             )
 
+            # TODO: Why are prompt and response still included?
             return {
                 "input_ids": seq[:-1],
                 # Mask everything before the assistant response.
