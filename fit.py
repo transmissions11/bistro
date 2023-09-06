@@ -96,6 +96,7 @@ def train(
         is_accumulating = (iter_num + 1) % gradient_accumulation_iters != 0
 
         with fabric.no_backward_sync(model, enabled=is_accumulating):
+            # TODO: Ideally moving to device gets done for us automatically!
             loss = model.training_step(batch.to(fabric.device), iter_num)
 
             fabric.backward(loss / gradient_accumulation_iters)
@@ -153,6 +154,7 @@ def validate(
     losses = torch.zeros(eval_iters)
 
     for k, batch in enumerate(val_dataloader):
+        # TODO: Ideally moving to device gets done for us automatically!
         loss = model.validation_step(batch.to(fabric.device), k)
         losses[k] = loss.item()
 
