@@ -205,8 +205,6 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     tokenizer = Tokenizer(checkpoint_dir)
 
-    datasets = load_dataset("parquet", data_dir=f"{data_dir}")
-
     config = Config.from_name(name=checkpoint_dir.name)
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
@@ -269,9 +267,9 @@ def main(fabric: L.Fabric, data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
 
 def setup(
-    data_dir: Path = Path("data/chess"),
+    data_dir: Path = Path("data"),
     checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
-    out_dir: Path = Path("out/full/chess"),
+    out_dir: Path = Path("out/full/bistro"),
     # TODO: Try "transformer-engine" (https://github.com/Lightning-AI/lightning/pull/17597)
     # TODO: Make this a W&B sweep param (bf16-true, bf16-mixed, 16-true, 16-mixed, fp8, 64, 32)
     precision: str = "bf16-true",
