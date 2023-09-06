@@ -55,11 +55,11 @@ class LitDataModule(L.LightningDataModule):
         # TODO: Why does it map twice over 20,000,000 inputs (each split only has 10m)?
         return (
             load_dataset("parquet", data_dir=self.data_dir)
+            .with_format("torch")
             .map(
                 transform,
                 num_proc=64,
             )
-            .with_format("torch", device=self.device)
         )
 
     def prepare_data(self):
