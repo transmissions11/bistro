@@ -82,6 +82,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         logger=WandbLogger(project="bistro"),
         accumulate_grad_batches=gradient_accumulation_iters,
         max_epochs=1,
+        log_every_n_steps=1,
     )
 
     with trainer.init_module(empty_init=False):
