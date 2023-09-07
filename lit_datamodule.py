@@ -58,7 +58,7 @@ class LitDataModule(L.LightningDataModule):
             .with_format("torch")
             .map(
                 transform,
-                num_proc=64,  # TODO: "RuntimeError: One of the subprocesses has abruptly died during map operation.To debug the error, disable multiprocessing."
+                # num_proc=64, TODO: "RuntimeError: One of the subprocesses has abruptly died during map operation.To debug the error, disable multiprocessing."
             )
         )
 
