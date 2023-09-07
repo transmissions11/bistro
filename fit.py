@@ -164,7 +164,6 @@ def validate(
     val_dataloader = datamodule.val_dataloader()  # TODO: Remove after fixing the above.
 
     for k, batch in enumerate(val_dataloader):
-        print(k)
         if k >= eval_iters:
             break
 
