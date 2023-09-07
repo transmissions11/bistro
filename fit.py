@@ -112,7 +112,7 @@ def train(
             step_count += 1
 
         t1 = time.time()
-        # TODO: wait i think we should need to get [0]
+        print("TODO", batch["input_ids"].shape, batch["input_ids"].size(1))
         total_lengths += batch["input_ids"].size(1)
         speed_monitor.on_train_batch_end(
             (iter_num + 1) * micro_batch_size,
