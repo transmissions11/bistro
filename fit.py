@@ -75,7 +75,9 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     # fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
 
-    trainer = L.Trainer(precision="bf16-true", logger=WandbLogger(project="bistro"))
+    trainer = L.Trainer(
+        devices=1, precision="bf16-true", logger=WandbLogger(project="bistro")
+    )
 
     with trainer.init_module(empty_init=False):
         gpt = GPT(
