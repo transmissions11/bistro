@@ -66,6 +66,7 @@ def train(
     out_dir: Path,
     speed_monitor: SpeedMonitor,
 ) -> None:
+    # TODO: oh this just only prints if rank 0
     fabric.print(
         f"starting val loss: {validate(fabric, model, datamodule, tokenizer):.4f}"
     )
@@ -189,8 +190,9 @@ def validate(
                 ),
             )
 
-            # TODO: Print and compare to a baseline w/o the soft prompt.
+            # TODO: Print and compare to a baseline w/o the soft prompt. (do we need a flag in the forward pass?)
 
+            # TODO: use fabric.print
             print(f"Input: {tokenizer.decode(sample[:prompt_end_idx + 1])}")
             output = sample_model(
                 model,
