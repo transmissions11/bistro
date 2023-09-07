@@ -16,13 +16,7 @@ from lit_datamodule import LitDataModule
 
 from lit_model import LitModel
 
-from model import GPT, Config, Block
-from sample import sample_model
-from utils.padding import strip_right_pad
-from utils.params import get_param_breakdown, mark_only_soft_prompt_as_trainable
-from utils.save import save_checkpoint
-from utils.tensors import find_subtensor_end
-from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
+from model import GPT, Config
 
 log_interval = 1
 eval_interval, eval_iters = 50, 100
