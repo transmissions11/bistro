@@ -101,10 +101,8 @@ def train(
         with fabric.no_backward_sync(model, enabled=is_accumulating):
             # TODO: Ideally moving to device gets done for us automatically!
             # TODO: Idk about iter_num being dataloader index.
-            loss = model.training_step(
-                datamodule.transfer_batch_to_device(batch, fabric.device, iter_num),
-                iter_num,
-            )
+            batch = datamodule.transfer_batch_to_device(batch, fabric.device, iter_num)
+            loss = model.training_step(batch, iter_num)
 
             fabric.backward(loss / gradient_accumulation_iters)
 
@@ -168,9 +166,8 @@ def validate(
     for k, batch in enumerate(val_dataloader):
         # TODO: Ideally moving to device gets done for us automatically!
         # TODO: Idk about k being dataloader index.
-        loss = model.validation_step(
-            datamodule.transfer_batch_to_device(batch, fabric.device, k), k
-        )
+        batch = datamodule.transfer_batch_to_device(batch, fabric.device, k)
+        loss = model.validation_step(batch, k)
         losses[k] = loss.item()
 
         # Target generating 5 examples.
