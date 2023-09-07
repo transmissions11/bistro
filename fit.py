@@ -28,7 +28,7 @@ log_interval = 1
 eval_interval, eval_iters = 50, 100
 save_interval = 9999999999  # 600
 
-devices = 1
+devices = 4
 
 # Hyperparameters.
 learning_rate = 1  # TODO: This is duplicated in lit_model!
@@ -76,7 +76,10 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     # fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
 
     trainer = L.Trainer(
-        devices=1, precision="bf16-true", logger=WandbLogger(project="bistro")
+        devices=devices,
+        strategy="deepspeed",
+        precision="bf16-true",
+        logger=WandbLogger(project="bistro"),
     )
 
     with trainer.init_module(empty_init=False):
