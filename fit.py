@@ -131,7 +131,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     #     speed_monitor,
     # )
 
-    trainer.fit(model, datamodule=datamodule)
+    trainer.fit(model, datamodule=datamodule, logger=WandbLogger(project="bistro"))
 
     # save_checkpoint(fabric, model, out_dir / "bistro_model_finetuned.pth")
 
