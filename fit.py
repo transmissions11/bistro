@@ -80,6 +80,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         strategy="deepspeed",
         precision="bf16-true",
         logger=WandbLogger(project="bistro"),
+        gradient_accumulation_iters=gradient_accumulation_iters,
         max_epochs=1,
     )
 
