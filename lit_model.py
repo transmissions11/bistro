@@ -29,8 +29,6 @@ class LitModel(L.LightningModule):
         logits = self.model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
-        print(input_ids, targets, loss)
-
         # TODO: do i need to do loss.item
         self.log("train/loss", loss, on_step=True, on_epoch=True, prog_bar=True)
 
