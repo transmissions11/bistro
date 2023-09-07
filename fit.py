@@ -28,7 +28,7 @@ log_interval = 1
 eval_interval, eval_iters = 50, 100
 save_interval = 9999999999  # 600
 
-devices = 4
+devices = 1
 
 # Hyperparameters.
 learning_rate = 1  # TODO: This is duplicated in lit_model!
