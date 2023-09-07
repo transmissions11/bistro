@@ -75,7 +75,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     # fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
 
-    trainer = L.Trainer()
+    trainer = L.Trainer(precision="bf16-true", logger=WandbLogger(project="bistro"))
 
     with trainer.init_module(empty_init=False):
         gpt = GPT(
@@ -131,7 +131,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     #     speed_monitor,
     # )
 
-    trainer.fit(model, datamodule=datamodule, logger=WandbLogger(project="bistro"))
+    trainer.fit(model, datamodule=datamodule)
 
     # save_checkpoint(fabric, model, out_dir / "bistro_model_finetuned.pth")
 
