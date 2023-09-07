@@ -84,7 +84,10 @@ def train(
     total_lengths = 0
     total_t0 = time.time()
 
-    for iter_num, batch in enumerate(datamodule.train_dataloader()):
+    # TODO: remove eventually
+    train_dataloader = datamodule.train_dataloader()
+
+    for iter_num, batch in enumerate(train_dataloader):
         # Linear warmup stage.
         if step_count <= warmup_steps:
             lr = learning_rate * step_count / warmup_steps
@@ -97,6 +100,8 @@ def train(
 
         with fabric.no_backward_sync(model, enabled=is_accumulating):
             # TODO: Ideally moving to device gets done for us automatically!
+            # TODO: Idk about k being dataloader index.
+            datamodule.transfer_batch_to_device(batch, fabric.device, k)
             loss = model.training_step(batch, iter_num)
 
             fabric.backward(loss / gradient_accumulation_iters)
@@ -144,7 +149,10 @@ def train(
 def validate(
     fabric: L.Fabric,
     model: LitModel,
-    val_dataloader: torch.utils.data.DataLoader,
+    # TODO: Should just specify val_dataloader here
+    # but need to manually call transfer_batch_to_device
+    # since we don't have trainer.
+    datamodule: LitDataModule,
     tokenizer: Tokenizer,
 ) -> torch.Tensor:
     fabric.print("Validating ...")
@@ -153,8 +161,12 @@ def validate(
 
     losses = torch.zeros(eval_iters)
 
+    val_dataloader = datamodule.val_dataloader()  # TODO: Remove after fixing the above.
+
     for k, batch in enumerate(val_dataloader):
         # TODO: Ideally moving to device gets done for us automatically!
+        # TODO: Idk about k being dataloader index.
+        datamodule.transfer_batch_to_device(batch, fabric.device, k)
         loss = model.validation_step(batch, k)
         losses[k] = loss.item()
 

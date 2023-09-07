@@ -62,15 +62,15 @@ class LitDataModule(L.LightningDataModule):
             )
         )
 
-    # TODO: Apparently this doesn't work with DDP? Wtf?
-    # https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#transfer-batch-to-device
-    def transfer_batch_to_device(self, batch, device):
-        print(device)
+    # # TODO: Apparently this doesn't work with DDP? Wtf?
+    # # https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#transfer-batch-to-device
+    # def transfer_batch_to_device(self, batch, device):
+    #     print(device)
 
-        batch["input_ids"] = batch["input_ids"].to(device)
-        batch["targets"] = batch["targets"].to(device)
+    #     batch["input_ids"] = batch["input_ids"].to(device)
+    #     batch["targets"] = batch["targets"].to(device)
 
-        return batch
+    #     return batch
 
     def prepare_data(self):
         # Download the dataset and build caches on a
