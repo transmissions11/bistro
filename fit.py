@@ -164,6 +164,10 @@ def validate(
     val_dataloader = datamodule.val_dataloader()  # TODO: Remove after fixing the above.
 
     for k, batch in enumerate(val_dataloader):
+        print(k)
+        if k >= eval_iters:
+            break
+
         # TODO: Ideally moving to device gets done for us automatically!
         # TODO: Idk about k being dataloader index.
         batch = datamodule.transfer_batch_to_device(batch, fabric.device, k)
