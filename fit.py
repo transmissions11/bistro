@@ -177,8 +177,8 @@ def validate(
         if k % (eval_iters // 5) == 0:
             tokens_out = 10
 
-            sample = strip_right_pad(batch[0]["input_ids"])
-            target = strip_right_pad(batch[0]["targets"])
+            sample = strip_right_pad(batch["input_ids"][0])
+            target = strip_right_pad(batch["targets"][0])
 
             prompt_end_idx = find_subtensor_end(
                 sample,
