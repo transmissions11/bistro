@@ -4,23 +4,15 @@ from pathlib import Path
 
 import lightning as L
 import torch
-from datasets import load_dataset
-from lightning.fabric.strategies import FSDPStrategy
 from lightning.pytorch.loggers import WandbLogger
-from lit_gpt.speed_monitor import (
-    SpeedMonitorFabric as SpeedMonitor,
-)
 from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
 from lit_datamodule import LitDataModule
+from utils.params import mark_only_soft_prompt_as_trainable
 
 from lit_model import LitModel
 
 from model import GPT, Config
-
-log_interval = 1
-eval_interval, eval_iters = 50, 100
-save_interval = 9999999999  # 600
 
 devices = 1
 
