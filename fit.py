@@ -67,7 +67,7 @@ def train(
     speed_monitor: SpeedMonitor,
 ) -> None:
     fabric.print(
-        f"starting val loss: {validate(fabric, model, datamodule.val_dataloader(), tokenizer):.4f}"
+        f"starting val loss: {validate(fabric, model, datamodule, tokenizer):.4f}"
     )
 
     measured_flops = 0.0  # TODO: Should get this working again.
@@ -131,7 +131,7 @@ def train(
 
         if not is_accumulating and step_count % eval_interval == 0:
             t0 = time.time()
-            val_loss = validate(fabric, model, datamodule.val_dataloader(), tokenizer)
+            val_loss = validate(fabric, model, datamodule, tokenizer)
             t1 = time.time() - t0
             speed_monitor.eval_end(t1)
             # TODO: W&B table to show examples.
