@@ -299,7 +299,8 @@ def setup(
         #     limit_all_gathers=True,
         #     cpu_offload=False,
         # )
-        strategy = "ddp"
+        # strategy = "ddp"
+        strategy = "deepspeed"
     else:
         strategy = "auto"
 
