@@ -32,8 +32,6 @@ class LitModel(L.LightningModule):
         return loss
 
     def validation_step(self, batch: dict, batch_idx):
-        print(batch)
-
         input_ids, targets = batch["input_ids"], batch["targets"]
 
         logits = self.model(input_ids)
