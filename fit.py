@@ -292,13 +292,14 @@ def setup(
     precision: str = "bf16-true",
 ):
     if devices > 1:
-        strategy = FSDPStrategy(
-            auto_wrap_policy={Block},
-            activation_checkpointing_policy={Block},
-            state_dict_type="full",
-            limit_all_gathers=True,
-            cpu_offload=False,
-        )
+        # strategy = FSDPStrategy(
+        #     auto_wrap_policy={Block},
+        #     activation_checkpointing_policy={Block},
+        #     state_dict_type="full",
+        #     limit_all_gathers=True,
+        #     cpu_offload=False,
+        # )
+        strategy = "ddp"
     else:
         strategy = "auto"
 
