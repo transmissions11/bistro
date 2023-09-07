@@ -80,6 +80,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         strategy="deepspeed",
         precision="bf16-true",
         logger=WandbLogger(project="bistro"),
+        max_epochs=1,
     )
 
     with trainer.init_module(empty_init=False):
