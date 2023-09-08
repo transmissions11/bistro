@@ -46,12 +46,12 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx):
         input_ids, targets = batch["input_ids"], batch["targets"]
 
-        print(batch_idx)
-
         if batch_idx <= warmup_steps:
             lr = learning_rate * batch_idx / warmup_steps
             for param_group in self.optimizers().param_groups:
                 param_group["lr"] = lr
+
+        print(batch_idx, param_group["lr"])
 
         logits = self.model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
