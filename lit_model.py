@@ -50,7 +50,7 @@ class LitModel(L.LightningModule):
 
         if batch_idx <= warmup_steps:
             lr = learning_rate * batch_idx / warmup_steps
-            for param_group in self.optimizers[0].param_groups:
+            for param_group in self.optimizers()[0].param_groups:
                 param_group["lr"] = lr
 
         logits = self.model(input_ids)
