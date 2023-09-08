@@ -53,6 +53,8 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
 
+    L.seed_everything(1337, workers=True)
+
     trainer = L.Trainer(
         devices=devices,
         strategy="deepspeed",
@@ -61,6 +63,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         accumulate_grad_batches=gradient_accumulation_iters,
         max_epochs=1,
         log_every_n_steps=1,
+        deterministic=True,
     )
 
     # TODO: Should empty_init be True or False?
