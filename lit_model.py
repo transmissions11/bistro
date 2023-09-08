@@ -45,7 +45,7 @@ class LitModel(L.LightningModule):
     def configure_optimizers(self):
         # TODO: Better config system.
         # TODO: Cosine learning rate scheduler.
-        learning_rate = 1
+        learning_rate = 0.3
         weight_decay = 1e-2
 
         return torch.optim.AdamW(
