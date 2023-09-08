@@ -57,7 +57,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     trainer = L.Trainer(
         devices=devices,
-        strategy="deepspeed",
+        # strategy="deepspeed",
         precision="bf16-true",
         logger=WandbLogger(project="bistro"),
         accumulate_grad_batches=gradient_accumulation_iters,
