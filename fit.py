@@ -14,7 +14,7 @@ from lit_model import LitModel
 
 from model import GPT, Config
 
-devices = 1
+devices = 4
 
 # Hyperparameters.
 learning_rate = 1  # TODO: This is duplicated in lit_model!
@@ -57,7 +57,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     trainer = L.Trainer(
         devices=devices,
-        # strategy="deepspeed",
+        strategy="ddp",  # deepspeed
         precision="bf16-true",
         logger=WandbLogger(project="bistro"),
         accumulate_grad_batches=gradient_accumulation_iters,
