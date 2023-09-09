@@ -26,7 +26,7 @@ warmup_steps = (
 # TODO: Better config system.
 # TODO: Cosine learning rate scheduler.
 learning_rate = 1
-weight_decay = 1e-2
+weight_decay = 0.02
 
 
 class LitModel(L.LightningModule):
