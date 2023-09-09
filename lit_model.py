@@ -48,12 +48,14 @@ class LitModel(L.LightningModule):
 
         # TODO: OHHH MAYBE ITS CUZ WEIGHT DECAY SHOULD BE 0.02 NOT 1e-2
 
-        if batch_idx <= warmup_steps:
-            lr = learning_rate * batch_idx / warmup_steps
+        step_count = batch_idx // self.trainer.accumulate_grad_batches
+
+        if step_count <= warmup_steps:
+            lr = learning_rate * step_count / warmup_steps
             for param_group in self.optimizers().param_groups:
                 param_group["lr"] = lr
 
-        print(batch_idx, param_group["lr"])
+        print(batch_idx, step_count, param_group["lr"])
 
         logits = self.model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
