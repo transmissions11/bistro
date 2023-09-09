@@ -76,8 +76,10 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     with lazy_load(checkpoint_path) as checkpoint:
         gpt.load_state_dict(checkpoint, strict=False)
 
+    mark_only_soft_prompt_as_trainable(
+        gpt
+    )  # TODO: should we do this to GPT or LitModel
     model = LitModel(gpt)
-    mark_only_soft_prompt_as_trainable(model)
 
     # fabric.seed_everything(1337 + fabric.global_rank)
 

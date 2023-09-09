@@ -18,7 +18,7 @@ epoch_size = 10_000_000  # TODO: Set this based on the actual dataset dynamicall
 num_epochs = 4
 
 max_iters = num_epochs * (epoch_size // micro_batch_size) // devices
-weight_decay = 0.02  # TODO: Should we be using this for finetuning?
+# weight_decay = 0.02  # TODO: Should we be using this for finetuning?
 warmup_steps = (
     2 * (epoch_size // micro_batch_size) // devices // gradient_accumulation_iters
 )
@@ -45,6 +45,8 @@ class LitModel(L.LightningModule):
 
     def training_step(self, batch: dict, batch_idx):
         input_ids, targets = batch["input_ids"], batch["targets"]
+
+        # TODO: OHHH MAYBE ITS CUZ WEIGHT DECAY SHOULD BE 0.02 NOT 1e-2
 
         if batch_idx <= warmup_steps:
             lr = learning_rate * batch_idx / warmup_steps
