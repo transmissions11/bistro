@@ -14,7 +14,7 @@ from lit_model import LitModel
 
 from model import GPT, Config
 
-devices = 1
+devices = 3
 micro_batch_size = 1
 gradient_accumulation_iters = 3  # batch_size // micro_batch_size
 

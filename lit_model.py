@@ -10,7 +10,7 @@ from lit_gpt.utils import (
 
 micro_batch_size = 1  # TODO: Set a larger value for this.
 
-devices = 1
+devices = 3
 
 gradient_accumulation_iters = 3
 
@@ -48,7 +48,9 @@ class LitModel(L.LightningModule):
 
         # TODO: OHHH MAYBE ITS CUZ WEIGHT DECAY SHOULD BE 0.02 NOT 1e-2
 
-        step_count = batch_idx // self.trainer.accumulate_grad_batches
+        step_count = (
+            batch_idx // self.trainer.accumulate_grad_batches
+        )  # TODO: should this include devices
 
         if step_count <= warmup_steps:
             lr = learning_rate * step_count / warmup_steps
