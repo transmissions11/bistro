@@ -14,27 +14,14 @@ from lit_model import LitModel
 
 from model import GPT, Config
 
-devices = 4
-
-# Hyperparameters.
-learning_rate = 1  # TODO: This is duplicated in lit_model!
-batch_size = 64 / devices  # TODO: Configure this better.
-micro_batch_size = 1  # TODO: Set a larger value for this.
+devices = 1
+micro_batch_size = 1
 gradient_accumulation_iters = 3  # batch_size // micro_batch_size
-assert gradient_accumulation_iters > 0
+
 
 num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
 
-# TODO: ALl of this logic is fucked. We currently do (1 * num_devices) epochs I think.
-# We should fix this at some point !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-epoch_size = 10_000_000
-num_epochs = 4
-max_iters = num_epochs * (epoch_size // micro_batch_size) // devices
-
-warmup_steps = (
-    2 * (epoch_size // micro_batch_size) // devices // gradient_accumulation_iters
-)  # 2 epochs — TODO: Set this to some industry standard (5%?)
 
 hparams = {
     k: v
