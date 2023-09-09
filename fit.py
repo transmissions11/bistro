@@ -53,7 +53,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
 
-    L.seed_everything(1337, workers=True)
+    # L.seed_everything(1337, workers=True)
 
     trainer = L.Trainer(
         devices=devices,
