@@ -62,6 +62,9 @@ class LitModel(L.LightningModule):
 
         # TODO: do i need to do loss.item
         self.log("train/loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log(
+            "samples", batch_idx, on_step=True, on_epoch=True, prog_bar=True
+        )  # TODO: hack
 
         return loss
 
