@@ -10,7 +10,7 @@ from lit_gpt.utils import (
 
 micro_batch_size = 1  # TODO: Set a larger value for this.
 
-devices = 3
+devices = 1
 
 gradient_accumulation_iters = 3
 

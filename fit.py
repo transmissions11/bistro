@@ -14,7 +14,7 @@ from lit_model import LitModel
 
 from model import GPT, Config
 
-devices = 3
+devices = 1
 micro_batch_size = 1
 gradient_accumulation_iters = 3  # batch_size // micro_batch_size
 
@@ -44,7 +44,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     trainer = L.Trainer(
         devices=devices,
-        strategy="deepspeed",  # ddp
+        strategy="ddp",  # deepspeed
         precision="bf16-true",
         logger=WandbLogger(project="bistro"),
         accumulate_grad_batches=gradient_accumulation_iters,
