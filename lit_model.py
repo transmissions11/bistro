@@ -101,6 +101,7 @@ class LitModel(L.LightningModule):
             anneal_strategy="cos",
             cycle_momentum=False,
             verbose=True,
+            div_factor=1e10,  # So that we start at 0.
         )
 
         return {
