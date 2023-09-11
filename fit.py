@@ -39,15 +39,20 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     L.seed_everything(1337, workers=True)  # TODO: Do we need this?
 
-    wandb_logger = WandbLogger(project="bistro")
-
-    wandb_logger.experiment.config.update(
-        {
+    # TODO: I really just want to be able to attach all trainer params.
+    # TODO: We could just have a config dict that gets passed into main
+    # with everything, and use **config syntax to unpack it into trainer.
+    # TODO: Then we'd just log that with log_hyperparams.
+    wandb_logger = WandbLogger(
+        project="bistro",
+        config={
             "devices": devices,
             "micro_batch_size": micro_batch_size,
             "gradient_accumulation_iters": gradient_accumulation_iters,
-        }
+        },
     )
+
+    wandb_logger.experiment.config.update()
 
     trainer = L.Trainer(
         devices=devices,
