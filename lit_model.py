@@ -100,6 +100,7 @@ class LitModel(L.LightningModule):
             / self.trainer.estimated_stepping_batches,
             anneal_strategy="cos",
             cycle_momentum=False,
+            verbose=True,
         )
 
         return {
