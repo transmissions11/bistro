@@ -74,22 +74,32 @@ class LitModel(L.LightningModule):
         #     verbose=True,
         # )
 
-        def get_lr(step):
-            if step < self.hparams.warmup_steps:
-                return step / self.hparams.warmup_steps
+        # def get_lr(step):
+        #     if step < self.hparams.warmup_steps:
+        #         return step / self.hparams.warmup_steps
 
-            # in between, use cosine decay down to min learning rate ratio
-            decay_ratio = (step - self.hparams.warmup_steps) / (
-                self.trainer.estimated_stepping_batches - self.hparams.warmup_steps
-            )
+        #     # in between, use cosine decay down to min learning rate ratio
+        #     decay_ratio = (step - self.hparams.warmup_steps) / (
+        #         self.trainer.estimated_stepping_batches - self.hparams.warmup_steps
+        #     )
 
-            assert 0 <= decay_ratio <= 1
-            coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
-            min_lr_ratio = self.hparams.min_learning_rate / self.hparams.learning_rate
-            return min_lr_ratio + coeff * (1.0 - min_lr_ratio)
+        #     assert 0 <= decay_ratio <= 1
+        #     coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
+        #     min_lr_ratio = self.hparams.min_learning_rate / self.hparams.learning_rate
+        #     return min_lr_ratio + coeff * (1.0 - min_lr_ratio)
 
-        lr_scheduler = torch.optim.lr_scheduler.LambdaLR(
-            optimizer, get_lr, verbose=True
+        # lr_scheduler = torch.optim.lr_scheduler.LambdaLR(
+        #     optimizer, get_lr, verbose=True
+        # )
+
+        lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            optimizer,
+            max_lr=self.hparams.learning_rate,
+            total_steps=self.trainer.estimated_stepping_batches,
+            pct_start=self.hparams.warmup_steps
+            / self.trainer.estimated_stepping_batches,
+            anneal_strategy="cos",
+            cycle_momentum=False,
         )
 
         return {
