@@ -76,7 +76,7 @@ class LitModel(L.LightningModule):
         logits = self.model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
-        return loss
+        return loss + 1
 
     def configure_optimizers(self):
         return torch.optim.AdamW(
