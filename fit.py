@@ -66,6 +66,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         log_every_n_steps=1,
         deterministic=True,  # TODO: Do we need this? Should we be using "warn"?
         callbacks=[LearningRateMonitor(logging_interval="step")],
+        profiler="simple",
     )
 
     # TODO: Try logging grads to wandb
