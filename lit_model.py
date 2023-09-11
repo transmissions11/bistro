@@ -80,12 +80,6 @@ class LitModel(L.LightningModule):
 
         return loss
 
-    def on_before_optimizer_step(self, optimizer):
-        # Compute the 2-norm for each layer
-        # If using mixed precision, the gradients are already unscaled here
-        norms = grad_norm(self.layer, norm_type=2)
-        self.log_dict(norms)
-
     def configure_optimizers(self):
         return torch.optim.AdamW(
             self.parameters(), lr=learning_rate, weight_decay=weight_decay
