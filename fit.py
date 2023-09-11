@@ -53,7 +53,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         deterministic=True,
     )
 
-    with trainer.init_module(empty_init=True):
+    with trainer.init_module(empty_init=False):
         gpt = GPT(
             config,
             soft_prompt_tkn=tokenizer.token_to_id(soft_prompt_tkn),
