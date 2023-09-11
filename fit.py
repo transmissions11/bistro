@@ -69,7 +69,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     # fabric.seed_everything(1337 + fabric.global_rank)
 
     datamodule = LitDataModule(
-        data_dir=data_dir,
+        data_dir=str(data_dir),
         # TODO: Should this be batch_size or micro_batch_size?
         batch_size=micro_batch_size,
         tokenizer=tokenizer,
