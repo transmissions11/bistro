@@ -51,7 +51,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         max_epochs=1,
         log_every_n_steps=1,
         deterministic=True,
-        # fast_dev_run=10,
+        overfit_batches=1,
     )
 
     # Can set empty_init=True if can also set strict=True below.

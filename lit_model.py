@@ -73,8 +73,6 @@ class LitModel(L.LightningModule):
     def validation_step(self, batch: dict, batch_idx):
         input_ids, targets = batch["input_ids"], batch["targets"]
 
-        print("!!!! validatiing!!!!")
-
         logits = self.model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
