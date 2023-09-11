@@ -17,23 +17,19 @@ from model import GPT, Config
 
 devices = 1
 micro_batch_size = 1
-gradient_accumulation_iters = 3  # batch_size // micro_batch_size
+gradient_accumulation_iters = 3
 
-
+# TODO: Make these hyperparameters?
 num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
 
-
-hparams = {
-    k: v
-    for k, v in locals().items()
-    if isinstance(v, (int, float, str)) and not k.startswith("_")
-}
+learning_rate = 3e-2
+min_learning_rate = 0
+warmup_steps = 2000
+weight_decay = 0.02
 
 
 def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
-    print("Hyperparams:", hparams)
-
     check_valid_checkpoint_dir(checkpoint_dir)
 
     tokenizer = Tokenizer(checkpoint_dir)
@@ -67,7 +63,13 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     with lazy_load(checkpoint_path) as checkpoint:
         gpt.load_state_dict(checkpoint, strict=False)
 
-    model = LitModel(gpt)
+    model = LitModel(
+        gpt,
+        learning_rate=learning_rate,
+        min_learning_rate=min_learning_rate,
+        warmup_steps=warmup_steps,
+        weight_decay=weight_decay,
+    )
 
     mark_only_soft_prompt_as_trainable(model)
 
