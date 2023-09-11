@@ -53,31 +53,27 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         deterministic=True,
     )
 
-    with trainer.init_module(empty_init=False):
+    with trainer.init_module(empty_init=True):
         gpt = GPT(
             config,
             soft_prompt_tkn=tokenizer.token_to_id(soft_prompt_tkn),
             num_soft_prompt_tkns=num_soft_prompt_tkns,
         )
 
-    # print the soft_prompt weights
-    print("soft prompt init", gpt.soft_prompt)
+    print("lm_head init", gpt.lm_head)
 
     with lazy_load(checkpoint_path) as checkpoint:
         gpt.load_state_dict(checkpoint, strict=False)
 
-    # print the soft_prompt weights
-    print("soft prompt loaded", gpt.soft_prompt)
+    print("lm_head loaded", gpt.lm_head)
 
     model = LitModel(gpt)
 
-    # print the soft_prompt weights
-    print("soft prompt model", model.model.soft_prompt)
+    print("lm_head model", model.model.lm_head)
 
     mark_only_soft_prompt_as_trainable(model)
 
-    # print the soft_prompt weights
-    print("soft prompt trainable", model.model.soft_prompt)
+    print("lm_head trainable", model.model.lm_head)
 
     datamodule = LitDataModule(
         data_dir=str(data_dir),

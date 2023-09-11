@@ -19,10 +19,8 @@ class GPT(nn.Module):
         self.num_soft_prompt_tkns = num_soft_prompt_tkns
         self.soft_prompt = nn.Parameter(
             # TODO: Allow init-ing this with some reasonable starting point.
-            torch.empty(num_soft_prompt_tkns, config.n_embd)
+            torch.randn(num_soft_prompt_tkns, config.n_embd)
         )
-
-        print("soft prompt init", self.soft_prompt)
 
         #############################################################################
 
@@ -34,6 +32,8 @@ class GPT(nn.Module):
                 ln_f=config.norm_class(config.n_embd, eps=config.norm_eps),
             )
         )
+
+        print("lm_head init", self.lm_head)
 
         self.rope_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
 
@@ -50,7 +50,7 @@ class GPT(nn.Module):
 
         #############################################################################
 
-        print("soft prompt forward", self.soft_prompt)
+        print("lm_head forward", self.lm_head)
 
         # find the position of the first occurrence of the soft_prompt_tkn in idx
         soft_prompt_start_pos = torch.where(idx == self.soft_prompt_tkn)[1][0]
