@@ -23,12 +23,6 @@ gradient_accumulation_iters = 3
 num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
 
-hparams = {
-    k: v
-    for k, v in locals().items()
-    if isinstance(v, (int, float, str)) and not k.startswith("_")
-}
-
 learning_rate = 3e-2
 min_learning_rate = 0
 warmup_steps = 2000
@@ -47,7 +41,13 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     wandb_logger = WandbLogger(project="bistro")
 
-    wandb_logger.log_hyperparams(hparams)
+    wandb_logger.experiment.config.update(
+        {
+            "devices": devices,
+            "micro_batch_size": micro_batch_size,
+            "gradient_accumulation_iters": gradient_accumulation_iters,
+        }
+    )
 
     trainer = L.Trainer(
         devices=devices,
