@@ -6,6 +6,8 @@ from model import GPT
 
 from lit_gpt.utils import chunked_cross_entropy
 
+import math
+
 # TODO: Try https://pytorch-lightning.readthedocs.io/en/1.4.9/advanced/lr_finder.html
 # INSPO from https://github.com/the-full-stack/fsdl-text-recognizer-2022/blob/9d6bc110822761398e03eadb978af793c3c40bc1/text_recognizer/lit_models/transformer.py#L22-L42
 
@@ -65,12 +67,29 @@ class LitModel(L.LightningModule):
         # TODO: How do we do linear warmup?
         # https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.LambdaLR.html
         # IS OneCycle equivalent? https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.OneCycleLR.html
-        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer,
-            self.trainer.estimated_stepping_batches,
-            eta_min=self.hparams.min_learning_rate,
-            verbose=True,
-        )
+        # lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        #     optimizer,
+        #     self.trainer.estimated_stepping_batches,
+        #     eta_min=self.hparams.min_learning_rate,
+        #     verbose=True,
+        # )
+
+        def get_lr(it):
+            if it < self.hparams.warmup_steps:
+                return self.hparams.learning_rate * it / self.hparams.warmup_steps
+
+            # 3) in between, use cosine decay down to min learning rate
+            decay_ratio = (it - self.hparams.warmup_steps) / (
+                self.trainer.estimated_stepping_batches - self.hparams.warmup_steps
+            )
+
+            assert 0 <= decay_ratio <= 1
+            coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
+            return self.hparams.min_learning_rate + coeff * (
+                self.hparams.learning_rate - self.hparams.min_learning_rate
+            )
+
+        lr_scheduler = torch.optim.LambdaLR(optimizer, get_lr, verbose=True)
 
         return {
             "optimizer": optimizer,
