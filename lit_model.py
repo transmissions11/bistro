@@ -6,6 +6,8 @@ from model import GPT
 
 from lit_gpt.utils import chunked_cross_entropy
 
+# TODO: Try https://pytorch-lightning.readthedocs.io/en/1.4.9/advanced/lr_finder.html
+
 
 class LitModel(L.LightningModule):
     def __init__(
@@ -18,7 +20,9 @@ class LitModel(L.LightningModule):
     ):
         super().__init__()
 
-        self.save_hyperparameters()
+        self.save_hyperparameters(
+            ignore=["model"]
+        )  # TODO: How to log grad accum steps and micro batch size to wandb?
 
         self.model = model
 

@@ -23,6 +23,12 @@ gradient_accumulation_iters = 3
 num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
 
+hparams = {
+    k: v
+    for k, v in locals().items()
+    if isinstance(v, (int, float, str)) and not k.startswith("_")
+}
+
 learning_rate = 3e-2
 min_learning_rate = 0
 warmup_steps = 2000
@@ -39,17 +45,24 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     L.seed_everything(1337, workers=True)  # TODO: Do we need this?
 
+    wandb_logger = WandbLogger(project="bistro")
+
+    wandb_logger.log_hyperparams(hparams)
+
     trainer = L.Trainer(
         devices=devices,
         strategy="auto",  # deepspeed/ddp
         precision="bf16-true",
-        logger=WandbLogger(project="bistro"),
+        logger=wandb_logger,
         accumulate_grad_batches=gradient_accumulation_iters,
         max_epochs=1,
         log_every_n_steps=1,
         deterministic=True,  # TODO: Do we need this? Should we be using "warn"?
         callbacks=[LearningRateMonitor(logging_interval="step")],
     )
+
+    # TODO: Try logging grads to wandb
+    # https://pytorch-lightning.readthedocs.io/en/1.4.9/extensions/generated/pytorch_lightning.loggers.WandbLogger.html
 
     # Can set empty_init=True if can also set strict=True below.
     # Otherwise some parameters may not get initialized properly.
