@@ -8,6 +8,8 @@ from lit_gpt.utils import (
     chunked_cross_entropy,
 )
 
+from lightning.pytorch.utilities import grad_norm
+
 micro_batch_size = 1  # TODO: Set a larger value for this.
 
 devices = 1
@@ -73,12 +75,16 @@ class LitModel(L.LightningModule):
     def validation_step(self, batch: dict, batch_idx):
         input_ids, targets = batch["input_ids"], batch["targets"]
 
-        print("!!!! validatiing!!!!")
-
         logits = self.model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
         return loss
+
+    def on_before_optimizer_step(self, optimizer):
+        # Compute the 2-norm for each layer
+        # If using mixed precision, the gradients are already unscaled here
+        norms = grad_norm(self.layer, norm_type=2)
+        self.log_dict(norms)
 
     def configure_optimizers(self):
         return torch.optim.AdamW(
