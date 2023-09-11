@@ -21,9 +21,7 @@ num_epochs = 4
 
 max_iters = num_epochs * (epoch_size // micro_batch_size) // devices
 # weight_decay = 0.02  # TODO: Should we be using this for finetuning?
-warmup_steps = (
-    2 * (epoch_size // micro_batch_size) // devices // gradient_accumulation_iters
-)
+warmup_steps = 2000
 
 # TODO: Better config system.
 # TODO: Cosine learning rate scheduler.
