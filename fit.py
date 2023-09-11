@@ -64,9 +64,8 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         gpt.load_state_dict(checkpoint, strict=False)
 
     model = LitModel(gpt)
-    mark_only_soft_prompt_as_trainable(model)
 
-    # fabric.seed_everything(1337 + fabric.global_rank)
+    mark_only_soft_prompt_as_trainable(model)
 
     datamodule = LitDataModule(
         data_dir=str(data_dir),
@@ -79,11 +78,11 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     trainer.fit(model, datamodule=datamodule)
 
-    trainer.save_checkpoint(out_dir / "bistro_model_finetuned.pth")
+    trainer.save_checkpoint(out_dir / "model_finetuned.pth")
 
 
 def setup(
-    data_dir: Path = Path("data"),
+    data_dir: Path = Path("data/bistro"),
     checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
     out_dir: Path = Path("out/full/bistro"),
 ):
