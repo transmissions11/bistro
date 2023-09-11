@@ -19,7 +19,7 @@ class GPT(nn.Module):
         self.num_soft_prompt_tkns = num_soft_prompt_tkns
         self.soft_prompt = nn.Parameter(
             # TODO: Allow init-ing this with some reasonable starting point.
-            torch.randn(num_soft_prompt_tkns, config.n_embd)
+            torch.empty(num_soft_prompt_tkns, config.n_embd)
         )
 
         print("soft prompt init", self.soft_prompt)
