@@ -89,7 +89,9 @@ class LitModel(L.LightningModule):
                 self.hparams.learning_rate - self.hparams.min_learning_rate
             )
 
-        lr_scheduler = torch.optim.LambdaLR(optimizer, get_lr, verbose=True)
+        lr_scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optimizer, get_lr, verbose=True
+        )
 
         return {
             "optimizer": optimizer,
