@@ -87,6 +87,7 @@ class LitModel(L.LightningModule):
 
         return {
             "optimizer": optimizer,
+            # TODO: How do we do linear warmup?
             "lr_scheduler": torch.optim.lr_scheduler.CosineAnnealingLR(
                 optimizer,
                 self.estimated_stepping_batches,
