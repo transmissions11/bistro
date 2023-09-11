@@ -36,6 +36,9 @@ class LitModel(L.LightningModule):
         model: GPT,
     ):
         super().__init__()
+
+        # TODO: Try self.save_hyperparameters() (https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#hparams)
+
         self.model = model
 
         # TODO: Try FusedCrossEntropyLoss from TinyLlama.

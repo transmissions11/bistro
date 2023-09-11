@@ -71,6 +71,8 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     mark_only_soft_prompt_as_trainable(model)
 
+    compiled_model = torch.compile(model)
+
     datamodule = LitDataModule(
         data_dir=str(data_dir),
         # TODO: Should this be batch_size or micro_batch_size?
@@ -80,7 +82,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         soft_prompt_tkn=soft_prompt_tkn,
     )
 
-    trainer.fit(model, datamodule=datamodule)
+    trainer.fit(compiled_model, datamodule=datamodule)
 
     trainer.save_checkpoint(out_dir / "model_finetuned.pth")
 
