@@ -79,6 +79,7 @@ class LitModel(L.LightningModule):
                 print(
                     "warmup", self.hparams.learning_rate, it, self.hparams.warmup_steps
                 )
+                print("r", self.hparams.learning_rate * it / self.hparams.warmup_steps)
                 return self.hparams.learning_rate * it / self.hparams.warmup_steps
 
             # 3) in between, use cosine decay down to min learning rate
