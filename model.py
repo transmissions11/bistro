@@ -22,6 +22,8 @@ class GPT(nn.Module):
             torch.randn(num_soft_prompt_tkns, config.n_embd)
         )
 
+        print("soft prompt init", self.soft_prompt)
+
         #############################################################################
 
         self.lm_head = nn.Linear(config.n_embd, config.padded_vocab_size, bias=False)
@@ -47,6 +49,8 @@ class GPT(nn.Module):
         x = self.transformer.wte(idx)  # (b, t, n_embd)
 
         #############################################################################
+
+        print("soft prompt forward", self.soft_prompt)
 
         # find the position of the first occurrence of the soft_prompt_tkn in idx
         soft_prompt_start_pos = torch.where(idx == self.soft_prompt_tkn)[1][0]
