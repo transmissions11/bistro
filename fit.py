@@ -54,7 +54,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     )
 
     # TODO: Should empty_init be True or False?
-    with trainer.init_module(empty_init=False):
+    with trainer.init_module(empty_init=True):
         gpt = GPT(
             config,
             soft_prompt_tkn=tokenizer.token_to_id(soft_prompt_tkn),
