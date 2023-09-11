@@ -7,6 +7,7 @@ from model import GPT
 from lit_gpt.utils import chunked_cross_entropy
 
 # TODO: Try https://pytorch-lightning.readthedocs.io/en/1.4.9/advanced/lr_finder.html
+# INSPO from https://github.com/the-full-stack/fsdl-text-recognizer-2022/blob/9d6bc110822761398e03eadb978af793c3c40bc1/text_recognizer/lit_models/transformer.py#L22-L42
 
 
 class LitModel(L.LightningModule):
@@ -63,6 +64,7 @@ class LitModel(L.LightningModule):
 
         # TODO: How do we do linear warmup?
         # https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.LambdaLR.html
+        # IS OneCycle equivalent? https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.OneCycleLR.html
         lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer,
             self.trainer.estimated_stepping_batches,
