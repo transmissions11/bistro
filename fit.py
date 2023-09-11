@@ -29,6 +29,9 @@ warmup_steps = 2000
 weight_decay = 0.02
 
 
+# Should we use https://github.com/omry/omegaconf?
+
+
 def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     check_valid_checkpoint_dir(checkpoint_dir)
 
@@ -43,6 +46,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     # TODO: We could just have a config dict that gets passed into main
     # with everything, and use **config syntax to unpack it into trainer.
     # TODO: Then we'd just log that with log_hyperparams.
+    # TODO: !!!!!! IF WE DO THIS, we should pass logger=False to save_hyperparams !!!
     wandb_logger = WandbLogger(
         project="bistro",
         config={
@@ -51,8 +55,6 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
             "gradient_accumulation_iters": gradient_accumulation_iters,
         },
     )
-
-    wandb_logger.experiment.config.update()
 
     trainer = L.Trainer(
         devices=devices,
