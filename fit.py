@@ -53,8 +53,10 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         deterministic=True,
     )
 
+    t0 = time.time()
+
     # TODO: Should empty_init be True or False?
-    with trainer.init_module(empty_init=True):
+    with trainer.init_module(empty_init=False):
         gpt = GPT(
             config,
             soft_prompt_tkn=tokenizer.token_to_id(soft_prompt_tkn),
@@ -66,6 +68,8 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     model = LitModel(gpt)
 
     mark_only_soft_prompt_as_trainable(model)
+
+    print(f"Loaded model empty_init=False in {time.time() - t0:.2f}s")
 
     datamodule = LitDataModule(
         data_dir=str(data_dir),
