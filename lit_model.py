@@ -85,12 +85,17 @@ class LitModel(L.LightningModule):
             self.parameters(), lr=learning_rate, weight_decay=weight_decay
         )
 
+        print(
+            "self.trainer.estimated_stepping_batches, ",
+            self.trainer.estimated_stepping_batches,
+        )
+
         return {
             "optimizer": optimizer,
             # TODO: How do we do linear warmup?
             "lr_scheduler": torch.optim.lr_scheduler.CosineAnnealingLR(
                 optimizer,
-                self.estimated_stepping_batches,
+                self.trainer.estimated_stepping_batches,
                 eta_min=min_learning_rate,
                 verbose=True,
             ),
