@@ -25,7 +25,8 @@ warmup_steps = 2000
 
 # TODO: Better config system.
 # TODO: Cosine learning rate scheduler.
-learning_rate = 3e-3
+learning_rate = 3e-2
+min_learning_rate = 0
 weight_decay = 0.02
 
 
@@ -52,12 +53,13 @@ class LitModel(L.LightningModule):
             batch_idx // self.trainer.accumulate_grad_batches
         )  # TODO: should this include devices
 
-        if step_count <= warmup_steps:
-            lr = learning_rate * step_count / warmup_steps
-            for param_group in self.optimizers().param_groups:
-                param_group["lr"] = lr
+        print(
+            batch_idx,
+            step_count,
+            self.trainer.learning_rate_schedulers[0].get_last_lr(),
+        )
 
-        print(batch_idx, step_count, param_group["lr"])
+        self.log("lr", self.trainer.learning_rate_schedulers[0].get_last_lr()[0])
 
         logits = self.model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
@@ -79,6 +81,16 @@ class LitModel(L.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        return torch.optim.AdamW(
+        optimizer = torch.optim.AdamW(
             self.parameters(), lr=learning_rate, weight_decay=weight_decay
         )
+
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer,
+                self.estimated_stepping_batches,
+                eta_min=min_learning_rate,
+                verbose=True,
+            ),
+        }
