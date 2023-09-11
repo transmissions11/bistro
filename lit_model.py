@@ -49,18 +49,6 @@ class LitModel(L.LightningModule):
 
         # TODO: OHHH MAYBE ITS CUZ WEIGHT DECAY SHOULD BE 0.02 NOT 1e-2
 
-        step_count = (
-            batch_idx // self.trainer.accumulate_grad_batches
-        )  # TODO: should this include devices
-
-        print(
-            batch_idx,
-            step_count,
-            self.trainer.learning_rate_schedulers[0].get_last_lr(),
-        )
-
-        self.log("lr", self.trainer.learning_rate_schedulers[0].get_last_lr()[0])
-
         logits = self.model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 
@@ -92,7 +80,7 @@ class LitModel(L.LightningModule):
 
         return {
             "optimizer": optimizer,
-            # TODO: How do we do linear warmup?
+            # TODO: How do we do linear warmup? https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.LambdaLR.html
             "lr_scheduler": torch.optim.lr_scheduler.CosineAnnealingLR(
                 optimizer,
                 self.trainer.estimated_stepping_batches,
