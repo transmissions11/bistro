@@ -76,6 +76,7 @@ class LitModel(L.LightningModule):
 
         def get_lr(step):
             if step < self.hparams.warmup_steps:
+                print(step)
                 return step / self.hparams.warmup_steps
 
             # in between, use cosine decay down to min learning rate ratio
