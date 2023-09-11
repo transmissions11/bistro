@@ -25,7 +25,7 @@ soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
 
 learning_rate = 3e-2
 min_learning_rate = 0
-warmup_steps = 2000
+warmup_steps = 333  # 2000
 weight_decay = 0.02
 
 
