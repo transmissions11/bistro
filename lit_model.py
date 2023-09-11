@@ -25,7 +25,7 @@ warmup_steps = 2000
 
 # TODO: Better config system.
 # TODO: Cosine learning rate scheduler.
-learning_rate = 1e-3
+learning_rate = 1e-2
 weight_decay = 0.02
 
 
