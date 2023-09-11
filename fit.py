@@ -10,7 +10,6 @@ from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
 from lit_datamodule import LitDataModule
 from utils.params import mark_only_soft_prompt_as_trainable
 from lightning.pytorch.callbacks import LearningRateMonitor
-from lightning.pytorch.callbacks import DeviceStatsMonitor
 
 from lit_model import LitModel
 
@@ -66,7 +65,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         max_epochs=1,
         log_every_n_steps=1,
         deterministic=True,  # TODO: Do we need this? Should we be using "warn"?
-        callbacks=[LearningRateMonitor(logging_interval="step"), DeviceStatsMonitor()],
+        callbacks=[LearningRateMonitor(logging_interval="step")],
         # profiler="simple",
         # max_steps=1000,
     )
