@@ -95,6 +95,9 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     mark_only_soft_prompt_as_trainable(model)
 
+    # TODO: Try LR and batch size finder
+    # https://lightning.ai/docs/pytorch/stable/advanced/training_tricks.html#batch-size-finder
+    # TODO: Auto checkpointing: https://lightning.ai/docs/pytorch/stable/common/checkpointing_intermediate.html
     datamodule = LitDataModule(
         data_dir=str(data_dir),
         # TODO: Should this be batch_size or micro_batch_size?
