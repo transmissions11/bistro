@@ -50,7 +50,7 @@ class GPT(nn.Module):
 
         #############################################################################
 
-        print("lm_head forward", self.lm_head)
+        print("lm_head forward", self.lm_head.weight)
 
         # find the position of the first occurrence of the soft_prompt_tkn in idx
         soft_prompt_start_pos = torch.where(idx == self.soft_prompt_tkn)[1][0]

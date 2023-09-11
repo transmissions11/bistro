@@ -60,20 +60,20 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
             num_soft_prompt_tkns=num_soft_prompt_tkns,
         )
 
-    print("lm_head init", gpt.lm_head)
+    print("lm_head init", gpt.lm_head.weight)
 
     with lazy_load(checkpoint_path) as checkpoint:
         gpt.load_state_dict(checkpoint, strict=False)
 
-    print("lm_head loaded", gpt.lm_head)
+    print("lm_head loaded", gpt.lm_head.weight)
 
     model = LitModel(gpt)
 
-    print("lm_head model", model.model.lm_head)
+    print("lm_head model", model.model.lm_head.weight)
 
     mark_only_soft_prompt_as_trainable(model)
 
-    print("lm_head trainable", model.model.lm_head)
+    print("lm_head trainable", model.model.lm_head.weight)
 
     datamodule = LitDataModule(
         data_dir=str(data_dir),
