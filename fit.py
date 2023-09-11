@@ -62,12 +62,12 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         precision="bf16-true",
         logger=wandb_logger,
         accumulate_grad_batches=gradient_accumulation_iters,
-        # max_epochs=1,
+        max_epochs=1,
         log_every_n_steps=1,
         deterministic=True,  # TODO: Do we need this? Should we be using "warn"?
         callbacks=[LearningRateMonitor(logging_interval="step")],
-        profiler="simple",
-        max_steps=1000,
+        # profiler="simple",
+        # max_steps=1000,
     )
 
     # TODO: Try logging grads to wandb
