@@ -7,9 +7,6 @@ build
 .vscode
 *.ipynb
 
-# data
 checkpoints
 out
 wandb
-
-tests/original_falcon_40b.py
