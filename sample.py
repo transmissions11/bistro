@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 
 
-@torch.no_grad()
+@torch.inference_mode()
 def sample_model(
     model: torch.nn.Module,
     idx: torch.Tensor,
