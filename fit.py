@@ -99,6 +99,8 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         soft_prompt_tkn=soft_prompt_tkn,
     )
 
+    wandb_logger.watch(model)
+
     trainer.fit(model, datamodule=datamodule)
 
     trainer.save_checkpoint(out_dir / "model_finetuned.pth")
