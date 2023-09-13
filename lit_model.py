@@ -19,7 +19,6 @@ class LitModel(L.LightningModule):
         learning_rate: float,
         warmup_ratio: float,
         min_lr_ratio: float,
-        warmup_steps: int,
         weight_decay: float,  # TODO: Should we be using this for finetuning?
     ):
         super().__init__()
