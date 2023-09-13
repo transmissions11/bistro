@@ -28,9 +28,7 @@ class LitModel(L.LightningModule):
 
     def training_step(self, batch: dict, batch_idx):
         input_ids, targets = batch["input_ids"], batch["targets"]
-
-        logits = self.model(input_ids)
-        loss = chunked_cross_entropy(logits, targets, chunk_size=0)
+        loss = self.compute_loss(input_ids, targets)
 
         self.log("train/loss", loss)
 
@@ -38,11 +36,15 @@ class LitModel(L.LightningModule):
 
     def validation_step(self, batch: dict, batch_idx):
         input_ids, targets = batch["input_ids"], batch["targets"]
+        loss = self.compute_loss(input_ids, targets)
 
-        logits = self.model(input_ids)
-        loss = chunked_cross_entropy(logits, targets, chunk_size=0)
+        self.log("val/loss", loss)
 
         return loss
+
+    def compute_loss(self, input_ids, targets):
+        logits = self.model(input_ids)
+        return chunked_cross_entropy(logits, targets, chunk_size=0)
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
