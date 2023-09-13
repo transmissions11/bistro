@@ -1,3 +1,4 @@
+from lit_gpt import Tokenizer
 import torch
 
 import lightning as L
@@ -5,6 +6,11 @@ import lightning as L
 from model import GPT
 
 from lit_gpt.utils import chunked_cross_entropy
+from sample import sample_model
+
+from utils.padding import strip_right_pad
+from utils.tensors import find_subtensor_end
+from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 
 
 class LitModel(L.LightningModule):
@@ -15,6 +21,7 @@ class LitModel(L.LightningModule):
         warmup_ratio: float,
         min_lr_ratio: float,
         weight_decay: float,
+        tokenizer: Tokenizer,
     ):
         super().__init__()
 
@@ -39,6 +46,36 @@ class LitModel(L.LightningModule):
         loss = self.compute_loss(input_ids, targets)
 
         self.log("val/loss", loss)
+
+        print("batch_idx", loss)
+
+        if batch_idx < 10:
+            tokenizer = self.hparams.tokenizer
+
+            tokens_out = 10
+
+            sample = strip_right_pad(input_ids[0])
+            target = strip_right_pad(targets[0])
+
+            prompt_end_idx = find_subtensor_end(
+                sample,
+                tokenizer.encode(
+                    VICUNA_END_OF_USER_PROMPT_SEQUENCE,
+                    device=self.device,
+                ),
+            )
+
+            print(f"Input: {tokenizer.decode(sample[:prompt_end_idx + 1])}")
+            output = sample_model(
+                self.model,
+                idx=sample[: prompt_end_idx + 1],
+                max_new_tokens=10,
+                temperature=0.01,
+            )[-tokens_out:]
+            print(f"Output:", tokenizer.decode(output))
+            target[target == -1] = 0  # TODO: Just show the relevant targets.
+            print(f"Target:", tokenizer.decode(target))
+            print("\n\n")
 
         return loss
 

@@ -84,6 +84,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         warmup_ratio=warmup_ratio,
         min_lr_ratio=min_lr_ratio,
         weight_decay=weight_decay,
+        tokenizer=tokenizer,
     )
 
     mark_only_soft_prompt_as_trainable(model)
