@@ -50,7 +50,7 @@ class LitDataModule(L.LightningDataModule):
             .map(
                 transform,
                 remove_columns=["prompt", "response"],
-                num_proc=8,
+                # num_proc=8,
             )
         )
 
