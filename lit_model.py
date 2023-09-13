@@ -17,7 +17,8 @@ class LitModel(L.LightningModule):
         self,
         model: GPT,
         learning_rate: float,
-        min_learning_rate: float,  # TODO: or should this be %, vicuna does 0.03, anton does 0.05 (https://github.com/huggingface/transformers/pull/10229)
+        warmup_ratio: float,
+        min_lr_ratio: float,
         warmup_steps: int,
         weight_decay: float,  # TODO: Should we be using this for finetuning?
     ):
@@ -64,46 +65,15 @@ class LitModel(L.LightningModule):
             weight_decay=self.hparams.weight_decay,
         )
 
-        # TODO: How do we do linear warmup?
-        # https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.LambdaLR.html
-        # IS OneCycle equivalent? https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.OneCycleLR.html
-        # lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        #     optimizer,
-        #     self.trainer.estimated_stepping_batches,
-        #     eta_min=self.hparams.min_learning_rate,
-        #     verbose=True,
-        # )
-
-        def get_lr(step):
-            if step < self.hparams.warmup_steps:
-                print(step)
-                return step / self.hparams.warmup_steps
-
-            # in between, use cosine decay down to min learning rate ratio
-            decay_ratio = (step - self.hparams.warmup_steps) / (
-                self.trainer.estimated_stepping_batches - self.hparams.warmup_steps
-            )
-
-            assert 0 <= decay_ratio <= 1
-            coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
-            min_lr_ratio = self.hparams.min_learning_rate / self.hparams.learning_rate
-            return min_lr_ratio + coeff * (1.0 - min_lr_ratio)
-
-        lr_scheduler = torch.optim.lr_scheduler.LambdaLR(
-            optimizer, get_lr, verbose=True
+        lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            optimizer,
+            max_lr=self.hparams.learning_rate,
+            total_steps=self.trainer.estimated_stepping_batches,
+            pct_start=self.hparams.warmup_ratio,
+            cycle_momentum=False,  #
+            div_factor=1e10,  # Large number, so we start at 0.
+            final_div_factor=1 / (self.hparams.min_lr_ratio + 1e-10),
         )
-
-        # lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
-        #     optimizer,
-        #     max_lr=self.hparams.learning_rate,
-        #     total_steps=self.trainer.estimated_stepping_batches,
-        #     pct_start=self.hparams.warmup_steps
-        #     / self.trainer.estimated_stepping_batches,
-        #     anneal_strategy="cos",
-        #     cycle_momentum=False,
-        #     verbose=True,
-        #     div_factor=1e10,  # So that we start at 0.
-        # )
 
         return {
             "optimizer": optimizer,

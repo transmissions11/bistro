@@ -24,9 +24,9 @@ num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
 
 learning_rate = 3e-2
-min_learning_rate = 0
-warmup_steps = 333  # 2000
-weight_decay = 0.02
+min_lr_ratio = 0.00  # Anneal to 0.
+warmup_ratio = 0.05  # Spend 5% of training steps warming up.
+weight_decay = 0.02  # TODO: Should we be using this for finetuning?
 
 
 # Should we use https://github.com/omry/omegaconf?
@@ -88,8 +88,8 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     model = LitModel(
         gpt,
         learning_rate=learning_rate,
-        min_learning_rate=min_learning_rate,
-        warmup_steps=warmup_steps,
+        warmup_ratio=warmup_ratio,
+        min_lr_ratio=min_lr_ratio,
         weight_decay=weight_decay,
     )
 
