@@ -36,10 +36,10 @@ class LitDataModule(L.LightningDataModule):
                 )
             ).type(torch.int64)
 
-            print("hi")
+            print("hi!!!!!!!!!!")
 
             return {
-                "input_ids": seq[:-1],
+                "input_ids": seq,
                 # Mask everything before the assistant response.
                 "targets": mask_before_inclusive(
                     VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], self.tokenizer
