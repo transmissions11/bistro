@@ -60,7 +60,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
 
     checkpoint_callback = ModelCheckpoint(
         save_top_k=10,
-        monitor="train_loss",
+        monitor="val_loss",
         mode="min",
         dirpath="bistro_checkpoints/",
         every_n_train_steps=checkpoint_check_interval,
