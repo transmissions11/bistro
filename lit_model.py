@@ -45,14 +45,7 @@ class LitModel(L.LightningModule):
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
-        self.log(
-            "val/loss",
-            loss.item(),
-            on_step=True,
-            on_epoch=True,
-            prog_bar=True,
-            batch_size=1,
-        )
+        self.log("val/loss", loss.item(), on_step=True, on_epoch=True)
 
         print(batch_idx, loss)
 
@@ -85,6 +78,9 @@ class LitModel(L.LightningModule):
             print("\n\n")
 
         return loss
+
+    def on_validation_epoch_end(self):
+        print("!!!!!!!!!!! END !!!!!!!!!", self.validation_step_outputs)
 
     def compute_loss(self, input_ids, targets):
         logits = self.model(input_ids)
