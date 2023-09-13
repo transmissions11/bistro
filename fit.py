@@ -32,8 +32,8 @@ weight_decay = 0.01  # TODO: Should we be using this for finetuning?
 
 val_batches = 10
 tokens_to_sample = 8
-val_check_interval = 40
-checkpoint_check_interval = 50
+val_check_interval = 0.05
+checkpoint_check_interval = 500
 
 
 hparams = {
@@ -60,7 +60,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
 
     checkpoint_callback = ModelCheckpoint(
         save_top_k=10,
-        monitor="train/loss",
+        monitor="train_loss",
         mode="min",
         dirpath="bistro_checkpoints/",
         every_n_train_steps=checkpoint_check_interval,
