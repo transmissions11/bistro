@@ -39,7 +39,7 @@ class LitModel(L.LightningModule):
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
-        self.log("train/loss", loss)
+        self.log("train_loss", loss)
 
         return loss
 
@@ -49,7 +49,7 @@ class LitModel(L.LightningModule):
 
         # Disabling on_epoch until I can figure out
         # why mean & sum reduction give weird results.
-        self.log("val/loss", loss, on_step=True, on_epoch=False)
+        self.log("val_loss", loss, on_step=True, on_epoch=False)
 
         tokenizer = self.hparams.tokenizer
 
