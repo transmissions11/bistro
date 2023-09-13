@@ -47,7 +47,7 @@ class LitModel(L.LightningModule):
 
         self.log("val/loss", loss)
 
-        print("batch_idx", loss)
+        print(batch_idx, loss)
 
         if batch_idx < 10:
             tokenizer = self.hparams.tokenizer
