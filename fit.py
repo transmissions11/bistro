@@ -62,7 +62,7 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         logger=wandb_logger,
         log_every_n_steps=10,
         val_check_interval=0.01,
-        limit_val_batches=50,
+        limit_val_batches=30,
         accumulate_grad_batches=gradient_accumulation_iters,
         callbacks=[LearningRateMonitor(logging_interval="step")],
     )
