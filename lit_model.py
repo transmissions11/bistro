@@ -37,7 +37,7 @@ class LitModel(L.LightningModule):
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
-        self.log("train/loss", loss)
+        self.log("train/loss", loss.item())
 
         return loss
 
@@ -45,7 +45,7 @@ class LitModel(L.LightningModule):
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
-        self.log("val/loss", loss)
+        self.log("val/loss", loss.item())
 
         print(batch_idx, loss)
 
