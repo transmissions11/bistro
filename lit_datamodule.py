@@ -37,9 +37,9 @@ class LitDataModule(L.LightningDataModule):
             ).type(torch.int64)
 
             return {
-                "TESTING": seq[:-1],
+                "input_ids": seq[:-1],
                 # Mask everything before the assistant response.
-                "TESTING2": mask_before_inclusive(
+                "targets": mask_before_inclusive(
                     VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], self.tokenizer
                 ),
             }
