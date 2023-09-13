@@ -50,8 +50,8 @@ class LitDataModule(L.LightningDataModule):
             .map(
                 transform,
                 remove_columns=["prompt", "response"],
-                load_from_cache_file=False
-                # num_proc=8,
+                load_from_cache_file=False,
+                num_proc=2,
             )
         )
 
