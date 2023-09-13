@@ -1,10 +1,13 @@
-import lightning.pytorch as L
 import torch
 from torch.utils.data import DataLoader
-from datasets import load_dataset
-from lit_gpt import Tokenizer
-from utils.masking import mask_before_inclusive
 
+import lightning.pytorch as L
+
+from lit_gpt import Tokenizer
+
+from datasets import load_dataset
+
+from utils.masking import mask_before_inclusive
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE, fmt_vicuna_input
 
 
@@ -26,39 +29,28 @@ class LitDataModule(L.LightningDataModule):
 
     def download_and_transform(self):
         def transform(x):
-            # TODO: Handle padding here somehow? HuggingFace
-            # tokenizers seems to allow padding but just pads
-            # to the max element in the dataset? Maybe we can
-            # use the batch feature of mapping? Would be slow
-            # for different batch sizes though...
             seq = self.tokenizer.encode(
                 fmt_vicuna_input(
                     f"{self.soft_prompt_tkn * self.num_soft_prompt_tkns} {x['prompt']}",
                     x["response"],
                 )
-            ).type(
-                # TODO: Do we need to do .type(torch.int64) here?
-                torch.int64
-            )
+            ).type(torch.int64)
 
-            # TODO: Why are prompt and response still included?
             return {
                 "input_ids": seq[:-1],
                 # Mask everything before the assistant response.
-                # TODO: Shouldn't rely on finding the end of the user prompt, maybe split
-                # prompt/response strings and use the len of first half to find the end of the prompt?
                 "targets": mask_before_inclusive(
                     VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], self.tokenizer
                 ),
             }
 
-        # TODO: Why does it map twice over 20,000,000 inputs (each split only has 10m)?
         return (
             load_dataset("parquet", data_dir=self.data_dir)
             .with_format("torch")
             .map(
                 transform,
-                # num_proc=64, TODO: "RuntimeError: One of the subprocesses has abruptly died during map operation.To debug the error, disable multiprocessing."
+                remove_columns=["prompt", "response"],
+                num_proc=8,
             )
         )
 
