@@ -10,6 +10,7 @@ from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
 from lit_datamodule import LitDataModule
 from utils.params import mark_only_soft_prompt_as_trainable
 from lightning.pytorch.callbacks import LearningRateMonitor
+from lightning.pytorch.callbacks import ModelCheckpoint
 
 from lit_model import LitModel
 
@@ -21,14 +22,17 @@ gradient_accumulation_iters = 3
 
 epochs = 1
 
-# TODO: Make these hyperparameters?
 num_soft_prompt_tkns = 20
-soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
+soft_prompt_tkn = "✅"
 
 learning_rate = 3e-2
 min_lr_ratio = 0.00  # Anneal to 0.
 warmup_ratio = 0.05  # Spend 5% of training steps warming up.
 weight_decay = 0.01  # TODO: Should we be using this for finetuning?
+
+val_batches = 10
+tokens_to_sample = 8
+val_check_interval = 0.05
 
 
 hparams = {
@@ -38,7 +42,7 @@ hparams = {
 }
 
 
-def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
+def main(data_dir: Path, checkpoint_dir: Path):
     check_valid_checkpoint_dir(checkpoint_dir)
 
     tokenizer = Tokenizer(checkpoint_dir)
@@ -53,6 +57,16 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         config=hparams,
     )
 
+    checkpoint_callback = ModelCheckpoint(
+        save_top_k=10,
+        save_last=True,
+        # every_n_train_steps=100,
+        monitor="val/loss",
+        mode="min",
+        dirpath="bistro_checkpoints/",
+        filename="ckpt-{epoch:02d}-{val_loss:.2f}",
+    )
+
     trainer = L.Trainer(
         devices=devices,
         strategy="auto",
@@ -60,11 +74,11 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         deterministic=True,
         precision="bf16-true",
         logger=wandb_logger,
-        log_every_n_steps=10,
-        val_check_interval=0.01,
-        limit_val_batches=30,
+        log_every_n_steps=10,  # Doesn't apply in validation loop.
+        limit_val_batches=val_batches,
+        val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
-        callbacks=[LearningRateMonitor(logging_interval="step")],
+        callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
 
     # Can set empty_init=True if can also set strict=True below.
@@ -85,17 +99,14 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
         warmup_ratio=warmup_ratio,
         min_lr_ratio=min_lr_ratio,
         weight_decay=weight_decay,
+        tokens_to_sample=tokens_to_sample,
         tokenizer=tokenizer,
     )
 
     mark_only_soft_prompt_as_trainable(model)
 
-    # TODO: Try LR and batch size finder
-    # https://lightning.ai/docs/pytorch/stable/advanced/training_tricks.html#batch-size-finder
-    # TODO: Auto checkpointing: https://lightning.ai/docs/pytorch/stable/common/checkpointing_intermediate.html
     datamodule = LitDataModule(
         data_dir=str(data_dir),
-        # TODO: Should this be batch_size or micro_batch_size?
         batch_size=micro_batch_size,
         tokenizer=tokenizer,
         num_soft_prompt_tkns=num_soft_prompt_tkns,
@@ -106,15 +117,12 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
 
     trainer.fit(model, datamodule=datamodule)
 
-    trainer.save_checkpoint(out_dir / "model_finetuned.pth")
-
 
 def setup(
     data_dir: Path = Path("data/bistro"),
     checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
-    out_dir: Path = Path("out/bistro"),
 ):
-    main(data_dir, checkpoint_dir, out_dir)
+    main(data_dir, checkpoint_dir)
 
 
 if __name__ == "__main__":

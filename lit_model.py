@@ -11,6 +11,7 @@ from sample import sample_model
 from utils.padding import strip_right_pad
 from utils.tensors import find_subtensor_end
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
+from lightning.pytorch.callbacks import ModelCheckpoint
 
 
 class LitModel(L.LightningModule):
@@ -21,12 +22,13 @@ class LitModel(L.LightningModule):
         warmup_ratio: float,
         min_lr_ratio: float,
         weight_decay: float,
+        tokens_to_sample: int,
         tokenizer: Tokenizer,
     ):
         super().__init__()
 
         # Disable logging hyperparams, since we do it manually in fit.py.
-        self.save_hyperparameters(ignore=["model"], logger=False)
+        self.save_hyperparameters(ignore=["model", "tokenizer"], logger=False)
 
         self.model = model
 
@@ -37,7 +39,7 @@ class LitModel(L.LightningModule):
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
-        self.log("train/loss", loss.item())
+        self.log("train/loss", loss)
 
         return loss
 
@@ -45,37 +47,33 @@ class LitModel(L.LightningModule):
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
-        self.log("val/loss", loss.item(), on_step=True, on_epoch=True, reduce_fx="sum")
+        # Disabling on_epoch until I can figure out
+        # why mean & sum reduction give weird results.
+        self.log("val/loss", loss, on_step=True, on_epoch=False)
 
-        print(batch_idx, loss)
+        tokenizer = self.hparams.tokenizer
 
-        if batch_idx < 10:
-            tokenizer = self.hparams.tokenizer
+        sample = strip_right_pad(input_ids[0])
+        target = strip_right_pad(targets[0])
 
-            tokens_out = 10
+        prompt_end_idx = find_subtensor_end(
+            sample,
+            tokenizer.encode(
+                VICUNA_END_OF_USER_PROMPT_SEQUENCE,
+                device=self.device,
+            ),
+        )
 
-            sample = strip_right_pad(input_ids[0])
-            target = strip_right_pad(targets[0])
-
-            prompt_end_idx = find_subtensor_end(
-                sample,
-                tokenizer.encode(
-                    VICUNA_END_OF_USER_PROMPT_SEQUENCE,
-                    device=self.device,
-                ),
-            )
-
-            print(f"Input: {tokenizer.decode(sample[:prompt_end_idx + 1])}")
-            output = sample_model(
-                self.model,
-                idx=sample[: prompt_end_idx + 1],
-                max_new_tokens=10,
-                temperature=0.01,
-            )[-tokens_out:]
-            print(f"Output:", tokenizer.decode(output))
-            target[target == -1] = 0  # TODO: Just show the relevant targets.
-            print(f"Target:", tokenizer.decode(target))
-            print("\n\n")
+        print(f"Input: {tokenizer.decode(sample[:prompt_end_idx + 1])}")
+        output = sample_model(
+            self.model,
+            idx=sample[: prompt_end_idx + 1],
+            temperature=0.00,  # Sample greedily.
+            max_new_tokens=self.hparams.tokens_to_sample,
+        )[-self.hparams.tokens_to_sample :]
+        print(f"Output:", tokenizer.decode(output))
+        print(f"Target:", tokenizer.decode(target[target != -1]))
+        print("\n\n")
 
         return loss
 
