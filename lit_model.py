@@ -1,17 +1,17 @@
-from lit_gpt import Tokenizer
 import torch
+
 
 import lightning as L
 
-from model import GPT
-
+from lit_gpt import Tokenizer
 from lit_gpt.utils import chunked_cross_entropy
+
+from model import GPT
 from sample import sample_model
 
 from utils.padding import strip_right_pad
 from utils.tensors import find_subtensor_end
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
-from lightning.pytorch.callbacks import ModelCheckpoint
 
 
 class LitModel(L.LightningModule):
@@ -68,7 +68,7 @@ class LitModel(L.LightningModule):
         output = sample_model(
             self.model,
             idx=sample[: prompt_end_idx + 1],
-            temperature=0.00,  # Sample greedily.
+            temperature=0.0,  # Sample greedily.
             max_new_tokens=self.hparams.tokens_to_sample,
         )[-self.hparams.tokens_to_sample :]
         print(f"Output:", tokenizer.decode(output))
@@ -93,7 +93,7 @@ class LitModel(L.LightningModule):
             max_lr=self.hparams.learning_rate,
             total_steps=self.trainer.estimated_stepping_batches,
             pct_start=self.hparams.warmup_ratio,
-            cycle_momentum=False,  #
+            cycle_momentum=False,
             div_factor=1e10,  # Large number, so we start at 0.
             final_div_factor=1 / (self.hparams.min_lr_ratio + 1e-10),
         )
