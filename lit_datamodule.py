@@ -37,20 +37,21 @@ class LitDataModule(L.LightningDataModule):
             ).type(torch.int64)
 
             return {
-                "input_ids": seq[:-1],
+                "TESTING": seq[:-1],
                 # Mask everything before the assistant response.
-                "targets": mask_before_inclusive(
+                "TESTING2": mask_before_inclusive(
                     VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], self.tokenizer
                 ),
             }
 
         return (
-            load_dataset("parquet", data_dir=self.data_dir).with_format("torch")
-            # .map(
-            #     transform,
-            #     remove_columns=["prompt", "response"],
-            #     # num_proc=8,
-            # )
+            load_dataset("parquet", data_dir=self.data_dir)
+            .with_format("torch")
+            .map(
+                transform,
+                remove_columns=["prompt", "response"],
+                # num_proc=8,
+            )
         )
 
     def prepare_data(self):
