@@ -79,8 +79,8 @@ class LitModel(L.LightningModule):
 
         return loss
 
-    def on_validation_epoch_end(self):
-        print("!!!!!!!!!!! END !!!!!!!!!", self.validation_step_outputs)
+    def on_validation_epoch_end(self, validation_step_outputs):
+        print("!!!!!!!!!!! END !!!!!!!!!", validation_step_outputs)
 
     def compute_loss(self, input_ids, targets):
         logits = self.model(input_ids)
