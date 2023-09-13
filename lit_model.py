@@ -45,7 +45,11 @@ class LitModel(L.LightningModule):
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
-        self.log("val/loss", loss)
+        def reduce_fx(x):
+            print(x.shape, x)
+            return torch.mean(x)
+
+        self.log("val/loss", loss, reduce_fx=reduce_fx)
 
         print(batch_idx, loss)
 
