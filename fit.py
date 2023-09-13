@@ -61,11 +61,11 @@ def main(data_dir: Path, checkpoint_dir: Path):
     checkpoint_callback = ModelCheckpoint(
         save_top_k=10,
         save_last=True,
-        monitor="val/loss",
+        monitor="train/loss",
         mode="min",
         dirpath="bistro_checkpoints/",
         every_n_train_steps=checkpoint_check_interval,
-        filename="ckpt-step{step}-loss{val/loss:.2f}",
+        filename="step={step}-train/loss={train/loss:.2f}",
     )
 
     trainer = L.Trainer(
