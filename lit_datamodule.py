@@ -36,6 +36,8 @@ class LitDataModule(L.LightningDataModule):
                 )
             ).type(torch.int64)
 
+            print("hi")
+
             return {
                 "input_ids": seq[:-1],
                 # Mask everything before the assistant response.
