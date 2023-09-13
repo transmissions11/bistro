@@ -19,6 +19,8 @@ devices = 1
 micro_batch_size = 1
 gradient_accumulation_iters = 3
 
+epochs = 1
+
 # TODO: Make these hyperparameters?
 num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
@@ -26,10 +28,14 @@ soft_prompt_tkn = "✅"  # TODO: Make this work across multiple tokenizers.
 learning_rate = 3e-2
 min_lr_ratio = 0.00  # Anneal to 0.
 warmup_ratio = 0.05  # Spend 5% of training steps warming up.
-weight_decay = 0.02  # TODO: Should we be using this for finetuning?
+weight_decay = 0.01  # TODO: Should we be using this for finetuning?
 
 
-# Should we use https://github.com/omry/omegaconf?
+hparams = {
+    k: v
+    for k, v in locals().items()
+    if isinstance(v, (int, float, str)) and not k.startswith("_")
+}
 
 
 def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
@@ -40,38 +46,24 @@ def main(data_dir: Path, checkpoint_dir: Path, out_dir: Path):
     checkpoint_path = checkpoint_dir / "lit_model.pth"
     print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
 
-    L.seed_everything(1337, workers=True)  # TODO: Do we need this?
+    L.seed_everything(1337, workers=True)
 
-    # TODO: I really just want to be able to attach all trainer params.
-    # TODO: We could just have a config dict that gets passed into main
-    # with everything, and use **config syntax to unpack it into trainer.
-    # TODO: Then we'd just log that with log_hyperparams.
-    # TODO: !!!!!! IF WE DO THIS, we should pass logger=False to save_hyperparams !!!
     wandb_logger = WandbLogger(
         project="bistro",
-        config={
-            "devices": devices,
-            "micro_batch_size": micro_batch_size,
-            "gradient_accumulation_iters": gradient_accumulation_iters,
-        },
+        config=hparams,
     )
 
     trainer = L.Trainer(
         devices=devices,
-        strategy="auto",  # deepspeed/ddp
+        strategy="auto",
+        max_epochs=epochs,
+        deterministic=True,
         precision="bf16-true",
         logger=wandb_logger,
+        log_every_n_steps=10,
         accumulate_grad_batches=gradient_accumulation_iters,
-        max_epochs=1,
-        log_every_n_steps=1,
-        deterministic=True,  # TODO: Do we need this? Should we be using "warn"?
         callbacks=[LearningRateMonitor(logging_interval="step")],
-        # profiler="simple",
-        # max_steps=1000,
     )
-
-    # TODO: Try logging grads to wandb
-    # https://pytorch-lightning.readthedocs.io/en/1.4.9/extensions/generated/pytorch_lightning.loggers.WandbLogger.html
 
     # Can set empty_init=True if can also set strict=True below.
     # Otherwise some parameters may not get initialized properly.

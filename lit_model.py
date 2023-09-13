@@ -6,11 +6,6 @@ from model import GPT
 
 from lit_gpt.utils import chunked_cross_entropy
 
-import math
-
-# TODO: Try https://pytorch-lightning.readthedocs.io/en/1.4.9/advanced/lr_finder.html
-# INSPO from https://github.com/the-full-stack/fsdl-text-recognizer-2022/blob/9d6bc110822761398e03eadb978af793c3c40bc1/text_recognizer/lit_models/transformer.py#L22-L42
-
 
 class LitModel(L.LightningModule):
     def __init__(
@@ -19,18 +14,14 @@ class LitModel(L.LightningModule):
         learning_rate: float,
         warmup_ratio: float,
         min_lr_ratio: float,
-        weight_decay: float,  # TODO: Should we be using this for finetuning?
+        weight_decay: float,
     ):
         super().__init__()
 
-        self.save_hyperparameters(
-            ignore=["model"]
-        )  # TODO: How to log grad accum steps and micro batch size to wandb?
+        # Disable logging hyperparams, since we do it manually in fit.py.
+        self.save_hyperparameters(ignore=["model"], logger=False)
 
         self.model = model
-
-        # TODO: Try FusedCrossEntropyLoss from TinyLlama.
-        # Also, anything other than chunk_size=0 is broken.
 
     def forward(self, x):
         return self.model(x)
