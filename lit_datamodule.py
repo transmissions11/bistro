@@ -77,4 +77,6 @@ class LitDataModule(L.LightningDataModule):
         )
 
     def val_dataloader(self):
-        return DataLoader(self.hf_dataset["validation"], batch_size=self.batch_size)
+        return DataLoader(
+            self.hf_dataset["validation"], batch_size=self.batch_size, num_workers=8
+        )
