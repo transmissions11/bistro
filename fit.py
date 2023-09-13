@@ -65,7 +65,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
         mode="min",
         dirpath="bistro_checkpoints/",
         every_n_train_steps=checkpoint_check_interval,
-        filename="step={step}-train/loss={train/loss:.2f}",
+        filename="{step}-{train/loss:.2f}",
     )
 
     trainer = L.Trainer(
