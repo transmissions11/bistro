@@ -28,7 +28,7 @@ class LitModel(L.LightningModule):
         super().__init__()
 
         # Disable logging hyperparams, since we do it manually in fit.py.
-        self.save_hyperparameters(ignore=["model", "tokenizer"], logger=False)
+        self.save_hyperparameters(ignore=["model"], logger=False)
 
         self.model = model
 
