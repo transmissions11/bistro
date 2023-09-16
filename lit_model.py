@@ -76,8 +76,6 @@ class LitModel(L.LightningModule):
             print(f"Target:", tokenizer.decode(target[target != -1]))
             print("\n\n")
 
-        return loss
-
     def compute_loss(self, input_ids, targets):
         logits = self.model(input_ids)
         return chunked_cross_entropy(logits, targets, chunk_size=0)
