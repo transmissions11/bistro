@@ -47,6 +47,7 @@ class LitModel(L.LightningModule):
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
+        # TODO: Just try logging all 1s, a range of numbers, etc.
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
 
         if batch_idx < 10:

@@ -51,7 +51,7 @@ class LitDataModule(L.LightningDataModule):
                 transform,
                 remove_columns=["prompt", "response"],
                 load_from_cache_file=False,  # TODO: Fix this.
-                # num_proc=2,
+                num_proc=2,
                 # We can force cache like this if needed.
                 # new_fingerprint="t1"
             )
