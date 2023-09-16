@@ -49,14 +49,7 @@ class LitModel(L.LightningModule):
 
         # Disabling on_epoch until I can figure out
         # why mean & sum reduction give weird results.
-        self.log(
-            "val_loss",
-            loss,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=True,
-            reduce_fx="sum",
-        )
+        self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
 
         if batch_idx < 10:
             tokenizer = self.hparams.tokenizer
