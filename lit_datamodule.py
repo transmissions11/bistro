@@ -10,6 +10,8 @@ from datasets import load_dataset
 from utils.masking import mask_before_inclusive
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE, fmt_vicuna_input
 
+import multiprocessing
+
 
 class LitDataModule(L.LightningDataModule):
     def __init__(
@@ -28,6 +30,8 @@ class LitDataModule(L.LightningDataModule):
         self.soft_prompt_tkn = soft_prompt_tkn
 
     def download_and_transform(self):
+        multiprocessing.set_start_method("spawn")
+
         def transform(x):
             seq = self.tokenizer.encode(
                 fmt_vicuna_input(
