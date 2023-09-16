@@ -14,6 +14,8 @@ from lit_model import LitModel
 
 from model import GPT, Config
 
+import torch.multiprocessing as mp
+
 devices = 1
 micro_batch_size = 1
 gradient_accumulation_iters = 3
@@ -124,6 +126,8 @@ def setup(
 
 
 if __name__ == "__main__":
+    mp.set_start_method("spawn")
+
     torch.set_float32_matmul_precision("high")
 
     from jsonargparse import CLI
