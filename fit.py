@@ -1,6 +1,5 @@
-import os
-import time
 from pathlib import Path
+import multiprocessing
 
 import lightning as L
 import torch
@@ -127,6 +126,8 @@ def setup(
 
 if __name__ == "__main__":
     torch.set_float32_matmul_precision("high")
+
+    multiprocessing.set_start_method("spawn")
 
     from jsonargparse import CLI
 
