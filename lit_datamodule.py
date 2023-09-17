@@ -34,7 +34,9 @@ class LitDataModule(L.LightningDataModule):
 
         # Note: This function cannot access any properties of self directly, or it
         # will mess up deterministic serialization. Instead, pass them as arguments.
-        def transform(x, tokenizer, soft_prompt_tkn, num_soft_prompt_tkns):
+        def transform(
+            x, tokenizer: Tokenizer, soft_prompt_tkn: str, num_soft_prompt_tkns: int
+        ):
             seq = tokenizer.encode(
                 fmt_vicuna_input(
                     f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
@@ -60,7 +62,7 @@ class LitDataModule(L.LightningDataModule):
                     num_soft_prompt_tkns=self.num_soft_prompt_tkns,
                 ),
                 remove_columns=["prompt", "response"],
-                num_proc=64,
+                num_proc=32,
             )
             .with_format("torch")
         )
