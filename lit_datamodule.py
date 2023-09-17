@@ -1,15 +1,7 @@
-import torch.multiprocessing as mp
-import multiprocessing as mp2
-
-# from multiprocess import set_start_method
-
-# set_start_method("spawn", force=True)
-
-# mp.set_start_method("spawn", force=True)
-# mp2.set_start_method("spawn", force=True)
-
 import torch
 from torch.utils.data import DataLoader
+
+from functools import partial
 
 import lightning.pytorch as L
 
@@ -38,15 +30,10 @@ class LitDataModule(L.LightningDataModule):
         self.soft_prompt_tkn = soft_prompt_tkn
 
     def download_and_transform(self):
-        # data_dir = self.data_dir
-        tokenizer = self.tokenizer
-        # num_soft_prompt_tkns = self.num_soft_prompt_tkns
-        soft_prompt_tkn = self.soft_prompt_tkn
-
-        def transform(x):
+        def transform(x, tokenizer, soft_prompt_tkn, num_soft_prompt_tkns):
             seq = tokenizer.encode(
                 fmt_vicuna_input(
-                    f"{soft_prompt_tkn * self.num_soft_prompt_tkns} {x['prompt']}",
+                    f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
                     x["response"],
                 )
             ).type(torch.int64)
@@ -62,7 +49,12 @@ class LitDataModule(L.LightningDataModule):
         return (
             load_dataset("parquet", data_dir=self.data_dir)
             .map(
-                transform,
+                partial(
+                    transform,
+                    tokenizer=self.tokenizer,
+                    soft_prompt_tkn=self.soft_prompt_tkn,
+                    num_soft_prompt_tkns=self.num_soft_prompt_tkns,
+                ),
                 remove_columns=["prompt", "response"],
                 load_from_cache_file=False,  # TODO: Fix this.
                 num_proc=64,
