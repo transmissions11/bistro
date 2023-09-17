@@ -29,9 +29,7 @@ class LitDataModule(L.LightningDataModule):
         self.num_soft_prompt_tkns = num_soft_prompt_tkns
         self.soft_prompt_tkn = soft_prompt_tkn
 
-    def download_and_transform(self):
-        print("download_and_transform!!")
-
+    def load_mapped_datasets(self):
         # Note: This function cannot access any properties of self directly, or it
         # will mess up deterministic serialization. Instead, pass them as arguments.
         def transform(
@@ -68,21 +66,19 @@ class LitDataModule(L.LightningDataModule):
         )
 
     def prepare_data(self):
-        print("prepare!")
         # Download the dataset and build caches on a
         # single process first to avoid waste w/ DDP.
-        self.download_and_transform()
+        self.load_mapped_datasets()
 
     def setup(self, stage: str):
-        print("setup!")
         # Load the dataset on each process, from cache.
-        self.hf_dataset = self.download_and_transform()
+        self.hf_datasets = self.load_mapped_datasets()
 
     def train_dataloader(self):
         # TODO: try collate
         return DataLoader(
-            self.hf_dataset["train"], batch_size=self.batch_size, shuffle=True
+            self.hf_datasets["train"], batch_size=self.batch_size, shuffle=True
         )
 
     def val_dataloader(self):
-        return DataLoader(self.hf_dataset["validation"], batch_size=self.batch_size)
+        return DataLoader(self.hf_datasets["validation"], batch_size=self.batch_size)
