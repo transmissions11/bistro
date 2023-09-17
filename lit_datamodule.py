@@ -40,13 +40,13 @@ class LitDataModule(L.LightningDataModule):
     def download_and_transform(self):
         # data_dir = self.data_dir
         tokenizer = self.tokenizer
-        num_soft_prompt_tkns = self.num_soft_prompt_tkns
+        # num_soft_prompt_tkns = self.num_soft_prompt_tkns
         soft_prompt_tkn = self.soft_prompt_tkn
 
         def transform(x):
             seq = tokenizer.encode(
                 fmt_vicuna_input(
-                    f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
+                    f"{soft_prompt_tkn * self.num_soft_prompt_tkns} {x['prompt']}",
                     x["response"],
                 )
             ).type(torch.int64)
