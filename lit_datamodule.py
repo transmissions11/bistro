@@ -20,6 +20,35 @@ from utils.masking import mask_before_inclusive
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE, fmt_vicuna_input
 
 
+def download_and_transform(soft_prompt_tkn, num_soft_prompt_tkns, data_dir):
+    print(soft_prompt_tkn, num_soft_prompt_tkns, data_dir)
+
+    def transform(x):
+        seq = fmt_vicuna_input(
+            f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
+            x["response"],
+        )
+
+        return {
+            "input_ids": seq[:-1],
+            # Mask everything before the assistant response.
+            "targets": seq[1:],
+        }
+
+    return (
+        load_dataset("parquet", data_dir=data_dir)
+        .map(
+            transform,
+            remove_columns=["prompt", "response"],
+            load_from_cache_file=False,  # TODO: Fix this.
+            num_proc=8,
+            # We can force cache like this if needed.
+            # new_fingerprint="t1"
+        )
+        .with_format("torch")
+    )
+
+
 class LitDataModule(L.LightningDataModule):
     def __init__(
         self,
@@ -36,38 +65,12 @@ class LitDataModule(L.LightningDataModule):
         self.num_soft_prompt_tkns = num_soft_prompt_tkns
         self.soft_prompt_tkn = soft_prompt_tkn
 
-    def download_and_transform(soft_prompt_tkn, num_soft_prompt_tkns, data_dir):
-        print(soft_prompt_tkn, num_soft_prompt_tkns, data_dir)
-
-        def transform(x):
-            seq = fmt_vicuna_input(
-                f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
-                x["response"],
-            )
-
-            return {
-                "input_ids": seq[:-1],
-                # Mask everything before the assistant response.
-                "targets": seq[1:],
-            }
-
-        return (
-            load_dataset("parquet", data_dir=data_dir)
-            .map(
-                transform,
-                remove_columns=["prompt", "response"],
-                load_from_cache_file=False,  # TODO: Fix this.
-                num_proc=8,
-                # We can force cache like this if needed.
-                # new_fingerprint="t1"
-            )
-            .with_format("torch")
-        )
-
     def prepare_data(self):
         # Download the dataset and build caches on a
         # single process first to avoid waste w/ DDP.
-        self.download_and_transform(self.soft_prompt_tkn, self.num_soft_prompt_tkns)
+        self.download_and_transform(
+            self.soft_prompt_tkn, self.num_soft_prompt_tkns, self.data_dir
+        )
 
     def setup(self, stage: str):
         # Load the dataset on each process, from cache.
