@@ -1,9 +1,3 @@
-# import torch.multiprocessing as mp
-# import multiprocessing as mp2
-
-# mp.set_start_method("spawn", force=True)
-# mp2.set_start_method("spawn", force=True)
-
 from pathlib import Path
 
 import lightning as L
