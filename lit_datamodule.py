@@ -41,7 +41,7 @@ def download_and_transform(soft_prompt_tkn, num_soft_prompt_tkns, data_dir):
             transform,
             remove_columns=["prompt", "response"],
             load_from_cache_file=False,  # TODO: Fix this.
-            num_proc=8,
+            num_proc=64,
             # We can force cache like this if needed.
             # new_fingerprint="t1"
         )
