@@ -68,13 +68,13 @@ class LitDataModule(L.LightningDataModule):
     def prepare_data(self):
         # Download the dataset and build caches on a
         # single process first to avoid waste w/ DDP.
-        self.download_and_transform(
+        download_and_transform(
             self.soft_prompt_tkn, self.num_soft_prompt_tkns, self.data_dir
         )
 
     def setup(self, stage: str):
         # Load the dataset on each process, from cache.
-        self.hf_dataset = self.download_and_transform(
+        self.hf_dataset = download_and_transform(
             self.soft_prompt_tkn, self.num_soft_prompt_tkns, self.data_dir
         )
 
