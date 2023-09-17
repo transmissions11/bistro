@@ -38,19 +38,15 @@ class LitDataModule(L.LightningDataModule):
 
     def download_and_transform(self):
         def transform(x):
-            seq = self.tokenizer.encode(
-                fmt_vicuna_input(
-                    f"{self.soft_prompt_tkn * self.num_soft_prompt_tkns} {x['prompt']}",
-                    x["response"],
-                )
-            ).type(torch.int64)
+            seq = fmt_vicuna_input(
+                f"{self.soft_prompt_tkn * self.num_soft_prompt_tkns} {x['prompt']}",
+                x["response"],
+            )
 
             return {
                 "input_ids": seq[:-1],
                 # Mask everything before the assistant response.
-                "targets": mask_before_inclusive(
-                    VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], self.tokenizer
-                ),
+                "targets": seq[1:],
             }
 
         return (
