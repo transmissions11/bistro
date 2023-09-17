@@ -37,10 +37,11 @@ class LitDataModule(L.LightningDataModule):
         self.num_soft_prompt_tkns = num_soft_prompt_tkns
         self.soft_prompt_tkn = soft_prompt_tkn
 
-    def download_and_transform(
-        self, tokenizer, soft_prompt_tkn, num_soft_prompt_tkns, data_dir
-    ):
-        print(soft_prompt_tkn, num_soft_prompt_tkns, data_dir)
+    def download_and_transform(self):
+        data_dir = self.data_dir
+        tokenizer = self.tokenizer
+        num_soft_prompt_tkns = self.num_soft_prompt_tkns
+        soft_prompt_tkn = self.soft_prompt_tkn
 
         def transform(x):
             seq = tokenizer.encode(
@@ -74,21 +75,11 @@ class LitDataModule(L.LightningDataModule):
     def prepare_data(self):
         # Download the dataset and build caches on a
         # single process first to avoid waste w/ DDP.
-        self.download_and_transform(
-            self.tokenizer,
-            self.soft_prompt_tkn,
-            self.num_soft_prompt_tkns,
-            self.data_dir,
-        )
+        self.download_and_transform()
 
     def setup(self, stage: str):
         # Load the dataset on each process, from cache.
-        self.hf_dataset = self.download_and_transform(
-            self.tokenizer,
-            self.soft_prompt_tkn,
-            self.num_soft_prompt_tkns,
-            self.data_dir,
-        )
+        self.hf_dataset = self.download_and_transform()
 
     def train_dataloader(self):
         # TODO: try collate
