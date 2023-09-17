@@ -37,7 +37,11 @@ class LitDataModule(L.LightningDataModule):
         self.soft_prompt_tkn = soft_prompt_tkn
 
     def download_and_transform(self):
+        torch.device("cpu")
+
         def transform(x):
+            torch.device("cpu")
+
             seq = fmt_vicuna_input(
                 f"{self.soft_prompt_tkn * self.num_soft_prompt_tkns} {x['prompt']}",
                 x["response"],
