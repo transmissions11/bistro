@@ -36,14 +36,10 @@ class LitDataModule(L.LightningDataModule):
         self.num_soft_prompt_tkns = num_soft_prompt_tkns
         self.soft_prompt_tkn = soft_prompt_tkn
 
-    def download_and_transform(self):
-        torch.device("cpu")
-
+    def download_and_transform(soft_prompt_tkn, num_soft_prompt_tkns, data_dir):
         def transform(x):
-            torch.device("cpu")
-
             seq = fmt_vicuna_input(
-                f"{self.soft_prompt_tkn * self.num_soft_prompt_tkns} {x['prompt']}",
+                f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
                 x["response"],
             )
 
@@ -54,7 +50,7 @@ class LitDataModule(L.LightningDataModule):
             }
 
         return (
-            load_dataset("parquet", data_dir=self.data_dir)
+            load_dataset("parquet", data_dir=data_dir)
             .map(
                 transform,
                 remove_columns=["prompt", "response"],
@@ -69,11 +65,15 @@ class LitDataModule(L.LightningDataModule):
     def prepare_data(self):
         # Download the dataset and build caches on a
         # single process first to avoid waste w/ DDP.
-        self.download_and_transform()
+        self.download_and_transform(
+            self.soft_prompt_tkn, self.num_soft_prompt_tkns, self.data_dir
+        )
 
     def setup(self, stage: str):
         # Load the dataset on each process, from cache.
-        self.hf_dataset = self.download_and_transform()
+        self.hf_dataset = self.download_and_transform(
+            self.soft_prompt_tkn, self.num_soft_prompt_tkns, self.data_dir
+        )
 
     def train_dataloader(self):
         # TODO: try collate
