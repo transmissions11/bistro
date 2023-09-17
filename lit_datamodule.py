@@ -30,6 +30,8 @@ class LitDataModule(L.LightningDataModule):
         self.soft_prompt_tkn = soft_prompt_tkn
 
     def download_and_transform(self):
+        print("download_and_transform!!")
+
         def transform(x, tokenizer, soft_prompt_tkn, num_soft_prompt_tkns):
             seq = tokenizer.encode(
                 fmt_vicuna_input(
@@ -65,11 +67,13 @@ class LitDataModule(L.LightningDataModule):
         )
 
     def prepare_data(self):
+        print("prepare!")
         # Download the dataset and build caches on a
         # single process first to avoid waste w/ DDP.
         self.download_and_transform()
 
     def setup(self, stage: str):
+        print("setup!")
         # Load the dataset on each process, from cache.
         self.hf_dataset = self.download_and_transform()
 
