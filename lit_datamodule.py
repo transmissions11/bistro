@@ -1,5 +1,8 @@
 import torch.multiprocessing as mp
 import multiprocessing as mp2
+from multiprocess import set_start_method
+
+set_start_method("spawn")
 
 mp.set_start_method("spawn", force=True)
 mp2.set_start_method("spawn", force=True)
