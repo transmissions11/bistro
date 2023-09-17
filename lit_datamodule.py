@@ -1,3 +1,9 @@
+import torch.multiprocessing as mp
+import multiprocessing as mp2
+
+mp.set_start_method("spawn", force=True)
+mp2.set_start_method("spawn", force=True)
+
 import torch
 from torch.utils.data import DataLoader
 
@@ -9,9 +15,6 @@ from datasets import load_dataset
 
 from utils.masking import mask_before_inclusive
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE, fmt_vicuna_input
-
-import torch.multiprocessing as mp
-import multiprocessing as mp2
 
 
 class LitDataModule(L.LightningDataModule):
@@ -46,9 +49,6 @@ class LitDataModule(L.LightningDataModule):
                     VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], self.tokenizer
                 ),
             }
-
-        print("START METHOD MP", mp.get_start_method())
-        print("START METHOD MP2", mp2.get_start_method())
 
         return (
             load_dataset("parquet", data_dir=self.data_dir)

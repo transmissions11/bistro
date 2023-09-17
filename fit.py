@@ -1,3 +1,9 @@
+import torch.multiprocessing as mp
+import multiprocessing as mp2
+
+mp.set_start_method("spawn", force=True)
+mp2.set_start_method("spawn", force=True)
+
 from pathlib import Path
 
 import lightning as L
@@ -14,8 +20,6 @@ from lit_model import LitModel
 
 from model import GPT, Config
 
-import torch.multiprocessing as mp
-import multiprocessing as mp2
 
 devices = 1
 micro_batch_size = 1
@@ -127,12 +131,6 @@ def setup(
 
 
 if __name__ == "__main__":
-    mp.set_start_method("spawn", force=True)
-    mp2.set_start_method("spawn", force=True)
-
-    print("START METHOD MP", mp.get_start_method())
-    print("START METHOD MP2", mp2.get_start_method())
-
     torch.set_float32_matmul_precision("high")
 
     from jsonargparse import CLI
