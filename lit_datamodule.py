@@ -21,19 +21,23 @@ from utils.masking import mask_before_inclusive
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE, fmt_vicuna_input
 
 
-def download_and_transform(soft_prompt_tkn, num_soft_prompt_tkns, data_dir):
+def download_and_transform(tokenizer, soft_prompt_tkn, num_soft_prompt_tkns, data_dir):
     print(soft_prompt_tkn, num_soft_prompt_tkns, data_dir)
 
     def transform(x):
-        seq = fmt_vicuna_input(
-            f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
-            x["response"],
-        )
+        seq = tokenizer.encode(
+            fmt_vicuna_input(
+                f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
+                x["response"],
+            )
+        ).type(torch.int64)
 
         return {
             "input_ids": seq[:-1],
             # Mask everything before the assistant response.
-            "targets": seq[1:],
+            "targets": mask_before_inclusive(
+                VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], tokenizer
+            ),
         }
 
     return (
@@ -70,13 +74,19 @@ class LitDataModule(L.LightningDataModule):
         # Download the dataset and build caches on a
         # single process first to avoid waste w/ DDP.
         download_and_transform(
-            self.soft_prompt_tkn, self.num_soft_prompt_tkns, self.data_dir
+            self.tokenizer,
+            self.soft_prompt_tkn,
+            self.num_soft_prompt_tkns,
+            self.data_dir,
         )
 
     def setup(self, stage: str):
         # Load the dataset on each process, from cache.
         self.hf_dataset = download_and_transform(
-            self.soft_prompt_tkn, self.num_soft_prompt_tkns, self.data_dir
+            self.tokenizer,
+            self.soft_prompt_tkn,
+            self.num_soft_prompt_tkns,
+            self.data_dir,
         )
 
     def train_dataloader(self):
