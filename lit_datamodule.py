@@ -1,9 +1,8 @@
-import torch
-from torch.utils.data import DataLoader
-
 from functools import partial
 
 import lightning.pytorch as L
+
+from torch.utils.data import DataLoader
 
 from lit_gpt import Tokenizer
 
@@ -76,9 +75,11 @@ class LitDataModule(L.LightningDataModule):
 
     def train_dataloader(self):
         # TODO: try collate
+        # TODO: num_workers
         return DataLoader(
             self.hf_datasets["train"], batch_size=self.batch_size, shuffle=True
         )
 
     def val_dataloader(self):
+        # TODO: num_workers
         return DataLoader(self.hf_datasets["validation"], batch_size=self.batch_size)

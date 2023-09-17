@@ -1,7 +1,9 @@
+import torch
+
 from pathlib import Path
 
 import lightning as L
-import torch
+
 from lightning.pytorch.loggers import WandbLogger
 from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
