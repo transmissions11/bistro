@@ -32,6 +32,8 @@ class LitDataModule(L.LightningDataModule):
     def download_and_transform(self):
         print("download_and_transform!!")
 
+        # Note: This function cannot access any properties of self directly, or it
+        # will mess up deterministic serialization. Instead, pass them as arguments.
         def transform(x, tokenizer, soft_prompt_tkn, num_soft_prompt_tkns):
             seq = tokenizer.encode(
                 fmt_vicuna_input(
@@ -58,10 +60,8 @@ class LitDataModule(L.LightningDataModule):
                     num_soft_prompt_tkns=self.num_soft_prompt_tkns,
                 ),
                 remove_columns=["prompt", "response"],
-                load_from_cache_file=False,  # TODO: Fix this.
+                load_from_cache_file=True,
                 num_proc=64,
-                # We can force cache like this if needed.
-                # new_fingerprint="t1"
             )
             .with_format("torch")
         )
