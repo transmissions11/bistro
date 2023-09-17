@@ -55,7 +55,6 @@ class LitDataModule(L.LightningDataModule):
 
         return (
             load_dataset("parquet", data_dir=self.data_dir)
-            .with_format("torch")
             .map(
                 transform,
                 remove_columns=["prompt", "response"],
@@ -64,6 +63,7 @@ class LitDataModule(L.LightningDataModule):
                 # We can force cache like this if needed.
                 # new_fingerprint="t1"
             )
+            .with_format("torch")
         )
 
     def prepare_data(self):
