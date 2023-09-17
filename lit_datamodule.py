@@ -40,7 +40,7 @@ class LitDataModule(L.LightningDataModule):
                     f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
                     x["response"],
                 )
-            ).type(torch.int64)
+            )
 
             return {
                 "input_ids": seq[:-1],
@@ -60,7 +60,6 @@ class LitDataModule(L.LightningDataModule):
                     num_soft_prompt_tkns=self.num_soft_prompt_tkns,
                 ),
                 remove_columns=["prompt", "response"],
-                load_from_cache_file=True,
                 num_proc=64,
             )
             .with_format("torch")
