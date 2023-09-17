@@ -38,7 +38,7 @@ class LitDataModule(L.LightningDataModule):
         self.soft_prompt_tkn = soft_prompt_tkn
 
     def download_and_transform(self):
-        data_dir = self.data_dir
+        # data_dir = self.data_dir
         tokenizer = self.tokenizer
         num_soft_prompt_tkns = self.num_soft_prompt_tkns
         soft_prompt_tkn = self.soft_prompt_tkn
@@ -60,7 +60,7 @@ class LitDataModule(L.LightningDataModule):
             }
 
         return (
-            load_dataset("parquet", data_dir=data_dir)
+            load_dataset("parquet", data_dir=self.data_dir)
             .map(
                 transform,
                 remove_columns=["prompt", "response"],
