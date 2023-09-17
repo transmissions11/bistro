@@ -37,6 +37,8 @@ class LitDataModule(L.LightningDataModule):
         self.soft_prompt_tkn = soft_prompt_tkn
 
     def download_and_transform(soft_prompt_tkn, num_soft_prompt_tkns, data_dir):
+        print(soft_prompt_tkn, num_soft_prompt_tkns, data_dir)
+
         def transform(x):
             seq = fmt_vicuna_input(
                 f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
