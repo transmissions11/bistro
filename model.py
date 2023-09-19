@@ -59,21 +59,21 @@ class GPT(nn.Module):
 
         #############################################################################
 
-        if self.rope_cache is None:
-            self.rope_cache = build_rope_cache(
-                seq_len=block_size,
-                n_elem=int(self.config.rotary_percentage * self.config.head_size),
-                dtype=torch.get_default_dtype(),
-                device=idx.device,
-                condense_ratio=self.config.rope_condense_ratio,
-            )
+        # if self.rope_cache is None:
+        #     self.rope_cache = build_rope_cache(
+        #         seq_len=block_size,
+        #         n_elem=int(self.config.rotary_percentage * self.config.head_size),
+        #         dtype=torch.get_default_dtype(),
+        #         device=idx.device,
+        #         condense_ratio=self.config.rope_condense_ratio,
+        #     )
 
-        cos, sin = self.rope_cache
-        cos = cos[:T]
-        sin = sin[:T]
+        # cos, sin = self.rope_cache
+        # cos = cos[:T]
+        # sin = sin[:T]
 
-        for block in self.transformer.h:
-            x, *_ = block(x, (cos, sin), block_size)  # (b, t, n_embd)
+        # for block in self.transformer.h:
+        #     x, *_ = block(x, (cos, sin), block_size)  # (b, t, n_embd)
 
         x = self.transformer.ln_f(x)  # (b, t, n_embd)
 
