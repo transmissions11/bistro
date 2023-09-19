@@ -80,7 +80,6 @@ def main(data_dir: Path, checkpoint_dir: Path):
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
         callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
-        num_sanity_val_steps=0,
     )
 
     # Can set empty_init=True if can also set strict=True below.
@@ -118,6 +117,8 @@ def main(data_dir: Path, checkpoint_dir: Path):
     wandb_logger.watch(model)
 
     trainer.validate(model, datamodule=datamodule)
+
+    model.train()
 
     trainer.fit(model, datamodule=datamodule)
 
