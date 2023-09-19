@@ -54,8 +54,8 @@ class LitModel(L.LightningModule):
 
         mark_only_soft_prompt_as_trainable(self.model)
 
-    def setup(self, stage):
-        self.print(f"Resetting model caches for {stage}...\n")
+    def on_train_start(self) -> None:
+        self.print(f"Resetting model caches for training...\n")
         self.model.reset_caches()
 
     def forward(self, x):
