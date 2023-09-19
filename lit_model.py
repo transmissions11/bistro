@@ -32,6 +32,9 @@ class LitModel(L.LightningModule):
 
         self.model = model
 
+    def on_train_start(self) -> None:
+        return self.model.reset()
+
     def forward(self, x):
         return self.model(x)
 

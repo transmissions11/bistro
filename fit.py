@@ -117,9 +117,6 @@ def main(data_dir: Path, checkpoint_dir: Path):
     wandb_logger.watch(model)
 
     trainer.validate(model, datamodule=datamodule)
-
-    model.model.rope_cache = None
-
     trainer.fit(model, datamodule=datamodule)
 
 

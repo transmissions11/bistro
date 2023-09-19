@@ -35,6 +35,9 @@ class GPT(nn.Module):
 
         self.rope_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
 
+    def reset(self) -> None:
+        self.rope_cache = None
+
     def forward(
         self,
         idx: torch.Tensor,
