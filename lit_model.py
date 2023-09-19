@@ -47,10 +47,12 @@ class LitModel(L.LightningModule):
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
-        # TODO: Just try logging all 1s, a range of numbers, etc.
         self.log(
             "val_loss",
-            torch.tensor(1, dtype=torch.float32),
+            # We need to cast to float64 as types like bfloat16
+            # have very low precision with larger values (~256+)
+            # that results in inaccurate accumulation w/ on_epoch.
+            loss.to(torch.float64),
             on_step=True,
             on_epoch=True,
             prog_bar=True,
