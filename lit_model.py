@@ -53,7 +53,6 @@ class LitModel(L.LightningModule):
             # have very low precision with larger values (~256+)
             # that results in inaccurate accumulation w/ on_epoch.
             loss.to(torch.float64),
-            on_step=True,
             on_epoch=True,
             prog_bar=True,
         )
@@ -72,7 +71,7 @@ class LitModel(L.LightningModule):
                 ),
             )
 
-            print(f"Input: {tokenizer.decode(sample[:prompt_end_idx + 1])}")
+            print(f"\n\nInput: {tokenizer.decode(sample[:prompt_end_idx + 1])}")
             output = sample_model(
                 self.model,
                 idx=sample[: prompt_end_idx + 1],
@@ -81,7 +80,6 @@ class LitModel(L.LightningModule):
             )[-self.hparams.tokens_to_sample :]
             print(f"Output:", tokenizer.decode(output))
             print(f"Target:", tokenizer.decode(target[target != -1]))
-            print("\n\n")
 
     def compute_loss(self, input_ids, targets):
         logits = self.model(input_ids)
