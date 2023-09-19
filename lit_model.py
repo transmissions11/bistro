@@ -71,16 +71,15 @@ class LitModel(L.LightningModule):
                 ),
             )
 
-            self.print(f"Input: {tokenizer.decode(sample[:prompt_end_idx + 1])}")
+            self.print(f"\nInput: '{tokenizer.decode(sample[:prompt_end_idx + 1])}'")
             output = sample_model(
                 self.model,
                 idx=sample[: prompt_end_idx + 1],
                 temperature=0.0,  # Sample greedily.
                 max_new_tokens=self.hparams.tokens_to_sample,
             )[-self.hparams.tokens_to_sample :]
-            self.print(f"Output:", tokenizer.decode(output))
-            self.print(f"Target:", tokenizer.decode(target[target != -1]))
-            self.print("\n\n")
+            self.print(f"Output: '{tokenizer.decode(output)}'")
+            self.print(f"Target: '{tokenizer.decode(target[target != -1])}'\n")
 
     def compute_loss(self, input_ids, targets):
         logits = self.model(input_ids)
