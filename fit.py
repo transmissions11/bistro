@@ -11,7 +11,6 @@ from lit_datamodule import LitDataModule
 from utils.params import mark_only_soft_prompt_as_trainable
 from lightning.pytorch.callbacks import LearningRateMonitor
 from lightning.pytorch.callbacks import ModelCheckpoint
-from lightning.pytorch.callbacks import RichProgressBar
 
 from lit_model import LitModel
 
@@ -80,11 +79,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
         limit_val_batches=val_batches,
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
-        callbacks=[
-            LearningRateMonitor(logging_interval="step"),
-            checkpoint_callback,
-            RichProgressBar(),
-        ],
+        callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
 
     # Can set empty_init=True if can also set strict=True below.
