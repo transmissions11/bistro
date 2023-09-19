@@ -2,6 +2,9 @@ import torch
 
 import lightning as L
 
+from pathlib import Path
+
+from lit_gpt.utils import lazy_load
 from lit_gpt import Config, Tokenizer
 from lit_gpt.utils import chunked_cross_entropy
 
@@ -11,12 +14,14 @@ from sample import sample_model
 from utils.padding import strip_right_pad
 from utils.tensors import find_subtensor_end
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
+from utils.params import mark_only_soft_prompt_as_trainable
 
 
 class LitModel(L.LightningModule):
     def __init__(
         self,
         model_config: Config,
+        checkpoint_path: Path,
         learning_rate: float,
         warmup_ratio: float,
         min_lr_ratio: float,
@@ -40,6 +45,11 @@ class LitModel(L.LightningModule):
             ),
             num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
         )
+
+        with lazy_load(self.hparams.checkpoint_path) as checkpoint:
+            self.model.load_state_dict(checkpoint, strict=False)
+
+        mark_only_soft_prompt_as_trainable(self.model)
 
     def on_train_start(self) -> None:
         self.print("Resetting model caches for training...\n")
