@@ -6,13 +6,15 @@ import lightning as L
 
 from lightning.pytorch.loggers import WandbLogger
 from lit_gpt.tokenizer import Tokenizer
+from lit_gpt.utils import lazy_load
 from lit_datamodule import LitDataModule
+from utils.params import mark_only_soft_prompt_as_trainable
 from lightning.pytorch.callbacks import LearningRateMonitor
 from lightning.pytorch.callbacks import ModelCheckpoint
 
 from lit_model import LitModel
 
-from model import Config
+from model import GPT, Config
 
 
 devices = 1
@@ -82,7 +84,6 @@ def main(data_dir: Path, checkpoint_dir: Path):
 
     model = LitModel(
         model_config=config,
-        checkpoint_path=checkpoint_path,
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         min_lr_ratio=min_lr_ratio,
@@ -92,6 +93,11 @@ def main(data_dir: Path, checkpoint_dir: Path):
         num_soft_prompt_tkns=num_soft_prompt_tkns,
         soft_prompt_tkn=soft_prompt_tkn,
     )
+
+    with lazy_load(checkpoint_path) as checkpoint:
+        model.model.load_state_dict(checkpoint, strict=False)
+
+    mark_only_soft_prompt_as_trainable(model)
 
     datamodule = LitDataModule(
         data_dir=str(data_dir),
