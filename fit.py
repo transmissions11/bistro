@@ -45,7 +45,7 @@ hparams = {
 
 
 def main(data_dir: Path, checkpoint_dir: Path):
-    torch.set_float32_matmul_precision("high")
+    torch.set_float32_matmul_precision("medium")
 
     check_valid_checkpoint_dir(checkpoint_dir)
 
