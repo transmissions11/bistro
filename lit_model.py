@@ -49,8 +49,8 @@ class LitModel(L.LightningModule):
             num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
         )
 
-        # with lazy_load(self.hparams.checkpoint_path) as checkpoint:
-        #     self.model.load_state_dict(checkpoint, strict=False)
+        with lazy_load(self.hparams.checkpoint_path) as checkpoint:
+            self.model.load_state_dict(checkpoint, strict=False)
 
         mark_only_soft_prompt_as_trainable(self.model)
 
