@@ -81,7 +81,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
     )
 
     model = LitModel.load_from_checkpoint(
-        strict=True,
+        strict=False,
         model_config=config,
         checkpoint_path=checkpoint_path,
         learning_rate=learning_rate,
