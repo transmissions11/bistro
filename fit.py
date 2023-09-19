@@ -6,6 +6,7 @@ import lightning as L
 
 from lightning.pytorch.loggers import WandbLogger
 from lit_gpt.tokenizer import Tokenizer
+from lit_gpt.utils import lazy_load
 from lit_datamodule import LitDataModule
 from utils.params import mark_only_soft_prompt_as_trainable
 from lightning.pytorch.callbacks import LearningRateMonitor
@@ -92,6 +93,9 @@ def main(data_dir: Path, checkpoint_dir: Path):
         num_soft_prompt_tkns=num_soft_prompt_tkns,
         soft_prompt_tkn=soft_prompt_tkn,
     )
+
+    with lazy_load(checkpoint_path) as checkpoint:
+        model.model.load_state_dict(checkpoint, strict=False)
 
     mark_only_soft_prompt_as_trainable(model)
 
