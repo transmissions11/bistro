@@ -45,6 +45,8 @@ hparams = {
 
 
 def main(data_dir: Path, checkpoint_dir: Path):
+    torch.set_float32_matmul_precision("high")
+
     check_valid_checkpoint_dir(checkpoint_dir)
 
     tokenizer = Tokenizer(checkpoint_dir)
@@ -128,8 +130,6 @@ def setup(
 
 
 if __name__ == "__main__":
-    torch.set_float32_matmul_precision("high")
-
     from jsonargparse import CLI
 
     CLI(setup)
