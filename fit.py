@@ -118,7 +118,15 @@ def main(data_dir: Path, checkpoint_dir: Path):
 
     trainer.validate(model, datamodule=datamodule)
 
-    model.train()
+    model = LitModel(
+        gpt,
+        learning_rate=learning_rate,
+        warmup_ratio=warmup_ratio,
+        min_lr_ratio=min_lr_ratio,
+        weight_decay=weight_decay,
+        tokens_to_sample=tokens_to_sample,
+        tokenizer=tokenizer,
+    )
 
     trainer.fit(model, datamodule=datamodule)
 
