@@ -128,7 +128,7 @@ def setup(
 
 
 if __name__ == "__main__":
-    # torch.set_float32_matmul_precision("high")
+    torch.set_float32_matmul_precision("high")
 
     from jsonargparse import CLI
 
