@@ -37,7 +37,10 @@ class LitModel(L.LightningModule):
         # TODO: We're currently saving the tokenizer as a hyperparam, which feels wrong.
         self.save_hyperparameters(ignore=["model"], logger=False)
 
-    def configure_model(self) -> None:
+    def configure_model(self):
+        if self.model is not None:
+            return
+
         self.model = GPT(
             config=self.hparams.model_config,
             soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
@@ -51,9 +54,9 @@ class LitModel(L.LightningModule):
 
         mark_only_soft_prompt_as_trainable(self.model)
 
-    def on_train_start(self) -> None:
-        self.print("Resetting model caches for training...\n")
-        return self.model.reset_caches()
+    def setup(self, stage):
+        self.print(f"Resetting model caches for {stage}...\n")
+        self.model.reset_caches()
 
     def forward(self, x):
         return self.model(x)
