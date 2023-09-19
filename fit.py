@@ -114,9 +114,10 @@ def main(data_dir: Path, checkpoint_dir: Path):
         soft_prompt_tkn=soft_prompt_tkn,
     )
 
+    trainer.validate(model, datamodule=datamodule)
+
     wandb_logger.watch(model)
 
-    trainer.validate(model, datamodule=datamodule)
     trainer.fit(model, datamodule=datamodule)
 
 
