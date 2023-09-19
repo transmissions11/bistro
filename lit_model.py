@@ -33,8 +33,8 @@ class LitModel(L.LightningModule):
         self.model = model
 
     def on_train_start(self) -> None:
-        self.print("Resetting inner model to prepare for training...\n")
-        return self.model.reset()
+        self.print("Resetting model caches for training...\n")
+        return self.model.reset_caches()
 
     def forward(self, x):
         return self.model(x)
