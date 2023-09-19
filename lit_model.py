@@ -48,7 +48,13 @@ class LitModel(L.LightningModule):
         loss = self.compute_loss(input_ids, targets)
 
         # TODO: Just try logging all 1s, a range of numbers, etc.
-        self.log("val_loss", 1, on_step=True, on_epoch=True, prog_bar=True)
+        self.log(
+            "val_loss",
+            torch.tensor(1, dtype=torch.float32),
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
 
         if batch_idx < 10:
             tokenizer = self.hparams.tokenizer
