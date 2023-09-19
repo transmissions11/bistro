@@ -80,7 +80,8 @@ def main(data_dir: Path, checkpoint_dir: Path):
         callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
 
-    model = LitModel(
+    model = LitModel.load_from_checkpoint(
+        strict=True,
         model_config=config,
         checkpoint_path=checkpoint_path,
         learning_rate=learning_rate,
