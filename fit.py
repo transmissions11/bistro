@@ -6,7 +6,6 @@ import lightning as L
 
 from lightning.pytorch.loggers import WandbLogger
 from lit_gpt.tokenizer import Tokenizer
-from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir
 from lit_datamodule import LitDataModule
 from utils.params import mark_only_soft_prompt_as_trainable
 from lightning.pytorch.callbacks import LearningRateMonitor
@@ -47,8 +46,6 @@ hparams = {
 def main(data_dir: Path, checkpoint_dir: Path):
     torch.set_float32_matmul_precision("high")
 
-    check_valid_checkpoint_dir(checkpoint_dir)
-
     tokenizer = Tokenizer(checkpoint_dir)
     config = Config.from_name(name=checkpoint_dir.name)
     checkpoint_path = checkpoint_dir / "lit_model.pth"
@@ -84,26 +81,16 @@ def main(data_dir: Path, checkpoint_dir: Path):
         callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
 
-    # Can set empty_init=True if can also set strict=True below.
-    # Otherwise some parameters may not get initialized properly.
-    with trainer.init_module(empty_init=False):
-        gpt = GPT(
-            config,
-            soft_prompt_tkn=tokenizer.token_to_id(soft_prompt_tkn),
-            num_soft_prompt_tkns=num_soft_prompt_tkns,
-        )
-
-    with lazy_load(checkpoint_path) as checkpoint:
-        gpt.load_state_dict(checkpoint, strict=False)
-
     model = LitModel(
-        gpt,
+        model_config=config,
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         min_lr_ratio=min_lr_ratio,
         weight_decay=weight_decay,
         tokens_to_sample=tokens_to_sample,
         tokenizer=tokenizer,
+        num_soft_prompt_tkns=num_soft_prompt_tkns,
+        soft_prompt_tkn=soft_prompt_tkn,
     )
 
     mark_only_soft_prompt_as_trainable(model)
