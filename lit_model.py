@@ -2,7 +2,7 @@ import torch
 
 import lightning as L
 
-from lit_gpt import Config, Tokenizer
+from lit_gpt import Tokenizer
 from lit_gpt.utils import chunked_cross_entropy
 
 from model import GPT
@@ -16,15 +16,13 @@ from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 class LitModel(L.LightningModule):
     def __init__(
         self,
-        model_config: Config,
+        model: GPT,
         learning_rate: float,
         warmup_ratio: float,
         min_lr_ratio: float,
         weight_decay: float,
         tokens_to_sample: int,
         tokenizer: Tokenizer,
-        num_soft_prompt_tkns: int,
-        soft_prompt_tkn: str,
     ):
         super().__init__()
 
@@ -32,14 +30,7 @@ class LitModel(L.LightningModule):
         # TODO: We're currently saving the tokenizer as a hyperparam, which feels wrong.
         self.save_hyperparameters(ignore=["model"], logger=False)
 
-    def configure_model(self) -> None:
-        self.model = GPT(
-            config=self.hparams.model_config,
-            soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
-                self.hparams.soft_prompt_tkn
-            ),
-            num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
-        )
+        self.model = model
 
     def on_train_start(self) -> None:
         self.print("Resetting model caches for training...\n")
