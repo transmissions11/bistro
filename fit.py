@@ -29,6 +29,8 @@ min_lr_ratio = 0.00  # Anneal to 0.
 warmup_ratio = 0.05  # Spend 5% of training steps warming up.
 weight_decay = 0.01  # TODO: Should we be using this for finetuning?
 
+log_step_interval = 10
+
 val_batches = 100
 tokens_to_sample = 8
 val_check_interval = 0.05
@@ -72,10 +74,10 @@ def main(data_dir: Path, checkpoint_dir: Path):
             project="bistro",
             config=hparams,
         ),
-        log_every_n_steps=10,  # Doesn't apply in validation loop.
         limit_val_batches=val_batches,
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
+        log_every_n_steps=log_step_interval,  # Doesn't apply in validation loop.
         callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
 
