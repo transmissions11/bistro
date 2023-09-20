@@ -2,13 +2,15 @@ import torch
 
 import lightning as L
 
-from typing import Optional
-
 from pathlib import Path
+
+from typing import Optional, cast
 
 from lit_gpt.utils import lazy_load
 from lit_gpt import Config, Tokenizer
 from lit_gpt.utils import chunked_cross_entropy
+
+from lightning.pytorch.loggers import WandbLogger
 
 from model import GPT
 from sample import sample_model
@@ -74,7 +76,7 @@ class LitModel(L.LightningModule):
 
         # TODO: Should we use self or self.model?
         print("Watching model gradients with W&B...")
-        self.trainer.logger.watch(self.model)
+        cast(WandbLogger, self.trainer.logger).watch(self.model)
 
         print("Done loading & configuring model.")
 

@@ -4,9 +4,9 @@ from pathlib import Path
 
 import lightning as L
 
-from lightning.pytorch.loggers import WandbLogger
 from lit_gpt.tokenizer import Tokenizer
 from lit_datamodule import LitDataModule
+from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor
 from lightning.pytorch.callbacks import ModelCheckpoint
 
