@@ -49,8 +49,8 @@ class LitModel(L.LightningModule):
     def configure_model(self):
         if self.model is not None:
             return
-        print("wut")
-        self.print("Initializing GPT model...")
+
+        print("Initializing GPT model...")
         self.model = GPT(
             config=self.hparams.model_config,
             soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
@@ -62,15 +62,15 @@ class LitModel(L.LightningModule):
         # If a checkpoint path was provided, we'll
         # load its state dict in, with strict=False.
         if self.hparams.checkpoint_path is not None:
-            self.print(f"Loading model weights from {self.hparams.checkpoint_path}...")
+            print(f"Loading model weights from {self.hparams.checkpoint_path}...")
             with lazy_load(self.hparams.checkpoint_path) as checkpoint:
                 # TODO: Should we use self.load_state_dict?
                 self.model.load_state_dict(checkpoint, strict=False)
 
-        self.print("Setting trainable parameters...")
+        print("Setting trainable parameters...")
         mark_only_soft_prompt_as_trainable(self.model)
 
-        self.print("Done configuring model.")
+        print("Done configuring model.")
 
     def on_train_start(self) -> None:
         self.print(f"Resetting model caches for training...\n")
