@@ -49,7 +49,7 @@ class LitModel(L.LightningModule):
     def configure_model(self):
         if self.model is not None:
             return
-
+        print("wut")
         self.print("Initializing GPT model...")
         self.model = GPT(
             config=self.hparams.model_config,
