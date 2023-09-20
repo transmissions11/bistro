@@ -67,7 +67,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
         strategy="auto",
         max_epochs=epochs,
         deterministic=True,
-        precision="bf16-true",
+        precision="bf16-mixed",
         logger=WandbLogger(
             project="bistro",
             config=hparams,
