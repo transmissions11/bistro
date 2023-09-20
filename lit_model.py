@@ -101,7 +101,7 @@ class LitModel(L.LightningModule):
 
         self.log(
             "val_loss",
-            # We need to cast to float64 as types like bfloat16
+            # Need to upcast precision as types like bfloat16
             # have very low precision with larger values (~256+)
             # that results in inaccurate accumulation w/ on_epoch.
             loss.to(torch.float64),
