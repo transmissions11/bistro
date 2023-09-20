@@ -70,7 +70,7 @@ class LitModel(L.LightningModule):
         print("Setting trainable parameters...")
         mark_only_soft_prompt_as_trainable(self.model)
 
-        print("Done configuring model.")
+        print("Done loading & configuring model.")
 
     def on_train_start(self) -> None:
         self.print(f"Resetting model caches for training...\n")
