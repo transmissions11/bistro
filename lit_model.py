@@ -68,11 +68,13 @@ class LitModel(L.LightningModule):
                 # TODO: Should we use self.load_state_dict?
                 self.model.load_state_dict(checkpoint, strict=False)
 
+        # TODO: Should we use self or self.model?
         print("Setting trainable parameters...")
         mark_only_soft_prompt_as_trainable(self.model)
 
-        print("Watching model with wandb...")
-        self.trainer.logger.watch(self)
+        # TODO: Should we use self or self.model?
+        print("Watching model gradients with W&B...")
+        self.trainer.logger.watch(self.model)
 
         print("Done loading & configuring model.")
 

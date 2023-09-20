@@ -53,11 +53,6 @@ def main(data_dir: Path, checkpoint_dir: Path):
 
     L.seed_everything(1337, workers=True)
 
-    wandb_logger = WandbLogger(
-        project="bistro",
-        config=hparams,
-    )
-
     checkpoint_callback = ModelCheckpoint(
         save_top_k=10,
         monitor="train_loss",
@@ -73,7 +68,10 @@ def main(data_dir: Path, checkpoint_dir: Path):
         max_epochs=epochs,
         deterministic=True,
         precision="bf16-true",
-        logger=wandb_logger,
+        logger=WandbLogger(
+            project="bistro",
+            config=hparams,
+        ),
         log_every_n_steps=10,  # Doesn't apply in validation loop.
         limit_val_batches=val_batches,
         val_check_interval=val_check_interval,
