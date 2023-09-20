@@ -62,6 +62,7 @@ class LitModel(L.LightningModule):
         if self.hparams.checkpoint_path is not None:
             self.print(f"Loading model weights from {self.hparams.checkpoint_path}...")
             with lazy_load(self.hparams.checkpoint_path) as checkpoint:
+                # TODO: Should we use self.load_state_dict?
                 self.model.load_state_dict(checkpoint, strict=False)
 
         self.print("Setting trainable parameters...")
