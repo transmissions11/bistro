@@ -50,6 +50,7 @@ class LitModel(L.LightningModule):
         if self.model is not None:
             return
 
+        # TODO: Only do on rank 0 (WHY DOENST SELF>PRINT WORK)
         print("Initializing GPT model...")
         self.model = GPT(
             config=self.hparams.model_config,

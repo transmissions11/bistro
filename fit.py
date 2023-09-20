@@ -17,7 +17,7 @@ from model import Config
 
 devices = 3
 micro_batch_size = 1
-gradient_accumulation_iters = 3
+gradient_accumulation_iters = 1
 
 epochs = 1
 
@@ -48,6 +48,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
     tokenizer = Tokenizer(checkpoint_dir)
     config = Config.from_name(name=checkpoint_dir.name)
     checkpoint_path = checkpoint_dir / "lit_model.pth"
+    # TODO: Only do on rank 0
     print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
 
     L.seed_everything(1337, workers=True)
