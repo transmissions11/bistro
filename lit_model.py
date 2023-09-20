@@ -66,6 +66,7 @@ class LitModel(L.LightningModule):
         # load its state dict in, with strict=False.
         if self.hparams.checkpoint_path is not None:
             print(f"Loading model weights from {self.hparams.checkpoint_path}...")
+            # TODO: Do we rly need lazy_load here? torch.load mmap? (https://pytorch.org/docs/2.1/generated/torch.load.html)
             with lazy_load(self.hparams.checkpoint_path) as checkpoint:
                 # TODO: Should we use self.load_state_dict?
                 self.model.load_state_dict(checkpoint, strict=False)
