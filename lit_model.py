@@ -71,6 +71,9 @@ class LitModel(L.LightningModule):
         print("Setting trainable parameters...")
         mark_only_soft_prompt_as_trainable(self.model)
 
+        print("Watching model with wandb...")
+        self.trainer.logger.watch(self)
+
         print("Done loading & configuring model.")
 
     def on_train_start(self) -> None:
