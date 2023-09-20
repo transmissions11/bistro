@@ -2,6 +2,8 @@ import torch
 
 import lightning as L
 
+from typing import Optional
+
 from pathlib import Path
 
 from lit_gpt.utils import lazy_load
@@ -21,15 +23,20 @@ class LitModel(L.LightningModule):
     def __init__(
         self,
         model_config: Config,
-        checkpoint_path: Path,
+        tokenizer: Tokenizer,
+        ###############################
         learning_rate: float,
         warmup_ratio: float,
         min_lr_ratio: float,
+        ###############################
         weight_decay: float,
+        ###############################
         tokens_to_sample: int,
-        tokenizer: Tokenizer,
+        ###############################
         num_soft_prompt_tkns: int,
         soft_prompt_tkn: str,
+        ###############################
+        checkpoint_path: Optional[Path] = None,
     ):
         super().__init__()
 
@@ -41,6 +48,7 @@ class LitModel(L.LightningModule):
         if self.model is not None:
             return
 
+        self.print("Initializing GPT model...")
         self.model = GPT(
             config=self.hparams.model_config,
             soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
@@ -49,10 +57,17 @@ class LitModel(L.LightningModule):
             num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
         )
 
-        with lazy_load(self.hparams.checkpoint_path) as checkpoint:
-            self.model.load_state_dict(checkpoint, strict=False)
+        # If a checkpoint path was provided, we'll
+        # load its state dict in, with strict=False.
+        if self.hparams.checkpoint_path is not None:
+            self.print(f"Loading model weights from {self.hparams.checkpoint_path}...")
+            with lazy_load(self.hparams.checkpoint_path) as checkpoint:
+                self.model.load_state_dict(checkpoint, strict=False)
 
+        self.print("Setting trainable parameters...")
         mark_only_soft_prompt_as_trainable(self.model)
+
+        self.print("Done configuring model.")
 
     def on_train_start(self) -> None:
         self.print(f"Resetting model caches for training...\n")
