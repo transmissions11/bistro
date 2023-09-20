@@ -76,7 +76,7 @@ class LitModel(L.LightningModule):
 
         # TODO: Should we use self or self.model?
         print("Watching model gradients with W&B...")
-        cast(WandbLogger, self.trainer.logger).watch(self.model)
+        cast(WandbLogger, self.trainer.logger).watch(self.model, log="all")
 
         print("Done loading & configuring model.")
 
