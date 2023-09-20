@@ -40,6 +40,8 @@ class LitModel(L.LightningModule):
     ):
         super().__init__()
 
+        self.model = None  # This will get set in configure_model.
+
         # Disable logging hyperparams, since we do it manually in fit.py.
         # TODO: We're currently saving the tokenizer as a hyperparam, which feels wrong.
         self.save_hyperparameters(ignore=["model"], logger=False)
