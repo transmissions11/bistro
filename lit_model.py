@@ -142,17 +142,17 @@ class LitModel(L.LightningModule):
         )
         print(f"Initialized GPT model in {time.time() - t0:.3f}s.")
 
-        # If a checkpoint path was provided, we'll load its state dict in, with strict=False.
+        # If a checkpoint path was provided, we'll
+        # load its state dict in, with strict=False.
         if self.hparams.checkpoint_path is not None:
             print(f"Loading checkpoint weights from {self.hparams.checkpoint_path}...")
             t0 = time.time()
-            state_dict = torch.load(str(self.hparams.checkpoint_path), mmap=True)
+            self.model.load_state_dict(
+                torch.load(str(self.hparams.checkpoint_path), mmap=True),
+                strict=False,
+                assign=True,
+            )
             print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
-
-            print(f"Loading checkpoint state dict...")
-            t0 = time.time()
-            self.model.load_state_dict(state_dict, strict=False, assign=True)
-            print(f"Loaded checkpoint state dict in {time.time() - t0:.3f}s.")
 
         print("Setting trainable parameters...")
         t0 = time.time()
