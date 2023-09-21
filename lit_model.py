@@ -132,6 +132,7 @@ class LitModel(L.LightningModule):
 
         # TODO: Only do on rank 0 (WHY DOENST SELF>PRINT WORK)
         print("Initializing GPT model...")
+        t0 = time.time()
         self.model = GPT(
             config=self.hparams.model_config,
             soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
@@ -139,6 +140,7 @@ class LitModel(L.LightningModule):
             ),
             num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
         )
+        print(f"Initialized GPT model in {time.time() - t0:.3f}s.")
 
         # If a checkpoint path was provided, we'll
         # load its state dict in, with strict=False.
@@ -150,13 +152,13 @@ class LitModel(L.LightningModule):
                 strict=False,
                 assign=True,
             )
-            print(f"Loaded model weights in {time.time() - t0:.2f}s.")
+            print(f"Loaded model weights in {time.time() - t0:.3f}s.")
 
-        # TODO: Should we use self or self.model?
         print("Setting trainable parameters...")
+        t0 = time.time()
         freeze_parameters(self.model, lambda name: "soft_prompt" not in name)
+        print(f"Set trainable parameters in {time.time() - t0:.3f}s.")
 
-        # TODO: Should we use self or self.model?
         print("Watching model gradients with W&B...")
         cast(WandbLogger, self.trainer.logger).watch(self.model)
 
