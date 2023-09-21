@@ -145,7 +145,7 @@ class LitModel(L.LightningModule):
             print(f"Loading model weights from {self.hparams.checkpoint_path}...")
             self.model.load_state_dict(
                 # TODO: Try assign=True
-                torch.load(self.hparams.checkpoint_path, mmap=True, assign=False),
+                torch.load(str(self.hparams.checkpoint_path), mmap=True, assign=False),
                 strict=False,
             )
 
