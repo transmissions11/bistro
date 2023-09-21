@@ -26,14 +26,15 @@ def pad_collate_fn(batch: List[Dict[str, torch.Tensor]]):
     print("START batch: ", batch)
 
     # Find the maximum length of 'input_ids' in the batch
-    max_len = max(
-        [len(item["input_ids"]) for item in batch]
-    )  # TODO: better way to do this? can we do it automatically
+    # TODO: better way to do this? can we do it automatically
+    max_len = max([len(item["input_ids"]) for item in batch])
 
     # Pad 'input_ids' and 'targets' in each item in the batch
-    for item in batch:
-        item["input_ids"] = pad_right(item["input_ids"], pad_tkn, max_len)
-        item["targets"] = pad_right(item["targets"], pad_tkn, max_len)
+    input_ids = [pad_right(item["input_ids"], pad_tkn, max_len) for item in batch]
+    targets = [pad_right(item["targets"], pad_tkn, max_len) for item in batch]
+
+    # Combine 'input_ids' and 'targets' into a single dictionary
+    batch = {"input_ids": torch.stack(input_ids), "targets": torch.stack(targets)}
 
     print("END batch: ", batch)
 
