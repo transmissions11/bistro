@@ -6,7 +6,6 @@ from pathlib import Path
 
 from typing import Optional, cast
 
-from lit_gpt.utils import lazy_load
 from lit_gpt import Config, Tokenizer
 from lit_gpt.utils import chunked_cross_entropy
 
@@ -144,11 +143,11 @@ class LitModel(L.LightningModule):
         # load its state dict in, with strict=False.
         if self.hparams.checkpoint_path is not None:
             print(f"Loading model weights from {self.hparams.checkpoint_path}...")
-            # TODO: Do we rly need lazy_load here? torch.load mmap? (https://pytorch.org/docs/2.1/generated/torch.load.html)
-            # TODO: use assign (https://github.com/pytorch/pytorch/issues/64601)
-            with lazy_load(self.hparams.checkpoint_path) as checkpoint:
-                # TODO: Should we use self.load_state_dict?
-                self.model.load_state_dict(checkpoint, strict=False)
+            self.model.load_state_dict(
+                # TODO: Try assign=True
+                torch.load(self.hparams.checkpoint_path, mmap=True, assign=False),
+                strict=False,
+            )
 
         # TODO: Should we use self or self.model?
         print("Setting trainable parameters...")
