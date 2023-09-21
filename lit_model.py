@@ -20,6 +20,8 @@ from utils.params import freeze_parameters
 from utils.tensors import find_subtensor_end
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 
+from lit_gpt.utils import lazy_load
+
 
 class LitModel(L.LightningModule):
     def __init__(
@@ -145,11 +147,11 @@ class LitModel(L.LightningModule):
         if self.hparams.checkpoint_path is not None:
             print(f"Loading model weights from {self.hparams.checkpoint_path}...")
             t0 = time.time()
-            self.model.load_state_dict(
-                torch.load(str(self.hparams.checkpoint_path), mmap=True),
-                strict=False,
-                assign=True,
-            )
+            # TODO: Do we rly need lazy_load here? torch.load mmap? (https://pytorch.org/docs/2.1/generated/torch.load.html)
+            # TODO: use assign (https://github.com/pytorch/pytorch/issues/64601)
+            with lazy_load(self.hparams.checkpoint_path) as checkpoint:
+                # TODO: Should we use self.load_state_dict?
+                self.model.load_state_dict(checkpoint, strict=False, assign=True)
             print(f"Loaded model weights in {time.time() - t0:.2f}s.")
 
         # TODO: Should we use self or self.model?
