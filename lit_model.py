@@ -130,8 +130,7 @@ class LitModel(L.LightningModule):
         if self.model is not None:
             return
 
-        # TODO: Only do on rank 0 (WHY DOENST SELF>PRINT WORK)
-        print("Initializing GPT model...")
+        self.print("Initializing GPT model...")
         t0 = time.time()
         self.model = GPT(
             config=self.hparams.model_config,
@@ -140,28 +139,30 @@ class LitModel(L.LightningModule):
             ),
             num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
         )
-        print(f"Initialized GPT model in {time.time() - t0:.3f}s.")
+        self.print(f"Initialized GPT model in {time.time() - t0:.3f}s.")
 
         # If a checkpoint path was provided, we'll load its state dict in, with strict=False.
         if self.hparams.checkpoint_path is not None:
-            print(f"Loading checkpoint weights from {self.hparams.checkpoint_path}...")
+            self.print(
+                f"Loading checkpoint weights from {self.hparams.checkpoint_path}..."
+            )
             t0 = time.time()
             self.model.load_state_dict(
                 torch.load(str(self.hparams.checkpoint_path), mmap=True),
                 strict=False,
                 assign=True,
             )
-            print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
+            self.print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
 
-        print("Setting trainable parameters...")
+        self.print("Setting trainable parameters...")
         t0 = time.time()
         freeze_parameters(self.model, lambda name: "soft_prompt" not in name)
-        print(f"Set trainable parameters in {time.time() - t0:.3f}s.")
+        self.print(f"Set trainable parameters in {time.time() - t0:.3f}s.")
 
-        print("Watching model gradients with W&B...")
+        self.print("Watching model gradients with W&B...")
         cast(WandbLogger, self.trainer.logger).watch(self.model)
 
-        print("Done loading & configuring model.")
+        self.print("Done loading & configuring model.")
 
     def on_train_start(self) -> None:
         self.print(f"Resetting model caches for training...\n")
