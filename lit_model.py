@@ -148,7 +148,7 @@ class LitModel(L.LightningModule):
             self.model.load_state_dict(
                 torch.load(str(self.hparams.checkpoint_path), mmap=True),
                 strict=False,
-                assign=False,  # TODO: Try assign=True
+                assign=True,
             )
             print(f"Loaded model weights in {time.time() - t0:.2f}s.")
 
