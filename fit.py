@@ -36,6 +36,8 @@ tokens_to_sample = 8
 val_check_interval = 0.05
 checkpoint_check_interval = 500
 
+freeze_criteria = lambda name: "soft_prompt" not in name
+
 
 hparams = {
     k: v
@@ -46,12 +48,6 @@ hparams = {
 
 def main(data_dir: Path, checkpoint_dir: Path):
     torch.set_float32_matmul_precision("high")
-
-    tokenizer = Tokenizer(checkpoint_dir)
-    config = Config.from_name(name=checkpoint_dir.name)
-    checkpoint_path = checkpoint_dir / "lit_model.pth"
-    # TODO: Only do on rank 0
-    print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}...")
 
     L.seed_everything(1337, workers=True)
 
@@ -81,10 +77,12 @@ def main(data_dir: Path, checkpoint_dir: Path):
         callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
 
+    tokenizer = Tokenizer(checkpoint_dir)
+
     model = LitModel(
-        model_config=config,
+        model_config=Config.from_name(name=checkpoint_dir.name),
         tokenizer=tokenizer,
-        checkpoint_path=checkpoint_path,
+        checkpoint_path=checkpoint_dir / "lit_model.pth",
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         min_lr_ratio=min_lr_ratio,
@@ -92,6 +90,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
         tokens_to_sample=tokens_to_sample,
         num_soft_prompt_tkns=num_soft_prompt_tkns,
         soft_prompt_tkn=soft_prompt_tkn,
+        freeze_criteria=freeze_criteria,
     )
 
     datamodule = LitDataModule(

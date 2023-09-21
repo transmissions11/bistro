@@ -5,7 +5,7 @@ import lightning as L
 
 from pathlib import Path
 
-from typing import Optional, cast
+from typing import Callable, Optional, cast
 
 from lit_gpt import Config, Tokenizer
 from lit_gpt.utils import chunked_cross_entropy
@@ -39,14 +39,14 @@ class LitModel(L.LightningModule):
         soft_prompt_tkn: str,
         ###############################
         checkpoint_path: Optional[Path] = None,
+        freeze_criteria: Callable[[str], bool] = None,
     ):
         super().__init__()
 
         self.model = None  # This will get set in configure_model.
 
         # Disable logging hyperparams, since we do it manually in fit.py.
-        # TODO: We're currently saving the tokenizer as a hyperparam, which feels wrong.
-        self.save_hyperparameters(ignore=["model"], logger=False)
+        self.save_hyperparameters(logger=False)
 
     def forward(self, x):
         return self.model(x)
@@ -130,14 +130,15 @@ class LitModel(L.LightningModule):
         if self.model is not None:
             return
 
-        progress_bar = self.trainer.progress_bar_callback
-        print(
-            self.trainer.is_global_zero,
-            progress_bar is not None,
-            progress_bar.is_enabled,
-        )
-        self.print("Initializing GPT model...")
-        t0 = time.time()
+        # Can't use self.print here since it will try
+        # to print via the not-yet-existent prog bar.
+        def g0_print(msg: str) -> None:
+            if self.trainer.is_global_zero:
+                print(msg)
+
+            return time.time()  # For timing convenience.
+
+        t0 = g0_print("Initializing model...")
         self.model = GPT(
             config=self.hparams.model_config,
             soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
@@ -145,30 +146,28 @@ class LitModel(L.LightningModule):
             ),
             num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
         )
-        self.print(f"Initialized GPT model in {time.time() - t0:.3f}s.")
+        g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
-        # If a checkpoint path was provided, we'll load its state dict in, with strict=False.
         if self.hparams.checkpoint_path is not None:
-            self.print(
+            t0 = g0_print(
                 f"Loading checkpoint weights from {self.hparams.checkpoint_path}..."
             )
-            t0 = time.time()
             self.model.load_state_dict(
                 torch.load(str(self.hparams.checkpoint_path), mmap=True),
                 strict=False,
                 assign=True,
             )
-            self.print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
+            g0_print(f"Loaded checkpoint in {time.time() - t0:.3f}s.")
 
-        self.print("Setting trainable parameters...")
-        t0 = time.time()
-        freeze_parameters(self.model, lambda name: "soft_prompt" not in name)
-        self.print(f"Set trainable parameters in {time.time() - t0:.3f}s.")
+        if self.hparams.freeze_criteria is not None:
+            t0 = g0_print("Freezing specified parameters...")
+            freeze_parameters(self.model, self.hparams.freeze_criteria)
+            g0_print(f"Froze specified parameters in {time.time() - t0:.3f}s.")
 
-        self.print("Watching model gradients with W&B...")
+        g0_print("Watching model gradients with W&B...")
         cast(WandbLogger, self.trainer.logger).watch(self.model)
 
-        self.print("Done loading & configuring model.")
+        g0_print("Done loading & configuring model.")
 
     def on_train_start(self) -> None:
         self.print(f"Resetting model caches for training...\n")
