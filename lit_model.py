@@ -142,8 +142,7 @@ class LitModel(L.LightningModule):
         )
         print(f"Initialized GPT model in {time.time() - t0:.3f}s.")
 
-        # If a checkpoint path was provided, we'll
-        # load its state dict in, with strict=False.
+        # If a checkpoint path was provided, we'll load its state dict in, with strict=False.
         if self.hparams.checkpoint_path is not None:
             print(f"Loading checkpoint weights from {self.hparams.checkpoint_path}...")
             t0 = time.time()
