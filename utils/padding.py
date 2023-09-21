@@ -23,6 +23,8 @@ def strip_right_pad(tensor):
 
 # TODO: Detemrine x's type
 def pad_collate_fn(batch: List[Dict[str, torch.Tensor]]):
+    print("START batch: ", batch)
+
     # Find the maximum length of 'input_ids' in the batch
     max_len = max(
         [len(item["input_ids"]) for item in batch]
@@ -32,5 +34,7 @@ def pad_collate_fn(batch: List[Dict[str, torch.Tensor]]):
     for item in batch:
         item["input_ids"] = pad_right(item["input_ids"], pad_tkn, max_len)
         item["targets"] = pad_right(item["targets"], pad_tkn, max_len)
+
+    print("END batch: ", batch)
 
     return batch
