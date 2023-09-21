@@ -102,12 +102,6 @@ class LitModel(L.LightningModule):
             self.print(f"Output: '{tokenizer.decode(output)}'")
             self.print(f"Target: '{tokenizer.decode(target[target != -1])}'\n")
 
-    def compute_loss(self, input_ids, targets):
-        logits = self.model(input_ids)
-        return F.cross_entropy(
-            logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1
-        )
-
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
             self.parameters(),
@@ -166,9 +160,9 @@ class LitModel(L.LightningModule):
             )
             g0_print(f"Loaded checkpoint in {time.time() - t0:.3f}s.")
 
-        if self.hparams.freeze_criteria is not None:
+        if self.freeze_criteria is not None:
             t0 = g0_print("Freezing specified parameters...")
-            freeze_parameters(self.model, self.hparams.freeze_criteria)
+            freeze_parameters(self.model, self.freeze_criteria)
             g0_print(f"Froze specified parameters in {time.time() - t0:.3f}s.")
 
         g0_print("Watching model gradients with W&B...")
@@ -179,3 +173,9 @@ class LitModel(L.LightningModule):
     def on_train_start(self) -> None:
         self.print(f"Resetting model caches for training...\n")
         self.model.reset_caches()
+
+    def compute_loss(self, input_ids, targets):
+        logits = self.model(input_ids)
+        return F.cross_entropy(
+            logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1
+        )
