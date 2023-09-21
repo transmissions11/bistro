@@ -1,5 +1,7 @@
 import time
+
 import torch
+from torch.nn import functional as F
 
 import lightning as L
 
@@ -8,7 +10,6 @@ from pathlib import Path
 from typing import Callable, Optional, cast
 
 from lit_gpt import Config, Tokenizer
-from lit_gpt.utils import chunked_cross_entropy
 
 from lightning.pytorch.loggers import WandbLogger
 
@@ -83,7 +84,7 @@ class LitModel(L.LightningModule):
                 sample,
                 tokenizer.encode(
                     VICUNA_END_OF_USER_PROMPT_SEQUENCE,
-                    device=self.device,
+                    device=self.device,  # TODO: idt these need to be on device manually anymore
                 ),
             )
 
@@ -99,7 +100,9 @@ class LitModel(L.LightningModule):
 
     def compute_loss(self, input_ids, targets):
         logits = self.model(input_ids)
-        return chunked_cross_entropy(logits, targets, chunk_size=0)
+        return F.cross_entropy(
+            logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1
+        )
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
