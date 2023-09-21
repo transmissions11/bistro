@@ -50,7 +50,7 @@ class LitModel(L.LightningModule):
         # and thus can't be saved via save_hyperparameters.
         self.freeze_criteria = freeze_criteria
 
-        # Note we logger=False since we already do it manually in fit.py.
+        # Note logger=False since we already do it manually in fit.py.
         self.save_hyperparameters(ignore=["freeze_criteria"], logger=False)
 
     def forward(self, x):
