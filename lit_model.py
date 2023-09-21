@@ -145,14 +145,14 @@ class LitModel(L.LightningModule):
         # If a checkpoint path was provided, we'll
         # load its state dict in, with strict=False.
         if self.hparams.checkpoint_path is not None:
-            print(f"Loading checkpoint from {self.hparams.checkpoint_path}...")
+            print(f"Loading checkpoint weights from {self.hparams.checkpoint_path}...")
             t0 = time.time()
             self.model.load_state_dict(
                 torch.load(str(self.hparams.checkpoint_path), mmap=True),
                 strict=False,
                 assign=True,
             )
-            print(f"Loaded checkpoint in {time.time() - t0:.3f}s.")
+            print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
 
         print("Setting trainable parameters...")
         t0 = time.time()
