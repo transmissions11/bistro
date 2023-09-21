@@ -130,7 +130,12 @@ class LitModel(L.LightningModule):
         if self.model is not None:
             return
 
-        print(self.trainer.is_global_zero)
+        progress_bar = self.trainer.progress_bar_callback
+        print(
+            self.trainer.is_global_zero,
+            progress_bar is not None,
+            progress_bar.is_enabled,
+        )
         self.print("Initializing GPT model...")
         t0 = time.time()
         self.model = GPT(
