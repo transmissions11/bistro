@@ -147,7 +147,7 @@ class LitModel(L.LightningModule):
         if self.hparams.checkpoint_path is not None:
             print(f"Loading checkpoint weights from {self.hparams.checkpoint_path}...")
             t0 = time.time()
-            self.model.load_state_dict(
+            self.load_state_dict(
                 torch.load(str(self.hparams.checkpoint_path), mmap=True),
                 strict=False,
                 assign=True,
