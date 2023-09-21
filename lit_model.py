@@ -151,9 +151,7 @@ class LitModel(L.LightningModule):
 
         t0 = g0_print("Initializing weights with optimal randomness...")
         self.model.apply(init_weights_optimally)
-        g0_print(
-            f"Initialized weights with optimal randomness in {time.time() - t0:.3f}s."
-        )
+        g0_print(f"Initialized weights optimally in {time.time() - t0:.3f}s.")
 
         if self.hparams.checkpoint_path is not None:
             t0 = g0_print(
@@ -164,7 +162,7 @@ class LitModel(L.LightningModule):
                 strict=False,
                 assign=True,
             )
-            g0_print(f"Loaded checkpoint in {time.time() - t0:.3f}s.")
+            g0_print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
 
         if self.freeze_criteria is not None:
             t0 = g0_print("Freezing specified parameters...")
