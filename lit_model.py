@@ -17,8 +17,8 @@ from model import GPT
 from sample import sample_model
 
 from utils.padding import strip_right_pad
-from utils.params import freeze_parameters
 from utils.tensors import find_subtensor_end
+from utils.params import freeze_parameters, init_weights
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 
 
@@ -148,6 +148,10 @@ class LitModel(L.LightningModule):
             num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
         )
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
+
+        t0 = g0_print("Initializing weights with optimal randomness...")
+        self.model.apply(init_weights)
+        g0_print(f"Initialized weights in {time.time() - t0:.3f}s.")
 
         if self.hparams.checkpoint_path is not None:
             t0 = g0_print(

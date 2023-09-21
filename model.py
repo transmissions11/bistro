@@ -3,8 +3,6 @@ import torch.nn as nn
 
 from typing import Optional, Tuple
 
-from utils.params import init_weights
-
 from lit_gpt.config import Config
 from lit_gpt.model import Block, build_rope_cache
 
@@ -37,10 +35,6 @@ class GPT(nn.Module):
         )
 
         self.rope_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
-
-        ##############################################################################
-
-        self.apply(init_weights)
 
     def reset_caches(self):
         self.rope_cache = None
