@@ -68,7 +68,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
         precision="bf16-true",
         logger=WandbLogger(
             project="bistro",
-            config=hparams,
+            config=hparams,  # TODO: Ensure this includes parameters passed to main!
         ),
         limit_val_batches=val_batches,
         val_check_interval=val_check_interval,
