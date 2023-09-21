@@ -74,12 +74,20 @@ class LitDataModule(L.LightningDataModule):
         self.hf_datasets = self.load_mapped_datasets()
 
     def train_dataloader(self):
-        # TODO: try collate
-        # TODO: num_workers
+        # TODO: collate_fn
         return DataLoader(
-            self.hf_datasets["train"], batch_size=self.batch_size, shuffle=True
+            self.hf_datasets["train"],
+            batch_size=self.batch_size,
+            num_workers=8,
+            pin_memory=True,
+            shuffle=True,
         )
 
     def val_dataloader(self):
-        # TODO: num_workers
-        return DataLoader(self.hf_datasets["validation"], batch_size=self.batch_size)
+        # TODO: double batch size?
+        return DataLoader(
+            self.hf_datasets["validation"],
+            batch_size=self.batch_size,
+            num_workers=8,
+            pin_memory=True,
+        )
