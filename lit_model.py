@@ -60,7 +60,7 @@ class LitModel(L.LightningModule):
     def forward(self, x):
         return self.model(x)
 
-    def training_step(self, batch: dict):
+    def training_step(self, batch: dict) -> torch.Tensor:
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
@@ -68,7 +68,7 @@ class LitModel(L.LightningModule):
 
         return loss
 
-    def validation_step(self, batch: dict, batch_idx):
+    def validation_step(self, batch: dict, batch_idx: int) -> None:
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
@@ -174,7 +174,7 @@ class LitModel(L.LightningModule):
 
         g0_print("Done loading & configuring model.")
 
-    def on_train_start(self) -> None:
+    def on_train_start(self):
         self.print(f"Resetting model caches for training...\n")
         self.model.reset_caches()
 
