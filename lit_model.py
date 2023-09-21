@@ -144,9 +144,9 @@ class LitModel(L.LightningModule):
         if self.hparams.checkpoint_path is not None:
             print(f"Loading model weights from {self.hparams.checkpoint_path}...")
             self.model.load_state_dict(
-                # TODO: Try assign=True
-                torch.load(str(self.hparams.checkpoint_path), mmap=True, assign=False),
+                torch.load(str(self.hparams.checkpoint_path), mmap=True),
                 strict=False,
+                assign=False,  # TODO: Try assign=True
             )
 
         # TODO: Should we use self or self.model?
