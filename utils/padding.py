@@ -1,5 +1,7 @@
 import torch
 
+from typing import List, Dict
+
 # Note: pad_tkn could be anything, since we pad
 # right in effect the model never even sees them.
 ignored_tkn, pad_tkn = -1, 0  # Some special tokens.
@@ -20,8 +22,15 @@ def strip_right_pad(tensor):
 
 
 # TODO: Detemrine x's type
-def pad_collate_fn(x):
-    print("x:", x)
+def pad_collate_fn(batch: List[Dict[str, torch.Tensor]]):
+    # Find the maximum length of 'input_ids' in the batch
+    max_len = max(
+        [len(item["input_ids"]) for item in batch]
+    )  # TODO: better way to do this? can we do it automatically
 
-    # pad to the same length
-    return pad_right(x, pad_tkn, 1000)  # TODO: set pad_to
+    # Pad 'input_ids' and 'targets' in each item in the batch
+    for item in batch:
+        item["input_ids"] = pad_right(item["input_ids"], pad_tkn, max_len)
+        item["targets"] = pad_right(item["targets"], pad_tkn, max_len)
+
+    return batch
