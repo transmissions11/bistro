@@ -1,3 +1,4 @@
+import time
 import torch
 
 import lightning as L
@@ -143,11 +144,13 @@ class LitModel(L.LightningModule):
         # load its state dict in, with strict=False.
         if self.hparams.checkpoint_path is not None:
             print(f"Loading model weights from {self.hparams.checkpoint_path}...")
+            t0 = time.time()
             self.model.load_state_dict(
                 torch.load(str(self.hparams.checkpoint_path), mmap=True),
                 strict=False,
                 assign=False,  # TODO: Try assign=True
             )
+            print(f"Loaded model weights in {time.time() - t0:.2f}s.")
 
         # TODO: Should we use self or self.model?
         print("Setting trainable parameters...")
