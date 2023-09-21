@@ -47,12 +47,15 @@ class LitModel(L.LightningModule):
         self.model = None  # This will get set in configure_model.
 
         # Assign these manually as they don't pickle well
-        # and shouldn't be saved via save_hyperparameters.
+        # or shouldn't be saved via save_hyperparameters.
         self.freeze_criteria = freeze_criteria
+        self.checkpoint_path = checkpoint_path
         self.tokenizer = tokenizer
 
-        # Note logger=False since we already do it manually in fit.py.
-        self.save_hyperparameters(ignore=["freeze_criteria", "tokenizer"], logger=False)
+        # Note: logger=False since we already log hparams it manually in fit.py.
+        self.save_hyperparameters(
+            ignore=["freeze_criteria", "checkpoint_path", "tokenizer"], logger=False
+        )
 
     def forward(self, x):
         return self.model(x)
@@ -152,12 +155,10 @@ class LitModel(L.LightningModule):
         self.model.apply(init_weights_optimally)
         g0_print(f"Initialized weights optimally in {time.time() - t0:.3f}s.")
 
-        if self.hparams.checkpoint_path is not None:
-            t0 = g0_print(
-                f"Loading checkpoint weights from {self.hparams.checkpoint_path}..."
-            )
+        if self.checkpoint_path is not None:
+            t0 = g0_print(f"Loading checkpoint weights from {self.checkpoint_path}...")
             self.model.load_state_dict(
-                torch.load(str(self.hparams.checkpoint_path), mmap=True),
+                torch.load(str(self.checkpoint_path), mmap=True),
                 strict=False,
                 assign=True,
             )
