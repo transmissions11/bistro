@@ -46,8 +46,12 @@ class LitModel(L.LightningModule):
 
         self.model = None  # This will get set in configure_model.
 
-        # Disable logging hyperparams, since we do it manually in fit.py.
-        self.save_hyperparameters(logger=False)
+        # Have to assign manually as it's not pickle-able
+        # and thus can't be saved via save_hyperparameters.
+        self.freeze_criteria = freeze_criteria
+
+        # Note we logger=False since we already do it manually in fit.py.
+        self.save_hyperparameters(ignore=["freeze_criteria"], logger=False)
 
     def forward(self, x):
         return self.model(x)
