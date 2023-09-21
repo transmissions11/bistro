@@ -18,8 +18,8 @@ from sample import sample_model
 
 from utils.padding import strip_right_pad
 from utils.tensors import find_subtensor_end
-from utils.params import freeze_parameters, init_weights
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
+from utils.params import freeze_parameters, init_weights_optimally
 
 
 class LitModel(L.LightningModule):
@@ -150,8 +150,10 @@ class LitModel(L.LightningModule):
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
         t0 = g0_print("Initializing weights with optimal randomness...")
-        self.model.apply(init_weights)
-        g0_print(f"Initialized weights optimally in {time.time() - t0:.3f}s.")
+        self.model.apply(init_weights_optimally)
+        g0_print(
+            f"Initialized weights with optimal randomness in {time.time() - t0:.3f}s."
+        )
 
         if self.hparams.checkpoint_path is not None:
             t0 = g0_print(
