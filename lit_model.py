@@ -16,9 +16,9 @@ from model import GPT
 from sample import sample_model
 
 from utils.padding import strip_right_pad
+from utils.params import freeze_parameters
 from utils.tensors import find_subtensor_end
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
-from utils.params import mark_only_soft_prompt_as_trainable
 
 
 class LitModel(L.LightningModule):
@@ -47,43 +47,6 @@ class LitModel(L.LightningModule):
         # Disable logging hyperparams, since we do it manually in fit.py.
         # TODO: We're currently saving the tokenizer as a hyperparam, which feels wrong.
         self.save_hyperparameters(ignore=["model"], logger=False)
-
-    def configure_model(self):
-        if self.model is not None:
-            return
-
-        # TODO: Only do on rank 0 (WHY DOENST SELF>PRINT WORK)
-        print("Initializing GPT model...")
-        self.model = GPT(
-            config=self.hparams.model_config,
-            soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
-                self.hparams.soft_prompt_tkn
-            ),
-            num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
-        )
-
-        # If a checkpoint path was provided, we'll
-        # load its state dict in, with strict=False.
-        if self.hparams.checkpoint_path is not None:
-            print(f"Loading model weights from {self.hparams.checkpoint_path}...")
-            # TODO: Do we rly need lazy_load here? torch.load mmap? (https://pytorch.org/docs/2.1/generated/torch.load.html)
-            with lazy_load(self.hparams.checkpoint_path) as checkpoint:
-                # TODO: Should we use self.load_state_dict?
-                self.model.load_state_dict(checkpoint, strict=False)
-
-        # TODO: Should we use self or self.model?
-        print("Setting trainable parameters...")
-        mark_only_soft_prompt_as_trainable(self.model)
-
-        # TODO: Should we use self or self.model?
-        print("Watching model gradients with W&B...")
-        cast(WandbLogger, self.trainer.logger).watch(self.model)
-
-        print("Done loading & configuring model.")
-
-    def on_train_start(self) -> None:
-        self.print(f"Resetting model caches for training...\n")
-        self.model.reset_caches()
 
     def forward(self, x):
         return self.model(x)
@@ -162,3 +125,41 @@ class LitModel(L.LightningModule):
                 "interval": "step",
             },
         }
+
+    def configure_model(self):
+        if self.model is not None:
+            return
+
+        # TODO: Only do on rank 0 (WHY DOENST SELF>PRINT WORK)
+        print("Initializing GPT model...")
+        self.model = GPT(
+            config=self.hparams.model_config,
+            soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
+                self.hparams.soft_prompt_tkn
+            ),
+            num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
+        )
+
+        # If a checkpoint path was provided, we'll
+        # load its state dict in, with strict=False.
+        if self.hparams.checkpoint_path is not None:
+            print(f"Loading model weights from {self.hparams.checkpoint_path}...")
+            # TODO: Do we rly need lazy_load here? torch.load mmap? (https://pytorch.org/docs/2.1/generated/torch.load.html)
+            # TODO: use assign (https://github.com/pytorch/pytorch/issues/64601)
+            with lazy_load(self.hparams.checkpoint_path) as checkpoint:
+                # TODO: Should we use self.load_state_dict?
+                self.model.load_state_dict(checkpoint, strict=False)
+
+        # TODO: Should we use self or self.model?
+        print("Setting trainable parameters...")
+        freeze_parameters(self.model, lambda name: "soft_prompt" not in name)
+
+        # TODO: Should we use self or self.model?
+        print("Watching model gradients with W&B...")
+        cast(WandbLogger, self.trainer.logger).watch(self.model)
+
+        print("Done loading & configuring model.")
+
+    def on_train_start(self) -> None:
+        self.print(f"Resetting model caches for training...\n")
+        self.model.reset_caches()
