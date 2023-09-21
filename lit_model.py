@@ -51,7 +51,7 @@ class LitModel(L.LightningModule):
         self.freeze_criteria = freeze_criteria
 
         # Note logger=False since we already do it manually in fit.py.
-        self.save_hyperparameters(ignore=["freeze_criteria"], logger=False)
+        self.save_hyperparameters(ignore=["freeze_criteria"], logger=True)
 
     def forward(self, x):
         return self.model(x)
