@@ -102,6 +102,8 @@ class LitModel(L.LightningModule):
         return chunked_cross_entropy(logits, targets, chunk_size=0)
 
     def configure_optimizers(self):
+        print("CONFIGURING OPTIMIZOOORS")
+
         optimizer = torch.optim.AdamW(
             self.parameters(),
             lr=self.hparams.learning_rate,
