@@ -21,5 +21,7 @@ def strip_right_pad(tensor):
 
 # TODO: Detemrine x's type
 def pad_collate_fn(x):
+    print("x:", x)
+
     # pad to the same length
     return pad_right(x, pad_tkn, 1000)  # TODO: set pad_to
