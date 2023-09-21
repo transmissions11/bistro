@@ -46,12 +46,13 @@ class LitModel(L.LightningModule):
 
         self.model = None  # This will get set in configure_model.
 
-        # Have to assign manually as it's not pickle-able
-        # and thus can't be saved via save_hyperparameters.
+        # Assign these manually as they don't pickle well
+        # and shouldn't be saved via save_hyperparameters.
         self.freeze_criteria = freeze_criteria
+        self.tokenizer = tokenizer
 
         # Note logger=False since we already do it manually in fit.py.
-        self.save_hyperparameters(ignore=["freeze_criteria"], logger=True)
+        self.save_hyperparameters(ignore=["freeze_criteria", "tokenizer"], logger=False)
 
     def forward(self, x):
         return self.model(x)
@@ -79,7 +80,7 @@ class LitModel(L.LightningModule):
         )
 
         if batch_idx < 10:
-            tokenizer = self.hparams.tokenizer
+            tokenizer = self.tokenizer
 
             sample = strip_right_pad(input_ids[0])
             target = strip_right_pad(targets[0])
@@ -142,9 +143,7 @@ class LitModel(L.LightningModule):
         t0 = g0_print("Initializing model...")
         self.model = GPT(
             config=self.hparams.model_config,
-            soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
-                self.hparams.soft_prompt_tkn
-            ),
+            soft_prompt_tkn=self.tokenizer.token_to_id(self.hparams.soft_prompt_tkn),
             num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
         )
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
