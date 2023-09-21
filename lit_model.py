@@ -60,7 +60,7 @@ class LitModel(L.LightningModule):
     def forward(self, x):
         return self.model(x)
 
-    def training_step(self, batch: dict, batch_idx):
+    def training_step(self, batch: dict):
         input_ids, targets = batch["input_ids"], batch["targets"]
         loss = self.compute_loss(input_ids, targets)
 
