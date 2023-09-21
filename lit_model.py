@@ -151,7 +151,7 @@ class LitModel(L.LightningModule):
 
         t0 = g0_print("Initializing weights with optimal randomness...")
         self.model.apply(init_weights)
-        g0_print(f"Initialized weights in {time.time() - t0:.3f}s.")
+        g0_print(f"Initialized weights optimally in {time.time() - t0:.3f}s.")
 
         if self.hparams.checkpoint_path is not None:
             t0 = g0_print(
