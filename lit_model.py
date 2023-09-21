@@ -130,6 +130,7 @@ class LitModel(L.LightningModule):
         if self.model is not None:
             return
 
+        print(self.trainer.is_global_zero)
         self.print("Initializing GPT model...")
         t0 = time.time()
         self.model = GPT(
