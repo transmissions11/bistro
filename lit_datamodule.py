@@ -8,6 +8,7 @@ from lit_gpt import Tokenizer
 
 from datasets import load_dataset
 
+from utils.padding import pad_collate_fn
 from utils.masking import mask_before_inclusive
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE, fmt_vicuna_input
 
@@ -74,9 +75,9 @@ class LitDataModule(L.LightningDataModule):
         self.hf_datasets = self.load_mapped_datasets()
 
     def train_dataloader(self):
-        # TODO: collate_fn
         return DataLoader(
             self.hf_datasets["train"],
+            collate_fn=pad_collate_fn,
             batch_size=self.batch_size,
             num_workers=8,
             pin_memory=True,
@@ -87,6 +88,7 @@ class LitDataModule(L.LightningDataModule):
         # TODO: double batch size?
         return DataLoader(
             self.hf_datasets["validation"],
+            collate_fn=pad_collate_fn,
             batch_size=self.batch_size,
             num_workers=8,
             pin_memory=True,
