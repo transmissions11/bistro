@@ -40,7 +40,7 @@ class GPT(nn.Module):
 
         ##############################################################################
 
-        self.apply(init_weights)  # TODO: How long does this add to init time?
+        self.apply(init_weights)
 
     def reset_caches(self):
         self.rope_cache = None
