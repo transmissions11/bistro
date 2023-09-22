@@ -7,7 +7,6 @@ from typing import List, Dict
 ignored_tkn, pad_tkn = -1, 0  # Some special tokens.
 
 
-# TODO: Should we pad to a power of 8? (https://github.com/Lightning-AI/lit-gpt/pull/123/files)
 def pad_collate_fn(batch: List[Dict[str, torch.Tensor]]):
     max_len = max([len(item["inputs"]) for item in batch])
 
