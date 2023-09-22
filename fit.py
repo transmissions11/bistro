@@ -31,7 +31,7 @@ weight_decay = 0.01  # TODO: Should we be using this for finetuning?
 
 log_step_interval = 10
 
-val_batches = 1000
+val_batches = 100
 tokens_to_sample = 8
 val_check_interval = 0.05
 checkpoint_check_interval = 500
