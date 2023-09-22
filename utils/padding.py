@@ -9,7 +9,7 @@ ignored_tkn, pad_tkn = -1, 0  # Some special tokens.
 
 # TODO: Should we pad to a power of 8? (https://github.com/Lightning-AI/lit-gpt/pull/123/files)
 def pad_collate_fn(batch: List[Dict[str, torch.Tensor]]):
-    max_len = find_multiple(max([len(item["inputs"]) for item in batch]), 8)
+    max_len = max([len(item["inputs"]) for item in batch])
 
     print(f"Max len: {max_len}")
 
@@ -27,10 +27,3 @@ def pad_right(x: torch.Tensor, pad_to: int, pad_id: int = pad_tkn) -> torch.Tens
 
 def strip_right_pad(x: torch.Tensor, pad_id: int = pad_tkn) -> torch.Tensor:
     return x[: torch.max(torch.where((x != pad_id) & (x != ignored_tkn))[0]) + 1]
-
-
-def find_multiple(number: int, divisor: int) -> int:
-    assert divisor > 0
-    if number % divisor == 0:
-        return number
-    return number + divisor - (number % divisor)
