@@ -25,17 +25,17 @@ def strip_right_pad(tensor):
 def pad_collate_fn(batch: List[Dict[str, torch.Tensor]]):
     print("START batch: ", batch)
 
-    # Find the maximum length of 'input_ids' in the batch
+    # Find the maximum length of 'inputs' in the batch
     # TODO: better way to do this? can we do it automatically
     # TODO: Should we pad to a power of 8? (https://github.com/Lightning-AI/lit-gpt/pull/123/files)
-    max_len = max([len(item["input_ids"]) for item in batch])
+    max_len = max([len(item["inputs"]) for item in batch])
 
-    # Pad 'input_ids' and 'targets' in each item in the batch
-    input_ids = [pad_right(item["input_ids"], pad_tkn, max_len) for item in batch]
+    # Pad 'inputs' and 'targets' in each item in the batch
+    inputs = [pad_right(item["inputs"], pad_tkn, max_len) for item in batch]
     targets = [pad_right(item["targets"], pad_tkn, max_len) for item in batch]
 
-    # Combine 'input_ids' and 'targets' into a single dictionary
-    batch = {"input_ids": torch.stack(input_ids), "targets": torch.stack(targets)}
+    # Combine 'inputs' and 'targets' into a single dictionary
+    batch = {"inputs": torch.stack(inputs), "targets": torch.stack(targets)}
 
     print("END batch: ", batch)
 

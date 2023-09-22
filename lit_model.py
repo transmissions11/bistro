@@ -61,16 +61,16 @@ class LitModel(L.LightningModule):
         return self.model(x)
 
     def training_step(self, batch: dict) -> torch.Tensor:
-        input_ids, targets = batch["input_ids"], batch["targets"]
-        loss = self.compute_loss(input_ids, targets)
+        inputs, targets = batch["inputs"], batch["targets"]
+        loss = self.compute_loss(inputs, targets)
 
         self.log("train_loss", loss)
 
         return loss
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
-        input_ids, targets = batch["input_ids"], batch["targets"]
-        loss = self.compute_loss(input_ids, targets)
+        inputs, targets = batch["inputs"], batch["targets"]
+        loss = self.compute_loss(inputs, targets)
 
         self.log(
             "val_loss",
@@ -85,7 +85,7 @@ class LitModel(L.LightningModule):
         if batch_idx < 10:
             tokenizer = self.tokenizer
 
-            sample = strip_right_pad(input_ids[0])
+            sample = strip_right_pad(inputs[0])
             target = strip_right_pad(targets[0])
 
             prompt_end_idx = find_subtensor_end(
@@ -178,8 +178,8 @@ class LitModel(L.LightningModule):
         self.print(f"Resetting model caches for training...\n")
         self.model.reset_caches()
 
-    def compute_loss(self, input_ids, targets):
-        logits = self.model(input_ids)
+    def compute_loss(self, inputs, targets):
+        logits = self.model(inputs)
         return F.cross_entropy(
             logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1
         )

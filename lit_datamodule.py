@@ -43,7 +43,7 @@ class LitDataModule(L.LightningDataModule):
             )
 
             return {
-                "input_ids": seq[:-1],
+                "inputs": seq[:-1],
                 # Mask everything before the assistant response.
                 "targets": mask_before_inclusive(
                     VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], tokenizer
