@@ -11,6 +11,8 @@ ignored_tkn, pad_tkn = -1, 0  # Some special tokens.
 def pad_collate_fn(batch: List[Dict[str, torch.Tensor]]):
     max_len = max([len(item["inputs"]) for item in batch])
 
+    print(f"Max len: {max_len}")
+
     inputs, targets = [], []
     for item in batch:
         inputs.append(pad_right(item["inputs"], max_len))
