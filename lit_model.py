@@ -21,6 +21,8 @@ from utils.tensors import find_subtensor_end
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 from utils.params import freeze_parameters, init_weights_optimally
 
+# TODO: oh maybe the reason we're seeing 3 device 1 grad acc being lower than 1 device 3 grad acc is because we're not syncing val loss
+
 
 class LitModel(L.LightningModule):
     def __init__(
@@ -80,6 +82,7 @@ class LitModel(L.LightningModule):
             loss.to(torch.float64),
             on_epoch=True,
             prog_bar=True,
+            sync_dist=True,
         )
 
         if batch_idx < 10:
