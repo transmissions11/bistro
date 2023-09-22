@@ -15,8 +15,8 @@ from lit_model import LitModel
 from model import Config
 
 
-devices = 4
-micro_batch_size = 1
+devices = 1
+micro_batch_size = 3
 gradient_accumulation_iters = 1
 
 epochs = 1
