@@ -60,7 +60,7 @@ class LitModel(L.LightningModule):
     def forward(self, x):
         return self.model(x)
 
-    def training_step(self, batch: dict) -> torch.Tensor:
+    def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
         loss = self.compute_loss(inputs, targets)
 
