@@ -16,8 +16,8 @@ from model import Config
 
 
 devices = 1
-micro_batch_size = 1
-gradient_accumulation_iters = 3
+micro_batch_size = 3
+gradient_accumulation_iters = 0
 
 epochs = 1
 
