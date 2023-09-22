@@ -12,7 +12,7 @@ def pad_collate_fn(batch: List[Dict[str, torch.Tensor]]):
 
     inputs, targets = [], []
     for item in batch:
-        inputs.append(pad_right(item["inputs"], max_len))
+        inputs.append(pad_right(item["inputs"], max_len))  # Defaults to pad_tkn.
         targets.append(pad_right(item["targets"], max_len, pad_id=ignored_tkn))
 
     return {"inputs": torch.stack(inputs), "targets": torch.stack(targets)}
