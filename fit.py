@@ -31,7 +31,7 @@ weight_decay = 0.00  # Generally not used for finetuning.
 
 val_batches = 100
 tokens_to_sample = 8
-val_check_interval = 100
+val_check_interval = 0.1  # After every 10% of training steps.
 
 freeze_criteria = lambda name: "soft_prompt" not in name
 
@@ -50,7 +50,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
 
     checkpoint_callback = ModelCheckpoint(
         verbose=True,
-        save_top_k=3,
+        save_top_k=5,
         monitor="val_loss",
         dirpath="bistro_checkpoints/",
         filename="{epoch}-{step}-{val_loss:.2f}",
