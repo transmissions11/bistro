@@ -52,7 +52,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
     L.seed_everything(1337, workers=True)
 
     checkpoint_callback = ModelCheckpoint(
-        save_top_k=10,
+        save_top_k=3,
         monitor="val_loss",
         mode="min",
         dirpath="bistro_checkpoints/",
