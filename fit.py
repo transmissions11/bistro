@@ -19,7 +19,7 @@ devices = 1
 micro_batch_size = 3
 gradient_accumulation_iters = 1
 
-epochs = 1
+epochs = 2
 
 num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"
@@ -70,11 +70,12 @@ def main(data_dir: Path, checkpoint_dir: Path):
             project="bistro",
             config=hparams,  # TODO: Ensure this includes parameters passed to main!
         ),
-        limit_train_batches=1000,
+        limit_train_batches=400,
         limit_val_batches=val_batches,
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
         log_every_n_steps=log_step_interval,
+        num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
         callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
 
