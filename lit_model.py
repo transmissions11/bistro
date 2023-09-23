@@ -89,11 +89,7 @@ class LitModel(L.LightningModule):
             target = strip_right_pad(targets[0])
 
             prompt_end_idx = find_subtensor_end(
-                sample,
-                tokenizer.encode(
-                    VICUNA_END_OF_USER_PROMPT_SEQUENCE,
-                    device=self.device,  # TODO: idt these need to be on device manually anymore
-                ),
+                sample, tokenizer.encode(VICUNA_END_OF_USER_PROMPT_SEQUENCE)
             )
 
             self.print(f"\nInput: '{tokenizer.decode(sample[:prompt_end_idx + 1])}'")
