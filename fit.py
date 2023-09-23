@@ -36,6 +36,8 @@ tokens_to_sample = 8
 val_check_interval = 100
 checkpoint_check_interval = 150
 
+# TODO: ensure checkpoint_val_interval is a multiple of val_check_interval?
+
 freeze_criteria = lambda name: "soft_prompt" not in name
 
 
