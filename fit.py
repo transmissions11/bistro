@@ -51,7 +51,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
     checkpoint_callback = ModelCheckpoint(
         verbose=True,
         save_top_k=3,
-        every_n_epochs=1,
+        # every_n_epochs=1,
         monitor="val_loss",
         dirpath="bistro_checkpoints/",
         filename="{epoch}-{step}-{val_loss:.2f}",
