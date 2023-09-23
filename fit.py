@@ -19,7 +19,7 @@ devices = 1
 micro_batch_size = 3
 gradient_accumulation_iters = 1
 
-epochs = 2
+epochs = 1
 
 num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"
@@ -28,8 +28,6 @@ learning_rate = 3e-2
 min_lr_ratio = 0.00  # Anneal to 0.
 warmup_ratio = 0.05  # Spend 5% of training steps warming up.
 weight_decay = 0.00  # Generally not used for finetuning.
-
-log_step_interval = 20
 
 val_batches = 100
 tokens_to_sample = 8
@@ -51,12 +49,11 @@ def main(data_dir: Path, checkpoint_dir: Path):
     L.seed_everything(1337, workers=True)
 
     checkpoint_callback = ModelCheckpoint(
-        save_top_k=3,
         verbose=True,
-        monitor="val_loss",
-        mode="min",
-        dirpath="bistro_checkpoints/",
+        save_top_k=3,
         every_n_epochs=1,
+        monitor="val_loss",
+        dirpath="bistro_checkpoints/",
         filename="{epoch}-{step}-{val_loss:.2f}",
     )
 
@@ -70,11 +67,9 @@ def main(data_dir: Path, checkpoint_dir: Path):
             project="bistro",
             config=hparams,  # TODO: Ensure this includes parameters passed to main!
         ),
-        limit_train_batches=400,
         limit_val_batches=val_batches,
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
-        log_every_n_steps=log_step_interval,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
         callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
