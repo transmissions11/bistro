@@ -68,6 +68,8 @@ class LitModel(L.LightningModule):
         return loss
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
+        print(batch)
+
         inputs, targets = batch["inputs"], batch["targets"]
         loss = self.compute_loss(inputs, targets)
 
