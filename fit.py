@@ -10,7 +10,7 @@ from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor
 from lightning.pytorch.callbacks import ModelCheckpoint
 
-from utils.warnings import ignore_uncontrollable_warnings, elevate_important_warnings
+from utils.warnings import suppress_uncontrollable_warnings, elevate_important_warnings
 
 from lit_model import LitModel
 
@@ -48,7 +48,7 @@ hparams = {
 def main(data_dir: Path, checkpoint_dir: Path):
     # Filter out incorrect or "out of our control" warnings
     # and elevate important ones we want to treat as errors.
-    ignore_uncontrollable_warnings()
+    suppress_uncontrollable_warnings()
     elevate_important_warnings()
 
     torch.set_float32_matmul_precision("high")
