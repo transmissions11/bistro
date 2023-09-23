@@ -47,7 +47,8 @@ hparams = {
 def main(data_dir: Path, checkpoint_dir: Path):
     # Filter incorrect or "out of our control" warnings.
     for msg in [
-        r"wandb\/wandb_torch\.py:\d+: UserWarning: .*\(Triggered internally .*\)",
+        # r"wandb\/wandb_torch\.py:\d+: UserWarning: .*\(Triggered internally .*\)",
+        r".*wandb_torch.*",
     ]:
         warnings.filterwarnings("ignore", msg)
 
