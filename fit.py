@@ -55,6 +55,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
 
     checkpoint_callback = ModelCheckpoint(
         save_top_k=3,
+        verbose=True,
         monitor="val_loss",
         mode="min",
         dirpath="bistro_checkpoints/",
