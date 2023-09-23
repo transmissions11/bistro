@@ -46,11 +46,7 @@ hparams = {
 
 def main(data_dir: Path, checkpoint_dir: Path):
     # Filter incorrect or "out of our control" warnings.
-    for msg in [
-        # r"wandb\/wandb_torch\.py:\d+: UserWarning: .*\(Triggered internally .*\)",
-        r".*cuda.*",
-    ]:
-        warnings.filterwarnings("ignore", msg)
+    warnings.filterwarnings("ignore", message=r".*cuda.*", module=r".*wandb_torch.*")
 
     torch.set_float32_matmul_precision("high")
 
