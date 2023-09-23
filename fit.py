@@ -48,9 +48,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
     # Filter incorrect or "out of our control" warnings.
     warnings.filterwarnings("ignore", message=r".*cuda.*", module=r".*wandb_torch.*")
     # Elevate warnings we want to treat as errors.
-    warnings.filterwarnings(
-        "error", message=r".*Checkpoint directory .+ exists and is not empty.*"
-    )
+    warnings.filterwarnings("error", message=r".*Checkpoint directory .+ not empty.*")
 
     torch.set_float32_matmul_precision("high")
 
