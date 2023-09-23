@@ -34,7 +34,7 @@ log_step_interval = 10
 val_batches = 100
 tokens_to_sample = 8
 val_check_interval = 100
-checkpoint_check_interval = 90
+checkpoint_check_interval = 10
 
 # TODO: ensure checkpoint_val_interval is a multiple of val_check_interval?
 
@@ -60,7 +60,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
         mode="min",
         dirpath="bistro_checkpoints/",
         every_n_train_steps=checkpoint_check_interval,
-        filename="{step}-{val_loss:.2f}",
+        filename="{epoch}-{step}-{val_loss:.2f}",
     )
 
     trainer = L.Trainer(
