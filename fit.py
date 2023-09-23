@@ -87,7 +87,6 @@ def main(data_dir: Path, checkpoint_dir: Path):
         checkpoint_path=checkpoint_dir / "lit_model.pth",
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
-        min_lr_ratio=min_lr_ratio,
         weight_decay=weight_decay,
         tokens_to_sample=tokens_to_sample,
         num_soft_prompt_tkns=num_soft_prompt_tkns,
