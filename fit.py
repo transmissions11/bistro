@@ -70,7 +70,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
             project="bistro",
             config=hparams,  # TODO: Ensure this includes parameters passed to main!
         ),
-        limit_test_batches=1000,
+        limit_train_batches=1000,
         limit_val_batches=val_batches,
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
