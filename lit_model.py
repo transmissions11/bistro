@@ -30,7 +30,6 @@ class LitModel(L.LightningModule):
         ###############################
         learning_rate: float,
         warmup_ratio: float,
-        min_lr_ratio: float,
         ###############################
         weight_decay: float,
         ###############################
@@ -121,11 +120,10 @@ class LitModel(L.LightningModule):
         lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
             optimizer,
             max_lr=self.hparams.learning_rate,
-            total_steps=self.trainer.estimated_stepping_batches,
             pct_start=self.hparams.warmup_ratio,
-            cycle_momentum=False,
+            total_steps=self.trainer.estimated_stepping_batches,
             div_factor=1e10,  # Large number, so we start at 0.
-            final_div_factor=1 / (self.hparams.min_lr_ratio + 1e-10),
+            cycle_momentum=False,
         )
 
         return {
