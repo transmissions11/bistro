@@ -48,7 +48,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
     # Filter incorrect or "out of our control" warnings.
     for msg in [
         # r"wandb\/wandb_torch\.py:\d+: UserWarning: .*\(Triggered internally .*\)",
-        r".*wandb_torch.*",
+        r".*cuda.*",
     ]:
         warnings.filterwarnings("ignore", msg)
 
