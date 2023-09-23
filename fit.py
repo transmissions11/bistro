@@ -49,12 +49,12 @@ def main(data_dir: Path, checkpoint_dir: Path):
     warnings.filterwarnings(
         "ignore",
         message=r".*DtypeTensor constructors are no longer recommended.*",
-        module="wandb_torch",
+        module="wandb",
     )
     warnings.filterwarnings(
         "ignore",
         message=r".*_histc_cuda does not have a deterministic implementation.*",
-        module="wandb_torch",
+        module="wandb",
     )
     # Elevate warnings we want to treat as errors.
     warnings.filterwarnings("error", message=r".*Checkpoint directory .+ not empty.*")
