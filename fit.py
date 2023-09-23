@@ -33,8 +33,8 @@ log_step_interval = 10
 
 val_batches = 100
 tokens_to_sample = 8
-val_check_interval = 0.05
-checkpoint_check_interval = 500
+val_check_interval = 100
+checkpoint_check_interval = 150
 
 freeze_criteria = lambda name: "soft_prompt" not in name
 
@@ -53,11 +53,11 @@ def main(data_dir: Path, checkpoint_dir: Path):
 
     checkpoint_callback = ModelCheckpoint(
         save_top_k=10,
-        monitor="train_loss",
+        monitor="val_loss",
         mode="min",
         dirpath="bistro_checkpoints/",
         every_n_train_steps=checkpoint_check_interval,
-        filename="{step}-{train_loss:.2f}",
+        filename="{step}-{val_loss:.2f}",
     )
 
     trainer = L.Trainer(
