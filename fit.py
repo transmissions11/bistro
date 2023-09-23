@@ -29,14 +29,11 @@ min_lr_ratio = 0.00  # Anneal to 0.
 warmup_ratio = 0.05  # Spend 5% of training steps warming up.
 weight_decay = 0.00  # Generally not used for finetuning.
 
-log_step_interval = 10
+log_step_interval = 20
 
 val_batches = 100
 tokens_to_sample = 8
 val_check_interval = 100
-checkpoint_check_interval = 10
-
-# TODO: ensure checkpoint_val_interval is a multiple of val_check_interval?
 
 freeze_criteria = lambda name: "soft_prompt" not in name
 
@@ -59,7 +56,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
         monitor="val_loss",
         mode="min",
         dirpath="bistro_checkpoints/",
-        every_n_train_steps=checkpoint_check_interval,
+        every_n_epochs=1,
         filename="{epoch}-{step}-{val_loss:.2f}",
     )
 
@@ -76,7 +73,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
         limit_val_batches=val_batches,
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
-        log_every_n_steps=log_step_interval,  # Doesn't apply in validation loop.
+        log_every_n_steps=log_step_interval,
         callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
 
