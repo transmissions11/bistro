@@ -80,7 +80,7 @@ class LitModel(L.LightningModule):
             loss.to(torch.float64),
             on_epoch=True,
             prog_bar=True,
-            # sync_dist=True,
+            sync_dist=True,
         )
 
         if batch_idx < 10:
