@@ -4,7 +4,6 @@ from typing import Callable
 
 
 def freeze_parameters(model: nn.Module, should_freeze: Callable[[str], bool]) -> None:
-    """Sets `requires_grad=False` for all parameters in `model` for which `freeze_lambda` returns `True`."""
     for name, param in model.named_parameters():
         param.requires_grad = not should_freeze(name)
 
