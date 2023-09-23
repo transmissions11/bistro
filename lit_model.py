@@ -76,6 +76,7 @@ class LitModel(L.LightningModule):
             # Need to upcast precision as types like bfloat16
             # have very low precision with larger values (~256+)
             # that results in inaccurate accumulation w/ on_epoch.
+            # https://github.com/Lightning-AI/lightning/issues/18620
             loss.to(torch.float64),
             on_epoch=True,
             prog_bar=True,
@@ -91,8 +92,7 @@ class LitModel(L.LightningModule):
             prompt_end_idx = find_subtensor_end(
                 sample,
                 tokenizer.encode(
-                    VICUNA_END_OF_USER_PROMPT_SEQUENCE,
-                    device=self.device,  # TODO: idt these need to be on device manually anymore
+                    VICUNA_END_OF_USER_PROMPT_SEQUENCE, device=self.device
                 ),
             )
 
