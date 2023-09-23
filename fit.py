@@ -33,7 +33,7 @@ log_step_interval = 10
 
 val_batches = 100
 tokens_to_sample = 8
-val_check_interval = 0.05
+val_check_interval = 0.2
 checkpoint_check_interval = 500
 
 freeze_criteria = lambda name: "soft_prompt" not in name
