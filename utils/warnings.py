@@ -17,4 +17,6 @@ def suppress_uncontrollable_warnings():
 
 def elevate_important_warnings():
     """Elevate warnings we want to treat as errors."""
-    warnings.filterwarnings("error", message=r".*Checkpoint directory .+ not empty.*")
+    warnings.filterwarnings(
+        "error", message=r".*Checkpoint directory .+ not empty.*", module="lightning"
+    )
