@@ -114,6 +114,10 @@ class LitModel(L.LightningModule):
             weight_decay=self.hparams.weight_decay,
         )
 
+        print(f"Min lr ratio: {self.hparams.min_lr_ratio}")
+        print(f"Min lr plus epsilon: {self.hparams.min_lr_ratio + 1e-10}")
+        print(f"Final div factor: {1 / (self.hparams.min_lr_ratio + 1e-10)}")
+
         lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
             optimizer,
             max_lr=self.hparams.learning_rate,
