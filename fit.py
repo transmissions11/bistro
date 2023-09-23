@@ -1,5 +1,4 @@
 import torch
-import warnings
 
 from pathlib import Path
 
@@ -10,6 +9,8 @@ from lit_datamodule import LitDataModule
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor
 from lightning.pytorch.callbacks import ModelCheckpoint
+
+from utils.warnings import ignore_uncontrollable_warnings, elevate_important_warnings
 
 from lit_model import LitModel
 
@@ -45,19 +46,10 @@ hparams = {
 
 
 def main(data_dir: Path, checkpoint_dir: Path):
-    # Filter incorrect or "out of our control" warnings.
-    warnings.filterwarnings(
-        "ignore",
-        message=r".*DtypeTensor constructors are no longer recommended.*",
-        module="wandb",
-    )
-    warnings.filterwarnings(
-        "ignore",
-        message=r".*_histc_cuda does not have a deterministic implementation.*",
-        module="wandb",
-    )
-    # Elevate warnings we want to treat as errors.
-    warnings.filterwarnings("error", message=r".*Checkpoint directory .+ not empty.*")
+    # Filter out incorrect or "out of our control" warnings
+    # and elevate important ones we want to treat as errors.
+    ignore_uncontrollable_warnings()
+    elevate_important_warnings()
 
     torch.set_float32_matmul_precision("high")
 
