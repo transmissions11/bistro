@@ -27,7 +27,7 @@ soft_prompt_tkn = "✅"
 learning_rate = 3e-2
 min_lr_ratio = 0.00  # Anneal to 0.
 warmup_ratio = 0.05  # Spend 5% of training steps warming up.
-weight_decay = 0.75  # Generally not used for finetuning.
+weight_decay = 0.00  # Generally not used for finetuning.
 
 log_step_interval = 10
 
