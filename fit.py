@@ -1,4 +1,5 @@
 import torch
+import warnings
 
 from pathlib import Path
 
@@ -44,6 +45,12 @@ hparams = {
 
 
 def main(data_dir: Path, checkpoint_dir: Path):
+    # Filter incorrect or "out of our control" warnings.
+    for msg in [
+        r"wandb\/wandb_torch\.py:\d+: UserWarning: .*\(Triggered internally .*\)",
+    ]:
+        warnings.filterwarnings("ignore", msg)
+
     torch.set_float32_matmul_precision("high")
 
     L.seed_everything(1337, workers=True)
