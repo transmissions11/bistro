@@ -34,7 +34,7 @@ log_step_interval = 10
 val_batches = 100
 tokens_to_sample = 8
 val_check_interval = 100
-checkpoint_check_interval = 150
+checkpoint_check_interval = 90
 
 # TODO: ensure checkpoint_val_interval is a multiple of val_check_interval?
 
