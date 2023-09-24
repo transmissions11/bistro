@@ -56,9 +56,6 @@ class LitModel(L.LightningModule):
             ignore=["freeze_criteria", "checkpoint_path", "tokenizer"], logger=False
         )
 
-    def forward(self, x):
-        return self.model(x)
-
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
         loss = self.compute_loss(inputs, targets)
