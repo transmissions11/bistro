@@ -13,6 +13,11 @@ def suppress_uncontrollable_warnings():
         message=r".*_histc_cuda does not have a deterministic implementation.*",
         module="wandb",
     )
+    warnings.filterwarnings(
+        "ignore",
+        message=r".*Using `DistributedSampler` with the dataloaders",
+        module="lightning",
+    )
 
 
 def elevate_important_warnings():
