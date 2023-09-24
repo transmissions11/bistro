@@ -114,9 +114,7 @@ class LitModel(L.LightningModule):
 
             columns = ["input", "output", "target"]
             data = list(zip(inputs_list, outputs_list, targets_list))
-            self.logger.experiment.log_text(
-                key="my_samples", columns=columns, data=data
-            )
+            self.logger.log_text(key="my_samples", columns=columns, data=data)
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
