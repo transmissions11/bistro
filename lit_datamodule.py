@@ -17,15 +17,15 @@ class LitDataModule(L.LightningDataModule):
     def __init__(
         self,
         data_dir: str,
-        micro_batch_size: int,
         tokenizer: Tokenizer,
+        micro_batch_size: int,
         num_soft_prompt_tkns: int,
         soft_prompt_tkn: str,
     ):
         super().__init__()
         self.data_dir = data_dir
-        self.micro_batch_size = micro_batch_size
         self.tokenizer = tokenizer
+        self.micro_batch_size = micro_batch_size
         self.num_soft_prompt_tkns = num_soft_prompt_tkns
         self.soft_prompt_tkn = soft_prompt_tkn
 
