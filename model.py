@@ -41,34 +41,45 @@ class GPT(nn.Module):
 
     def forward(
         self,
-        idx: torch.Tensor,
+        input_ids: torch.Tensor = None,
+        input_embs: torch.Tensor = None,
     ) -> torch.Tensor:
-        (B, T), block_size = idx.shape, self.config.block_size
+        if input_ids is not None and input_embs is not None:
+            raise ValueError(
+                "[!] you cannot specify both input_ids and input_embs at the same time"
+            )
+        elif input_embs is not None:
+            x = input_embs
+        elif input_ids is not None:
+            # pass input tokens through the embedding layer
+            x = self.transformer.wte(input_ids)  # (b, t, n_embd)
+
+            #############################################################################
+
+            # find the position of the first occurrence of the soft_prompt_tkn in idx
+            soft_prompt_start_pos = torch.where(input_ids == self.soft_prompt_tkn)[1][0]
+
+            # starting at soft_prompt_start_pos, replace num_tokens_in_soft_prompt tokens with the soft prompt
+            x[
+                :,
+                soft_prompt_start_pos : soft_prompt_start_pos
+                + self.num_soft_prompt_tkns,
+            ] = self.soft_prompt
+
+            #############################################################################
+        else:
+            raise ValueError("[!] you must specify either input_ids or input_embs")
+
+        (B, T), block_size = x.shape[:2], self.config.block_size
 
         assert block_size >= T, f"[!] seq of len {T} exceeds block_size of {block_size}"
-
-        # pass input tokens through the embedding layer
-        x = self.transformer.wte(idx)  # (b, t, n_embd)
-
-        #############################################################################
-
-        # find the position of the first occurrence of the soft_prompt_tkn in idx
-        soft_prompt_start_pos = torch.where(idx == self.soft_prompt_tkn)[1][0]
-
-        # starting at soft_prompt_start_pos, replace num_tokens_in_soft_prompt tokens with the soft prompt
-        x[
-            :,
-            soft_prompt_start_pos : soft_prompt_start_pos + self.num_soft_prompt_tkns,
-        ] = self.soft_prompt
-
-        #############################################################################
 
         if self.rope_cache is None:
             self.rope_cache = build_rope_cache(
                 seq_len=block_size,
                 n_elem=int(self.config.rotary_percentage * self.config.head_size),
                 dtype=torch.get_default_dtype(),
-                device=idx.device,
+                device=x.device,
                 condense_ratio=self.config.rope_condense_ratio,
             )
 
