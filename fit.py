@@ -107,7 +107,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
 
     datamodule = LitDataModule(
         data_dir=str(data_dir),
-        batch_size=micro_batch_size,
+        micro_batch_size=micro_batch_size,
         tokenizer=tokenizer,
         num_soft_prompt_tkns=num_soft_prompt_tkns,
         soft_prompt_tkn=soft_prompt_tkn,
