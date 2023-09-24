@@ -97,7 +97,7 @@ class LitModel(L.LightningModule):
             output = sample_model(
                 self.model,
                 idx=sample[: prompt_end_idx + 1],
-                temperature=0.0,  # Sample greedily.
+                temperature=0.00,  # Sample greedily.
                 max_new_tokens=self.hparams.tokens_to_sample,
             )[-self.hparams.tokens_to_sample :]
             self.print(f"Output: '{tokenizer.decode(output)}'")
