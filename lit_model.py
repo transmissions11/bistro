@@ -186,7 +186,8 @@ class LitModel(L.LightningModule):
             x = torch.randint(
                 0,
                 1,
-                (self.train_dataloader().batch_size, meta_model.max_seq_length),
+                # TODO: don't hardcode 3, need to take micro_batcH_size
+                (3, meta_model.max_seq_length),
             )
             self.measured_flops = measure_flops(meta_model, x)
             self.print(
