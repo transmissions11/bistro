@@ -40,9 +40,7 @@ class GPT(nn.Module):
         self.rope_cache = None
 
     def forward(
-        self,
-        input_ids: torch.Tensor = None,
-        input_embs: torch.Tensor = None,
+        self, input_embs: torch.Tensor = None, input_ids: torch.Tensor = None
     ) -> torch.Tensor:
         if input_ids is not None and input_embs is not None:
             raise ValueError(
