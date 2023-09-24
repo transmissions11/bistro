@@ -83,6 +83,10 @@ class LitModel(L.LightningModule):
         if batch_idx == 0:
             tokenizer = self.tokenizer
 
+            inputs_list = []
+            outputs_list = []
+            targets_list = []
+
             for i in range(len(inputs)):
                 sample = strip_right_pad(inputs[i])
                 target = strip_right_pad(targets[i])
@@ -95,18 +99,24 @@ class LitModel(L.LightningModule):
                 )
 
                 input_sample = sample[: prompt_end_idx + 1]
+                inputs_list.append(tokenizer.decode(input_sample))
 
-                self.print(f"\nInput: '{tokenizer.decode(input_sample)}'")
                 output = sample_model(
                     self.model,
                     idx=input_sample,
                     temperature=0.00,  # Sample greedily.
                     max_new_tokens=self.hparams.tokens_to_sample,
                 )[-self.hparams.tokens_to_sample :]
-                self.print(f"Output: '{tokenizer.decode(output)}'")
+                outputs_list.append(tokenizer.decode(output))
                 # Note: This strips away ignored_tkn tokens entirely, which may
                 # lead to confusion if ignored_tkns are used between real tokens.
-                self.print(f"Target: '{tokenizer.decode(target[target != -1])}'\n")
+                targets_list.append(tokenizer.decode(target[target != -1]))
+
+            columns = ["input", "output", "target"]
+            data = list(zip(inputs_list, outputs_list, targets_list))
+            self.logger.experiment.log_text(
+                key="my_samples", columns=columns, data=data
+            )
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
