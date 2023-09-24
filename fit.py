@@ -30,9 +30,9 @@ learning_rate = 3e-2
 warmup_ratio = 0.05  # Spend 5% of training steps warming up.
 weight_decay = 0.00  # Generally not used for finetuning.
 
-val_batches = 100
+val_batches = 1.0  # 100% of validation dataset.
 tokens_to_sample = 8
-val_check_interval = 0.1  # After every 10% of training steps.
+val_check_interval = 0.05  # After every 5% of training steps.
 
 freeze_criteria = lambda name: "soft_prompt" not in name
 
