@@ -17,14 +17,14 @@ class LitDataModule(L.LightningDataModule):
     def __init__(
         self,
         data_dir: str,
-        batch_size: int,
+        micro_batch_size: int,
         tokenizer: Tokenizer,
         num_soft_prompt_tkns: int,
         soft_prompt_tkn: str,
     ):
         super().__init__()
         self.data_dir = data_dir
-        self.batch_size = batch_size
+        self.micro_batch_size = micro_batch_size
         self.tokenizer = tokenizer
         self.num_soft_prompt_tkns = num_soft_prompt_tkns
         self.soft_prompt_tkn = soft_prompt_tkn
@@ -78,7 +78,7 @@ class LitDataModule(L.LightningDataModule):
         return DataLoader(
             self.hf_datasets["train"],
             collate_fn=pad_collate_fn,
-            batch_size=self.batch_size,
+            batch_size=self.micro_batch_size,
             num_workers=8,
             pin_memory=True,
             shuffle=True,
@@ -91,7 +91,7 @@ class LitDataModule(L.LightningDataModule):
             collate_fn=pad_collate_fn,
             # Since we're not computing and storing gradients
             # while validating, we can use a larger batch size.
-            batch_size=self.batch_size * 2,
+            batch_size=self.micro_batch_size * 2,
             num_workers=8,
             pin_memory=True,
         )
