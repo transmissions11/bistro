@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Callable, Optional, cast
 
 from lit_gpt import Config, Tokenizer
+from lit_gpt.speed_monitor import measure_flops
 
 from lightning.pytorch.loggers import WandbLogger
 
@@ -174,6 +175,18 @@ class LitModel(L.LightningModule):
         g0_print("Done loading & configuring model.")
 
     def on_train_start(self):
+        with torch.device("meta"):
+            meta_model = GPT(self.model.config)
+            x = torch.randint(
+                0,
+                1,
+                (self.train_dataloader.micro_batch_size, meta_model.max_seq_length),
+            )
+            self.measured_flops = measure_flops(meta_model, x)
+            self.print(
+                f"Measured TFLOPs: {self.measured_flops * self.trainer.world_size / 1e12:.2f}"
+            )
+
         self.print(f"\nResetting model caches for training...\n")
         self.model.reset_caches()
 
