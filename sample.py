@@ -25,7 +25,7 @@ def sample_model(
         # Pluck the logits at the final step and scale by desired temperature.
         logits = logits[:, -1, :] / (
             temperature + 1e-10
-        )  # +1e-10 as eps to avoid divide by zero
+        )  # +1e-10 as eps to avoid divide by zero.
 
         # Apply softmax to convert logits to (normalized) probabilities.
         probs = F.softmax(logits, dim=-1)
