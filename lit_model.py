@@ -80,28 +80,33 @@ class LitModel(L.LightningModule):
             sync_dist=True,
         )
 
-        if batch_idx < 10:
+        if batch_idx == 0:
             tokenizer = self.tokenizer
 
-            sample = strip_right_pad(inputs[0])
-            target = strip_right_pad(targets[0])
+            for i in range(len(inputs)):
+                sample = strip_right_pad(inputs[i])
+                target = strip_right_pad(targets[i])
 
-            prompt_end_idx = find_subtensor_end(
-                sample,
-                tokenizer.encode(
-                    VICUNA_END_OF_USER_PROMPT_SEQUENCE, device=self.device
-                ),
-            )
+                prompt_end_idx = find_subtensor_end(
+                    sample,
+                    tokenizer.encode(
+                        VICUNA_END_OF_USER_PROMPT_SEQUENCE, device=self.device
+                    ),
+                )
 
-            self.print(f"\nInput: '{tokenizer.decode(sample[:prompt_end_idx + 1])}'")
-            output = sample_model(
-                self.model,
-                idx=sample[: prompt_end_idx + 1],
-                temperature=0.00,  # Sample greedily.
-                max_new_tokens=self.hparams.tokens_to_sample,
-            )[-self.hparams.tokens_to_sample :]
-            self.print(f"Output: '{tokenizer.decode(output)}'")
-            self.print(f"Target: '{tokenizer.decode(target[target != -1])}'\n")
+                input_sample = sample[: prompt_end_idx + 1]
+
+                self.print(f"\nInput: '{tokenizer.decode(input_sample)}'")
+                output = sample_model(
+                    self.model,
+                    idx=input_sample,
+                    temperature=0.00,  # Sample greedily.
+                    max_new_tokens=self.hparams.tokens_to_sample,
+                )[-self.hparams.tokens_to_sample :]
+                self.print(f"Output: '{tokenizer.decode(output)}'")
+                # Note: This strips away ignored_tkn tokens entirely, which may
+                # lead to confusion if ignored_tkns are used between real tokens.
+                self.print(f"Target: '{tokenizer.decode(target[target != -1])}'\n")
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
