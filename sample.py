@@ -20,6 +20,7 @@ def sample_model(
 
     for _ in range(max_new_tokens):
         # Forward pass through the model .
+        # TODO: we should be using input_ids= no?
         logits = model(torch.cat((idx, decoded_tkns)).unsqueeze(0))
 
         # Pluck the logits at the final step and scale by desired temperature.

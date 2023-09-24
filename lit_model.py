@@ -178,7 +178,7 @@ class LitModel(L.LightningModule):
         self.model.reset_caches()
 
     def compute_loss(self, inputs, targets):
-        logits = self.model(inputs)
+        logits = self.model(input_ids=inputs)
         return F.cross_entropy(
             logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1
         )

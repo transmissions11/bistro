@@ -41,7 +41,7 @@ class GPT(nn.Module):
 
     def forward(
         self,
-        *,
+        *,  # Force keyword args to avoid confusion.
         input_ids: Optional[torch.Tensor] = None,
         input_embs: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
