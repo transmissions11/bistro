@@ -176,7 +176,13 @@ class LitModel(L.LightningModule):
 
     def on_train_start(self):
         with torch.device("meta"):
-            meta_model = GPT(self.model.config)
+            meta_model = GPT(
+                self.model.config,
+                soft_prompt_tkn=self.tokenizer.token_to_id(
+                    self.hparams.soft_prompt_tkn
+                ),
+                num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
+            )
             x = torch.randint(
                 0,
                 1,
