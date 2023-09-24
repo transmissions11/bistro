@@ -15,7 +15,7 @@ def suppress_uncontrollable_warnings():
     )
     warnings.filterwarnings(
         "ignore",
-        message=r".*Using DistributedSampler` with the dataloaders",
+        message=r".*Using `DistributedSampler` with the dataloaders",
         module="lightning",
     )
 
