@@ -5,13 +5,15 @@ from pathlib import Path
 import lightning as L
 
 from lit_gpt.tokenizer import Tokenizer
-from lit_datamodule import LitDataModule
+from lit_gpt.speed_monitor import SpeedMonitorCallback
+
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor
 from lightning.pytorch.callbacks import ModelCheckpoint
 
 from utils.warnings import suppress_uncontrollable_warnings, elevate_important_warnings
 
+from lit_datamodule import LitDataModule
 from lit_model import LitModel
 
 from model import Config
@@ -76,7 +78,16 @@ def main(data_dir: Path, checkpoint_dir: Path):
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
-        callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
+        callbacks=[
+            LearningRateMonitor(logging_interval="step"),
+            checkpoint_callback,
+            SpeedMonitorCallback(
+                length_fn=lambda batch: batch["inputs"].size(1),
+                batch_size=micro_batch_size,
+                window_size=50,
+                time_unit="seconds",
+            ),
+        ],
     )
 
     tokenizer = Tokenizer(checkpoint_dir)
