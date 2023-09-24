@@ -37,8 +37,8 @@ class LitDataModule(L.LightningDataModule):
         ):
             seq = tokenizer.encode(
                 fmt_vicuna_input(
-                    f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['prompt']}",
-                    x["response"],
+                    f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['inputs']}",
+                    x["targets"],
                 )
             )
 
@@ -59,7 +59,6 @@ class LitDataModule(L.LightningDataModule):
                     soft_prompt_tkn=self.soft_prompt_tkn,
                     num_soft_prompt_tkns=self.num_soft_prompt_tkns,
                 ),
-                remove_columns=["prompt", "response"],
                 num_proc=32,
             )
             .with_format("torch")
