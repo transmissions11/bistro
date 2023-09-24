@@ -1,6 +1,6 @@
 import time
-
 import torch
+
 from torch.nn import functional as F
 
 import lightning as L
@@ -9,17 +9,17 @@ from pathlib import Path
 
 from typing import Callable, Optional, cast
 
-from lit_gpt import Config, Tokenizer
-
 from lightning.pytorch.loggers import WandbLogger
 
-from model import GPT
-from sample import sample_model
+from lit_gpt import Config, Tokenizer
 
 from utils.padding import strip_right_pad
 from utils.tensors import find_subtensor_end
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 from utils.params import freeze_parameters, init_weights_optimally
+
+from model import GPT
+from sample import sample_model
 
 
 class LitModel(L.LightningModule):
