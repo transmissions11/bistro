@@ -26,7 +26,7 @@ epochs = 1
 num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"
 
-learning_rate = 6e-2
+learning_rate = 1e-1
 warmup_ratio = 0.05  # Spend 5% of training steps warming up.
 weight_decay = 0.00  # Generally not used for finetuning.
 
