@@ -17,8 +17,8 @@ from lit_model import LitModel
 from model import Config
 
 
-devices = 3
-micro_batch_size = 3
+devices = 4
+micro_batch_size = 4
 gradient_accumulation_iters = 1
 
 epochs = 1
@@ -26,7 +26,7 @@ epochs = 1
 num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"
 
-learning_rate = 3e-2
+learning_rate = 6e-2
 warmup_ratio = 0.05  # Spend 5% of training steps warming up.
 weight_decay = 0.00  # Generally not used for finetuning.
 
