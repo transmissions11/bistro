@@ -15,7 +15,7 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
 
     ckpt = torch.load(str(checkpoint), mmap=True)
 
-    print(ckpt["hyper_parameters"]["tokenizer"])
+    print("hello world", ckpt["hyper_parameters"]["tokenizer"].encode("hello world"))
 
     # model = GPT(
     #     config=self.hparams.model_config,
