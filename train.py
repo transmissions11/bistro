@@ -65,7 +65,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
         verbose=True,
         save_top_k=5,
         monitor="val_loss",
-        dirpath=f"checkpoints/trained/{project}",
+        dirpath=f"checkpoints/trained/{project}/{run_name}",
         filename="{epoch}-{step}-{val_loss:.2f}",
     )
 
