@@ -48,6 +48,8 @@ def sample_model(
 
 
 def main(checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
+    print(checkpoint, temperature, interactive)
+
     model = LitModel.load_from_checkpoint(checkpoint)
     tokenizer = model.tokenizer
     model.eval()
