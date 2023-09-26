@@ -5,7 +5,7 @@ from lit_model import LitModel
 from utils.inference import inference_model
 
 
-def main(checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
+def main(checkpoint: str, temperature: float = 0.7, interactive: bool = False):
     print(checkpoint, temperature, interactive)
 
     model = LitModel.load_from_checkpoint(checkpoint)
