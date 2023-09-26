@@ -20,12 +20,12 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
 
     print(hparams, hparams["model_config"])
 
-    print(hparams.soft_prompt_tkn, hparams.num_soft_prompt_tkns)
+    print(hparams["soft_prompt_tkn"], hparams["num_soft_prompt_tkns"])
 
     model = GPT(
         config=hparams["model_config"],
-        soft_prompt_tkn=tokenizer.token_to_id(hparams.soft_prompt_tkn),
-        num_soft_prompt_tkns=hparams.num_soft_prompt_tkns,
+        soft_prompt_tkn=tokenizer.token_to_id(hparams["soft_prompt_tkn"]),
+        num_soft_prompt_tkns=hparams["num_soft_prompt_tkns"],
     )
 
     # model = GPT()
