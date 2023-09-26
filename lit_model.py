@@ -46,15 +46,16 @@ class LitModel(L.LightningModule):
 
         self.model = None  # This will get set in configure_model.
 
+        self.tokenizer = tokenizer
+
         # Assign these manually as they don't pickle well
         # or shouldn't be saved via save_hyperparameters.
         self.freeze_criteria = freeze_criteria
         self.checkpoint_path = checkpoint_path
-        self.tokenizer = tokenizer
 
         # Note: logger=False since we already log hparams it manually in fit.py.
         self.save_hyperparameters(
-            ignore=["freeze_criteria", "checkpoint_path", "tokenizer"], logger=False
+            ignore=["freeze_criteria", "checkpoint_path"], logger=False
         )
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
