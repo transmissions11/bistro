@@ -13,13 +13,15 @@ from model import GPT
 def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
     print(checkpoint, temperature, interactive)
 
+    ckpt = torch.load(checkpoint, mmap=True)
+
+    print(ckpt)
+
     # model = GPT(
     #     config=self.hparams.model_config,
     #     soft_prompt_tkn=self.tokenizer.token_to_id(self.hparams.soft_prompt_tkn),
     #     num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
     # )
-
-    # torch.load(str(self.checkpoint_path), mmap=True),
 
     # model = GPT()
 
