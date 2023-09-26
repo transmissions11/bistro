@@ -44,6 +44,13 @@ class LitModel(L.LightningModule):
     ):
         super().__init__()
 
+        # TODO: shouildnt be setting here, just testing
+        self.model = GPT(
+            config=self.hparams.model_config,
+            soft_prompt_tkn=self.tokenizer.token_to_id(self.hparams.soft_prompt_tkn),
+            num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
+        )
+
         self.tokenizer = tokenizer  # TODO: Comment explaining why this is here.
 
         # Assign these manually as they don't pickle well
@@ -54,13 +61,6 @@ class LitModel(L.LightningModule):
         # Note: logger=False since we already log hparams it manually in fit.py.
         self.save_hyperparameters(
             ignore=["freeze_criteria", "checkpoint_path"], logger=False
-        )
-
-        # TODO: shouildnt be setting here, just testing
-        self.model = GPT(
-            config=self.hparams.model_config,
-            soft_prompt_tkn=self.tokenizer.token_to_id(self.hparams.soft_prompt_tkn),
-            num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
         )
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
