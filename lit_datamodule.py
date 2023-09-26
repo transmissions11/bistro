@@ -73,16 +73,19 @@ class LitDataModule(L.LightningDataModule):
                 "torch"
             )  # TODO: Should this first or after? Any performance difference?
         )
-        print("Done.")
 
     def prepare_data(self):
+        print("Preparing data...")
         # Download the dataset and build caches on a
         # single process first to avoid waste w/ DDP.
         self.load_mapped_datasets()
+        print("Done preparing data.")
 
     def setup(self, stage: str):
+        print(f"Setting up {stage} data...")
         # Load the dataset on each process, from cache.
         self.hf_datasets = self.load_mapped_datasets()
+        print(f"Done setting up {stage} data.")
 
     def train_dataloader(self):
         return DataLoader(
