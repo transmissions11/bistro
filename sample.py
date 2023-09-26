@@ -38,7 +38,7 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
             model,
             idx=tokenizer.encode("hello world my name is ✅✅✅✅✅✅✅✅✅ hi"),
             temperature=temperature,
-            max_new_tokens=100,
+            max_new_tokens=69,
         )
 
     # else:
