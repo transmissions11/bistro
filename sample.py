@@ -13,7 +13,7 @@ from model import GPT
 def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
     print(checkpoint, temperature, interactive)
 
-    ckpt = torch.load(str(checkpoint), mmap=True)
+    ckpt = torch.load(str(checkpoint))
 
     print(ckpt)
 
