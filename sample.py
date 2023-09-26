@@ -14,6 +14,23 @@ from lit_model import LitModel
 # TODO: why isnt the star working to rqurie checkpoint be passed named
 def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
     model = LitModel.load_from_checkpoint(checkpoint, strict=False)
+    model.eval()
+
+    tokenizer = model.tokenizer
+
+    print(
+        tokenizer.decode(
+            inference_model(
+                model,
+                idx=tokenizer.encode(
+                    "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 737 * 850 = ASSISTANT:",
+                    device=model.device,
+                ),
+                temperature=temperature,
+                max_new_tokens=8,
+            )
+        )
+    )
 
     print("hi")
 
