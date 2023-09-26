@@ -40,7 +40,7 @@ val_check_interval = 0.05  # After every 5% of training steps.
 freeze_criteria = lambda name: "soft_prompt" not in name
 
 project_name = "bistro"
-run_name = project_name + "-" + datetime.now().isoformat(timespec="seconds", sep="-")
+run_name = project_name + "-" + datetime.now().strftime("%m-%d-%H:%M:%S")
 
 
 hparams = {
