@@ -3,6 +3,10 @@ import torch.nn.functional as F
 
 from typing import Optional
 
+from pathlib import Path
+
+from lit_model import LitModel
+
 
 @torch.inference_mode()
 def sample_model(
@@ -41,3 +45,33 @@ def sample_model(
             break
 
     return decoded_tkns
+
+
+def main(checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
+    model = LitModel.load_from_checkpoint(checkpoint)
+    tokenizer = model.tokenizer
+    model.eval()
+
+    if not interactive:
+        sample_model(
+            model,
+            idx=[0],
+            temperature=0.00,  # Sample greedily.
+            max_new_tokens=self.hparams.tokens_to_sample,
+        )
+
+    else:
+        # Interactive mode
+        while True:
+            print("\n")
+            start = input("Enter text to run through the model: ")
+            if start.lower() == "quit" or start.lower() == "exit":
+                break
+            print("\n")
+        print("TODO")  # TODO
+
+
+if __name__ == "__main__":
+    from jsonargparse import CLI
+
+    CLI(main)
