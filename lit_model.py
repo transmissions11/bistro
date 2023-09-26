@@ -14,10 +14,10 @@ from lightning.pytorch.loggers import WandbLogger
 from lit_gpt import Config, Tokenizer
 
 from utils.padding import strip_right_pad
+from utils.params import freeze_parameters
 from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
-from utils.params import freeze_parameters, init_weights_optimally
 
 
 from model import GPT
@@ -161,10 +161,6 @@ class LitModel(L.LightningModule):
             num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
         )
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
-
-        t0 = g0_print("Initializing weights with optimal randomness...")
-        self.model.apply(init_weights_optimally)
-        g0_print(f"Initialized weights optimally in {time.time() - t0:.3f}s.")
 
         if self.checkpoint_path is not None:
             t0 = g0_print(f"Loading checkpoint weights from {self.checkpoint_path}...")
