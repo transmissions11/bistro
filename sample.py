@@ -36,7 +36,9 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
     if not interactive:
         inference_model(
             model,
-            idx=tokenizer.encode("hello world my name is ✅✅✅✅✅✅✅✅✅ hi"),
+            idx=tokenizer.encode(
+                "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 737 * 850 = ASSISTANT:"
+            ),
             temperature=temperature,
             max_new_tokens=69,
         )
