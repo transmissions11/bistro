@@ -46,8 +46,6 @@ class LitModel(L.LightningModule):
 
         self.model = None  # This will get set in configure_model.
 
-        self.tokenizer = tokenizer  # TODO: Comment explaining why this is here.
-
         # Assign these manually as they don't pickle well
         # or shouldn't be saved via save_hyperparameters.
         self.freeze_criteria = freeze_criteria
@@ -83,7 +81,7 @@ class LitModel(L.LightningModule):
         )
 
         if batch_idx == 0:
-            tokenizer = self.tokenizer
+            tokenizer = self.hparams.tokenizer
 
             inputs_list = []
             outputs_list = []
@@ -157,7 +155,9 @@ class LitModel(L.LightningModule):
         t0 = g0_print("Initializing model...")
         self.model = GPT(
             config=self.hparams.model_config,
-            soft_prompt_tkn=self.tokenizer.token_to_id(self.hparams.soft_prompt_tkn),
+            soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
+                self.hparams.soft_prompt_tkn
+            ),
             num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
         )
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
