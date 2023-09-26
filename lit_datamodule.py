@@ -54,7 +54,6 @@ class LitDataModule(L.LightningDataModule):
             # All the data will be in the root level of data_dir,
             # so it's all considered part of the "train" split.
             load_dataset("parquet", data_dir=self.data_dir, split="train")
-            .with_format("torch")
             .map(
                 partial(
                     transform,
@@ -67,6 +66,7 @@ class LitDataModule(L.LightningDataModule):
             # After map so changing test_size doesn't bust the cache.
             # Seed the shuffle so it's 100% idempotent, just in case.
             .train_test_split(test_size=0.05, shuffle=True, seed=1337)
+            .with_format("torch")
         )
 
     def prepare_data(self):
