@@ -13,7 +13,7 @@ from lit_model import LitModel
 
 # TODO: why isnt the star working to rqurie checkpoint be passed named
 def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
-    model = LitModel.load_from_checkpoint(checkpoint)
+    model = LitModel.load_from_checkpoint(checkpoint, strict=False)
 
     print("hi")
 
