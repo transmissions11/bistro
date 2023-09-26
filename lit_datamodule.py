@@ -51,7 +51,9 @@ class LitDataModule(L.LightningDataModule):
             }
 
         return (
-            load_dataset("parquet", data_dir=self.data_dir)
+            # All the data will be in the root level of data_dir,
+            # so it's all considered part of the "train" split.
+            load_dataset("parquet", data_dir=self.data_dir, split="train")
             .map(
                 partial(
                     transform,
@@ -60,8 +62,15 @@ class LitDataModule(L.LightningDataModule):
                     num_soft_prompt_tkns=self.num_soft_prompt_tkns,
                 ),
                 num_proc=32,
+                load_from_cache_file=False,
             )
-            .with_format("torch")
+            # Seed the shuffle so it's 100% idempotent, just in case.
+            .train_test_split(
+                test_size=0.1, shuffle=True, seed=1337
+            )  # TODO: Should this first or after? Any performance difference?
+            .with_format(
+                "torch"
+            )  # TODO: Should this first or after? Any performance difference?
         )
 
     def prepare_data(self):
@@ -86,7 +95,7 @@ class LitDataModule(L.LightningDataModule):
     def val_dataloader(self):
         # TODO: double batch size?
         return DataLoader(
-            self.hf_datasets["validation"],
+            self.hf_datasets["test"],
             collate_fn=pad_collate_fn,
             # Since we're not computing and storing gradients
             # while validating, we can use a larger batch size.
