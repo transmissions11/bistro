@@ -6,13 +6,9 @@ from utils.inference import inference_model
 
 
 def main(
-    checkpoint: Path = Path(
-        "checkpoints/trained/bistro/09-26+16:56:58/epoch=0-step=21636-val_loss=0.55.ckpt"
-    ),
-    temperature: float = 0.7,
-    interactive: bool = False,
+    checkpoint: Path, ckpt: Path, temperature: float = 0.7, interactive: bool = False
 ):
-    print(checkpoint, temperature, interactive)
+    print(checkpoint, ckpt, temperature, interactive)
 
     model = LitModel.load_from_checkpoint(checkpoint)
     tokenizer = model.tokenizer
