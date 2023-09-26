@@ -65,7 +65,7 @@ class LitDataModule(L.LightningDataModule):
             )
             # After map so changing test_size doesn't bust the cache.
             # Seed the shuffle so it's 100% idempotent, just in case.
-            .train_test_split(test_size=0.1, shuffle=True, seed=1337)
+            .train_test_split(test_size=0.05, shuffle=True, seed=1337)
             .with_format("torch")
         )
 
@@ -95,7 +95,7 @@ class LitDataModule(L.LightningDataModule):
             collate_fn=pad_collate_fn,
             # Since we're not computing and storing gradients
             # while validating, we can use a larger batch size.
-            batch_size=self.micro_batch_size * 1,
+            batch_size=self.micro_batch_size * 2,
             num_workers=8,
             pin_memory=True,
         )
