@@ -46,7 +46,7 @@ class LitModel(L.LightningModule):
 
         self.model = None  # This will get set in configure_model.
 
-        self.tokenizer = tokenizer
+        self.tokenizer = tokenizer  # TODO: Comment explaining why this is here.
 
         # Assign these manually as they don't pickle well
         # or shouldn't be saved via save_hyperparameters.
