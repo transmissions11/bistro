@@ -65,7 +65,7 @@ class LitDataModule(L.LightningDataModule):
             )
             # Seed the shuffle so it's 100% idempotent, just in case.
             # After map to avoid overhead of mapping 2 smaller datasets.
-            .train_test_split(test_size=0.1, shuffle=True, seed=1337)
+            .train_test_split(test_size=0.5, shuffle=True, seed=1337)
             .with_format("torch")
         )
 
