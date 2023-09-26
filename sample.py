@@ -38,7 +38,7 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
             model,
             idx=tokenizer.encode(
                 "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 737 * 850 = ASSISTANT:",
-                device=model.device,
+                device=torch.device("meta"),
             ),
             temperature=temperature,
             max_new_tokens=69,
