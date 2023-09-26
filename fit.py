@@ -107,7 +107,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
 
 
 def setup(
-    data_dir: Path = Path("data/bistro"),
+    data_dir: Path = Path("data"),
     checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
 ):
     main(data_dir, checkpoint_dir)
