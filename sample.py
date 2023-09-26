@@ -8,53 +8,59 @@ from lit_model import LitModel
 from utils.inference import inference_model
 
 from model import GPT
+from lit_model import LitModel
 
 device = "cuda"
 
 
+# TODO: why isnt the star working to rqurie checkpoint be passed named
 def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
-    print(checkpoint, temperature, interactive)
+    model = LitModel.load_from_checkpoint(checkpoint, map_location=device)
 
-    ckpt = torch.load(str(checkpoint), mmap=True)
+    print("hi")
 
-    hparams = ckpt["hyper_parameters"]
-    tokenizer = hparams["tokenizer"]
+    # print(checkpoint, temperature, interactive)
 
-    # todo seed everything
+    # ckpt = torch.load(str(checkpoint), mmap=True)
 
-    with torch.device("meta"):
-        model = GPT(
-            config=hparams["model_config"],
-            soft_prompt_tkn=tokenizer.token_to_id(hparams["soft_prompt_tkn"]),
-            num_soft_prompt_tkns=hparams["num_soft_prompt_tkns"],
-        )
+    # hparams = ckpt["hyper_parameters"]
+    # tokenizer = hparams["tokenizer"]
 
-    new_state_dict = {
-        key.replace("model.", ""): value for key, value in ckpt["state_dict"].items()
-    }
+    # # todo seed everything
 
-    print(ckpt["state_dict"].keys(), new_state_dict.keys())
+    # with torch.device("meta"):
+    #     model = GPT(
+    #         config=hparams["model_config"],
+    #         soft_prompt_tkn=tokenizer.token_to_id(hparams["soft_prompt_tkn"]),
+    #         num_soft_prompt_tkns=hparams["num_soft_prompt_tkns"],
+    #     )
 
-    # TODO: should strict=True
-    # TODO: hmm state dict has .model in front of everything
-    model.load_state_dict(new_state_dict, strict=False, assign=True)
+    # new_state_dict = {
+    #     key.replace("model.", ""): value for key, value in ckpt["state_dict"].items()
+    # }
 
-    model.eval()
-    model.to(device)
+    # print(ckpt["state_dict"].keys(), new_state_dict.keys())
 
-    if not interactive:
-        print(
-            tokenizer.decode(
-                inference_model(
-                    model,
-                    idx=tokenizer.encode(
-                        "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 737 * 850 = ASSISTANT:",
-                        device=device,
-                    ),
-                    temperature=temperature,
-                    max_new_tokens=8,
-                )
-            )
+    # # TODO: should strict=True
+    # # TODO: hmm state dict has .model in front of everything
+    # model.load_state_dict(new_state_dict, strict=False, assign=True)
+
+    # model.eval()
+    # model.to(device)
+
+    # if not interactive:
+    #     print(
+    #         tokenizer.decode(
+    #             inference_model(
+    #                 model,
+    #                 idx=tokenizer.encode(
+    #                     "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 737 * 850 = ASSISTANT:",
+    #                     device=device,
+    #                 ),
+    #                 temperature=temperature,
+    #                 max_new_tokens=8,
+    #             )
+    #         )
         )
 
     # else:
