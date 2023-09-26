@@ -50,7 +50,10 @@ hparams = {
 }
 
 
-def main(data_dir: Path, checkpoint_dir: Path):
+def main(
+    data_dir: Path = Path("data"),
+    checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
+):
     # Filter out incorrect or "out of our control" warnings
     # and elevate important ones we want to treat as errors.
     suppress_uncontrollable_warnings()
@@ -117,14 +120,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
     trainer.fit(model, datamodule=datamodule)
 
 
-def setup(
-    data_dir: Path = Path("data"),
-    checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
-):
-    main(data_dir, checkpoint_dir)
-
-
 if __name__ == "__main__":
     from jsonargparse import CLI
 
-    CLI(setup)
+    CLI(main)
