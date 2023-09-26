@@ -44,7 +44,12 @@ class LitModel(L.LightningModule):
     ):
         super().__init__()
 
-        self.model = None  # This will get set in configure_model.
+        # TODO: shouildnt be setting here, just testing
+        self.model = GPT(
+            config=self.hparams.model_config,
+            soft_prompt_tkn=self.tokenizer.token_to_id(self.hparams.soft_prompt_tkn),
+            num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
+        )
 
         self.tokenizer = tokenizer  # TODO: Comment explaining why this is here.
 
