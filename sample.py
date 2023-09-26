@@ -37,7 +37,7 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
 
     # TODO: should strict=True
     # TODO: hmm state dict has .model in front of everything
-    model.load_state_dict(ckpt["state_dict"], strict=False, assign=True)
+    model.load_state_dict(new_state_dict, strict=False, assign=True)
 
     model.eval()
     model.to(device)
