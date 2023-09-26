@@ -63,8 +63,8 @@ class LitDataModule(L.LightningDataModule):
                 ),
                 num_proc=32,
             )
-            # Seed the shuffle so it's 100% idempotent, just in case.
             # After map so changing test_size doesn't bust the cache.
+            # Seed the shuffle so it's 100% idempotent, just in case.
             .train_test_split(test_size=0.05, shuffle=True, seed=1337)
             .with_format("torch")
         )
