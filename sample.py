@@ -5,7 +5,13 @@ from lit_model import LitModel
 from utils.inference import inference_model
 
 
-def main(checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
+def main(
+    checkpoint: Path = Path(
+        "checkpoints/trained/bistro/09-26+16:56:58/epoch=0-step=21636-val_loss=0.55.ckpt"
+    ),
+    temperature: float = 0.7,
+    interactive: bool = False,
+):
     print(checkpoint, temperature, interactive)
 
     model = LitModel.load_from_checkpoint(checkpoint)
