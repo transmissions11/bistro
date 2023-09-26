@@ -1,15 +1,4 @@
-import torch
-
 from pathlib import Path
-
-from lit_model import LitModel
-
-
-from utils.inference import inference_model
-
-from model import GPT
-
-device = "cuda"
 
 
 # TODO: why doesnt star work
