@@ -52,7 +52,7 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
                         device=device,
                     ),
                     temperature=temperature,
-                    max_new_tokens=69,
+                    max_new_tokens=8,
                 )
             )
         )
