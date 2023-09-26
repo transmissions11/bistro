@@ -169,6 +169,7 @@ class LitModel(L.LightningModule):
         if self.checkpoint_path is not None:
             t0 = g0_print(f"Loading checkpoint weights from {self.checkpoint_path}...")
             self.model.load_state_dict(
+                # mmap=True requires checkpoint_path to be a str.
                 torch.load(str(self.checkpoint_path), mmap=True),
                 strict=False,
                 assign=True,
