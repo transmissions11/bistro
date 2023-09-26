@@ -8,85 +8,13 @@ from lit_model import LitModel
 from utils.inference import inference_model
 
 from model import GPT
-from lit_model import LitModel
+
+device = "cuda"
 
 
-# TODO: why isnt the star working to rqurie checkpoint be passed named
+# TODO: why doesnt star work
 def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
-    model = LitModel.load_from_checkpoint(checkpoint, strict=False)
-    model.eval()
-
-    tokenizer = model.tokenizer
-
-    print(
-        tokenizer.decode(
-            inference_model(
-                model.model,
-                idx=tokenizer.encode(
-                    "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 737 * 850 = ASSISTANT:",
-                    device=model.device,
-                ),
-                temperature=temperature,
-                max_new_tokens=8,
-            )
-        )
-    )
-
-    print("hi")
-
-    # print(checkpoint, temperature, interactive)
-
-    # ckpt = torch.load(str(checkpoint), mmap=True)
-
-    # hparams = ckpt["hyper_parameters"]
-    # tokenizer = hparams["tokenizer"]
-
-    # # todo seed everything
-
-    # with torch.device("meta"):
-    #     model = GPT(
-    #         config=hparams["model_config"],
-    #         soft_prompt_tkn=tokenizer.token_to_id(hparams["soft_prompt_tkn"]),
-    #         num_soft_prompt_tkns=hparams["num_soft_prompt_tkns"],
-    #     )
-
-    # new_state_dict = {
-    #     key.replace("model.", ""): value for key, value in ckpt["state_dict"].items()
-    # }
-
-    # print(ckpt["state_dict"].keys(), new_state_dict.keys())
-
-    # # TODO: should strict=True
-    # # TODO: hmm state dict has .model in front of everything
-    # model.load_state_dict(new_state_dict, strict=False, assign=True)
-
-    # model.eval()
-    # model.to(device)
-
-    # if not interactive:
-    #     print(
-    #         tokenizer.decode(
-    #             inference_model(
-    #                 model,
-    #                 idx=tokenizer.encode(
-    #                     "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 737 * 850 = ASSISTANT:",
-    #                     device=device,
-    #                 ),
-    #                 temperature=temperature,
-    #                 max_new_tokens=8,
-    #             )
-    #         )
-    # )
-
-    # else:
-    #     # Interactive mode
-    #     while True:
-    #         print("\n")
-    #         start = input("Enter text to run through the model: ")
-    #         if start.lower() == "quit" or start.lower() == "exit":
-    #             break
-    #         print("\n")
-    #     print("TODO")  # TODO
+    print(checkpoint, temperature, interactive)
 
 
 if __name__ == "__main__":
