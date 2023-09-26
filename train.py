@@ -20,7 +20,7 @@ from model import Config
 
 
 devices = 1
-micro_batch_size = 1
+micro_batch_size = 3
 gradient_accumulation_iters = 1
 
 epochs = 1
@@ -33,7 +33,7 @@ warmup_ratio = 0.05  # Spend 5% of training steps warming up.
 weight_decay = 0.00  # Generally not used for finetuning.
 
 val_split_ratio = 0.05  # 5% of training dataset.
-val_batches = 1  # 100% of validation dataset.
+val_batches = 0.01  # 100% of validation dataset.
 tokens_to_sample = 8
 val_check_interval = 0.0001  # After every 5% of training steps.
 
