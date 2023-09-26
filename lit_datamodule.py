@@ -19,6 +19,7 @@ class LitDataModule(L.LightningDataModule):
         data_dir: str,
         tokenizer: Tokenizer,
         micro_batch_size: int,
+        val_split_ratio: float,
         num_soft_prompt_tkns: int,
         soft_prompt_tkn: str,
     ):
@@ -26,6 +27,7 @@ class LitDataModule(L.LightningDataModule):
         self.data_dir = data_dir
         self.tokenizer = tokenizer
         self.micro_batch_size = micro_batch_size
+        self.val_split_ratio = val_split_ratio
         self.num_soft_prompt_tkns = num_soft_prompt_tkns
         self.soft_prompt_tkn = soft_prompt_tkn
 
@@ -64,8 +66,8 @@ class LitDataModule(L.LightningDataModule):
                 num_proc=32,
             )
             # After map so changing test_size doesn't bust the cache.
-            # Seed the shuffle so it's 100% idempotent, just in case.
-            .train_test_split(test_size=0.05, shuffle=True, seed=1337)
+            # Seed so the auto shuffle is 100% idempotent, just in case.
+            .train_test_split(test_size=self.val_split_ratio, seed=1337)
             .with_format("torch")  # Convert relevant types to tensors.
         )
 
