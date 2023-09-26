@@ -9,6 +9,8 @@ from utils.inference import inference_model
 
 from model import GPT
 
+device = "cuda"
+
 
 def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
     print(checkpoint, temperature, interactive)
@@ -32,6 +34,7 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
     model.load_state_dict(ckpt["state_dict"], strict=False, assign=True)
 
     model.eval()
+    model.to(device)
 
     if not interactive:
         inference_model(
