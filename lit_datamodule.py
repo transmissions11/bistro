@@ -50,6 +50,7 @@ class LitDataModule(L.LightningDataModule):
                 ),
             }
 
+        print(f"Loading dataset from {self.data_dir}...")
         return (
             # All the data will be in the root level of data_dir,
             # so it's all considered part of the "train" split.
@@ -72,6 +73,7 @@ class LitDataModule(L.LightningDataModule):
                 "torch"
             )  # TODO: Should this first or after? Any performance difference?
         )
+        print("Done.")
 
     def prepare_data(self):
         # Download the dataset and build caches on a
