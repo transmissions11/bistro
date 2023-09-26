@@ -59,7 +59,7 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
     #                 max_new_tokens=8,
     #             )
     #         )
-        )
+    # )
 
     # else:
     #     # Interactive mode
