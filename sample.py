@@ -29,7 +29,11 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
             num_soft_prompt_tkns=hparams["num_soft_prompt_tkns"],
         )
 
-    print(ckpt["state_dict"].keys())
+    new_state_dict = {
+        key.replace("model.", ""): value for key, value in ckpt["state_dict"].items()
+    }
+
+    print(ckpt["state_dict"].keys(), new_state_dict.keys())
 
     # TODO: should strict=True
     # TODO: hmm state dict has .model in front of everything
