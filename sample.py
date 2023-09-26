@@ -28,7 +28,7 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
         )
 
     # TODO: should strict=True
-    model.load_state_dict(ckpt["state_dict"], strict=True, assign=True)
+    model.load_state_dict(ckpt["state_dict"], strict=False, assign=True)
 
     # checkpoint = torch.load(checkpoint)
 
