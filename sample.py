@@ -30,24 +30,24 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
     #     assign=True,
     # )
 
-    checkpoint = torch.load(checkpoint)
+    # checkpoint = torch.load(checkpoint)
 
-    model = LitModel.load_from_checkpoint(checkpoint, strict=False)
-    tokenizer = model.tokenizer
-    model.eval()
+    # model = LitModel.load_from_checkpoint(checkpoint, strict=False)
+    # tokenizer = model.tokenizer
+    # model.eval()
 
-    if not interactive:
-        inference_model(model, idx=[0], temperature=temperature, max_new_tokens=100)
+    # if not interactive:
+    #     inference_model(model, idx=[0], temperature=temperature, max_new_tokens=100)
 
-    else:
-        # Interactive mode
-        while True:
-            print("\n")
-            start = input("Enter text to run through the model: ")
-            if start.lower() == "quit" or start.lower() == "exit":
-                break
-            print("\n")
-        print("TODO")  # TODO
+    # else:
+    #     # Interactive mode
+    #     while True:
+    #         print("\n")
+    #         start = input("Enter text to run through the model: ")
+    #         if start.lower() == "quit" or start.lower() == "exit":
+    #             break
+    #         print("\n")
+    #     print("TODO")  # TODO
 
 
 if __name__ == "__main__":
