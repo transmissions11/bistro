@@ -14,12 +14,13 @@ from lightning.pytorch.loggers import WandbLogger
 from lit_gpt import Config, Tokenizer
 
 from utils.padding import strip_right_pad
+from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 from utils.params import freeze_parameters, init_weights_optimally
 
+
 from model import GPT
-from sample import sample_model
 
 
 class LitModel(L.LightningModule):
@@ -101,7 +102,7 @@ class LitModel(L.LightningModule):
                 input_sample = sample[: prompt_end_idx + 1]
                 inputs_list.append(tokenizer.decode(input_sample))
 
-                output = sample_model(
+                output = inference_model(
                     self.model,
                     idx=input_sample,
                     temperature=0.00,  # Sample greedily.
