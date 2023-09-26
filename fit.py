@@ -33,9 +33,9 @@ warmup_ratio = 0.05  # Spend 5% of training steps warming up.
 weight_decay = 0.00  # Generally not used for finetuning.
 
 val_split_ratio = 0.05  # 5% of training dataset.
-val_batches = 1.0  # 100% of validation dataset.
+val_batches = 1  # 100% of validation dataset.
 tokens_to_sample = 8
-val_check_interval = 0.05  # After every 5% of training steps.
+val_check_interval = 0.0001  # After every 5% of training steps.
 
 freeze_criteria = lambda name: "soft_prompt" not in name
 
@@ -68,7 +68,6 @@ def main(data_dir: Path, checkpoint_dir: Path):
         filename="{epoch}-{step}-{val_loss:.2f}",
     )
 
-    # TODO: should I set run dirs
     wandb_logger = WandbLogger(
         project=project,
         name=run_name,
