@@ -56,6 +56,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
     suppress_uncontrollable_warnings()
     elevate_important_warnings()
 
+    # Enables using the fast Tensor Cores on NVIDIA GPUs.
     torch.set_float32_matmul_precision("high")
 
     L.seed_everything(1337, workers=True)
@@ -64,7 +65,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
         verbose=True,
         save_top_k=5,
         monitor="val_loss",
-        dirpath=f"{project}-checkpoints",
+        dirpath=f"checkpoints/trained/{project}",
         filename="{epoch}-{step}-{val_loss:.2f}",
     )
 
@@ -73,8 +74,6 @@ def main(data_dir: Path, checkpoint_dir: Path):
         name=run_name,
         config=hparams,  # TODO: Ensure this includes parameters passed to main!
     )
-
-    print("WANDB", wandb_logger.experiment.name, wandb_logger.name)
 
     trainer = L.Trainer(
         devices=devices,
