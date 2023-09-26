@@ -63,16 +63,20 @@ def main(data_dir: Path, checkpoint_dir: Path):
         filename="{epoch}-{step}-{val_loss:.2f}",
     )
 
+    wandb_logger = WandbLogger(
+        project="bistro",
+        config=hparams,  # TODO: Ensure this includes parameters passed to main!
+    )
+
+    print("WANDB", wandb_logger.experiment.name, wandb_logger.name)
+
     trainer = L.Trainer(
         devices=devices,
         strategy="auto",
         max_epochs=epochs,
         deterministic="warn",
         precision="bf16-true",
-        logger=WandbLogger(
-            project="bistro",
-            config=hparams,  # TODO: Ensure this includes parameters passed to main!
-        ),
+        logger=wandb_logger,
         limit_val_batches=val_batches,
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
