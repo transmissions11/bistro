@@ -15,13 +15,18 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
 
     ckpt = torch.load(str(checkpoint), mmap=True)
 
-    print("hello world", ckpt["hyper_parameters"]["tokenizer"].encode("hello world"))
+    hparams = ckpt["hyper_parameters"]
+    tokenizer = hparams["tokenizer"]
 
-    # model = GPT(
-    #     config=self.hparams.model_config,
-    #     soft_prompt_tkn=self.tokenizer.token_to_id(self.hparams.soft_prompt_tkn),
-    #     num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
-    # )
+    print(hparams, hparams["model_config"])
+
+    print(hparams.soft_prompt_tkn, hparams.num_soft_prompt_tkns)
+
+    model = GPT(
+        config=hparams["model_config"],
+        soft_prompt_tkn=tokenizer.token_to_id(hparams.soft_prompt_tkn),
+        num_soft_prompt_tkns=hparams.num_soft_prompt_tkns,
+    )
 
     # model = GPT()
 
