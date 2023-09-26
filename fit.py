@@ -11,6 +11,8 @@ from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 
 from utils.warnings import suppress_uncontrollable_warnings, elevate_important_warnings
 
+from datetime import datetime
+
 from lit_datamodule import LitDataModule
 from lit_model import LitModel
 
@@ -36,6 +38,9 @@ tokens_to_sample = 8
 val_check_interval = 0.05  # After every 5% of training steps.
 
 freeze_criteria = lambda name: "soft_prompt" not in name
+
+project_name = "bistro"
+run_name = project_name + "-" + datetime.now().isoformat(timespec="seconds", sep="-")
 
 
 hparams = {
@@ -63,8 +68,10 @@ def main(data_dir: Path, checkpoint_dir: Path):
         filename="{epoch}-{step}-{val_loss:.2f}",
     )
 
+    # TODO: should I set run dirs
     wandb_logger = WandbLogger(
-        project="bistro",
+        project=project_name,
+        name=run_name,
         config=hparams,  # TODO: Ensure this includes parameters passed to main!
     )
 
