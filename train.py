@@ -33,7 +33,7 @@ warmup_ratio = 0.05  # Spend 5% of training steps warming up.
 weight_decay = 0.00  # Generally not used for finetuning.
 
 val_split_ratio = 0.05  # 5% of training dataset.
-val_batches = 1.0  # 100% of validation dataset.
+val_batches = 1.00  # 100% of validation dataset.
 tokens_to_sample = 8
 val_check_interval = 0.05  # After every 5% of training steps.
 
