@@ -18,22 +18,17 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
     hparams = ckpt["hyper_parameters"]
     tokenizer = hparams["tokenizer"]
 
-    print(hparams, hparams["model_config"])
+    # todo seed everything
 
-    print(hparams["soft_prompt_tkn"], hparams["num_soft_prompt_tkns"])
+    with torch.device("meta"):
+        model = GPT(
+            config=hparams["model_config"],
+            soft_prompt_tkn=tokenizer.token_to_id(hparams["soft_prompt_tkn"]),
+            num_soft_prompt_tkns=hparams["num_soft_prompt_tkns"],
+        )
 
-    model = GPT(
-        config=hparams["model_config"],
-        soft_prompt_tkn=tokenizer.token_to_id(hparams["soft_prompt_tkn"]),
-        num_soft_prompt_tkns=hparams["num_soft_prompt_tkns"],
-    )
-
-    # model = GPT()
-
-    # load_state_dict(
-    #     strict=False,
-    #     assign=True,
-    # )
+    # TODO: should strict=True
+    model.load_state_dict(ckpt["state_dict"], strict=True, assign=True)
 
     # checkpoint = torch.load(checkpoint)
 
