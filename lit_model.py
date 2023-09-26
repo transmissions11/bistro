@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Callable, Optional, cast
 
 from lightning.pytorch.loggers import WandbLogger
-from lightning.pytorch.utilities import grad_norm
 
 from lit_gpt import Config, Tokenizer
 
@@ -56,12 +55,6 @@ class LitModel(L.LightningModule):
         self.save_hyperparameters(
             ignore=["freeze_criteria", "checkpoint_path", "tokenizer"], logger=False
         )
-
-    def on_before_optimizer_step(self, optimizer):
-        # Compute the 2-norm for each layer
-        # If using mixed precision, the gradients are already unscaled here
-        norms = grad_norm(self.layer, norm_type=2)
-        self.log_dict(norms)
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
