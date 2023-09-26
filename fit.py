@@ -30,6 +30,7 @@ learning_rate = 3e-2
 warmup_ratio = 0.05  # Spend 5% of training steps warming up.
 weight_decay = 0.00  # Generally not used for finetuning.
 
+val_split_ratio = 0.05  # 5% of training dataset.
 val_batches = 1.0  # 100% of validation dataset.
 tokens_to_sample = 8
 val_check_interval = 0.05  # After every 5% of training steps.
@@ -98,6 +99,7 @@ def main(data_dir: Path, checkpoint_dir: Path):
         data_dir=str(data_dir),
         tokenizer=tokenizer,
         micro_batch_size=micro_batch_size,
+        val_split_ratio=val_split_ratio,
         num_soft_prompt_tkns=num_soft_prompt_tkns,
         soft_prompt_tkn=soft_prompt_tkn,
     )
