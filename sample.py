@@ -10,12 +10,10 @@ from utils.inference import inference_model
 from model import GPT
 from lit_model import LitModel
 
-device = "cuda"
-
 
 # TODO: why isnt the star working to rqurie checkpoint be passed named
 def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
-    model = LitModel.load_from_checkpoint(checkpoint, map_location=device)
+    model = LitModel.load_from_checkpoint(checkpoint)
 
     print("hi")
 
