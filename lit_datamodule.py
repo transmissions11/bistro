@@ -54,6 +54,9 @@ class LitDataModule(L.LightningDataModule):
             # All the data will be in the root level of data_dir,
             # so it's all considered part of the "train" split.
             load_dataset("parquet", data_dir=self.data_dir, split="train")
+            # Seed the shuffle so it's 100% idempotent, just in case.
+            # TODO: Should this first or after? Any performance difference?
+            .train_test_split(test_size=0.1, shuffle=True, seed=1337)
             .map(
                 partial(
                     transform,
@@ -63,10 +66,6 @@ class LitDataModule(L.LightningDataModule):
                 ),
                 num_proc=32,
             )
-            # Seed the shuffle so it's 100% idempotent, just in case.
-            .train_test_split(
-                test_size=0.1, shuffle=True, seed=1337
-            )  # TODO: Should this first or after? Any performance difference?
             .with_format(
                 "torch"
             )  # TODO: Should this first or after? Any performance difference?
