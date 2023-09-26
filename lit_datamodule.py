@@ -50,7 +50,6 @@ class LitDataModule(L.LightningDataModule):
                 ),
             }
 
-        print(f"Loading dataset from {self.data_dir}...")
         return (
             # All the data will be in the root level of data_dir,
             # so it's all considered part of the "train" split.
