@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 # TODO: why doesnt star work
-def main(checkpoint: Path, temperature: float = 0.7, interactive: bool = False):
+def main(checkpoint: Path, temperature: float, interactive: bool):
     print(checkpoint, temperature, interactive)
 
 
