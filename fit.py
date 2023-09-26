@@ -39,8 +39,8 @@ val_check_interval = 0.05  # After every 5% of training steps.
 
 freeze_criteria = lambda name: "soft_prompt" not in name
 
-project_name = "bistro"
-run_name = project_name + "-" + datetime.now().strftime("%m-%d-%H:%M:%S")
+project = "bistro"
+run_name = datetime.now().strftime("%m-%d+%H:%M:%S")
 
 
 hparams = {
@@ -64,13 +64,13 @@ def main(data_dir: Path, checkpoint_dir: Path):
         verbose=True,
         save_top_k=5,
         monitor="val_loss",
-        dirpath="bistro_checkpoints/",
+        dirpath=f"{project}-checkpoints",
         filename="{epoch}-{step}-{val_loss:.2f}",
     )
 
     # TODO: should I set run dirs
     wandb_logger = WandbLogger(
-        project=project_name,
+        project=project,
         name=run_name,
         config=hparams,  # TODO: Ensure this includes parameters passed to main!
     )
