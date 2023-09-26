@@ -34,7 +34,12 @@ def main(*, checkpoint: Path, temperature: float = 0.7, interactive: bool = Fals
     model.eval()
 
     if not interactive:
-        inference_model(model, idx=[0], temperature=temperature, max_new_tokens=100)
+        inference_model(
+            model,
+            idx=tokenizer.encode("hello"),
+            temperature=temperature,
+            max_new_tokens=100,
+        )
 
     # else:
     #     # Interactive mode
