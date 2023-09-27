@@ -39,6 +39,7 @@ def main(
     warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
     weight_decay: float = 0.00,  # Generally not used for finetuning.
     #################################################################
+    log_every_n_steps: int = 50,
     val_split_ratio: float = 0.05,  # 5% of training dataset.
     val_check_interval: float = 0.05,  # After very 5% of training.
     #################################################################
@@ -84,6 +85,7 @@ def main(
         deterministic="warn",
         precision=precision,
         val_check_interval=val_check_interval,
+        log_every_n_steps=log_every_n_steps,
         enable_checkpointing=save_checkpoints,
         accumulate_grad_batches=gradient_accumulation_iters,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
