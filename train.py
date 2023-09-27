@@ -59,6 +59,8 @@ def main(
         if isinstance(v, (int, float, str)) and not k.startswith("_")
     }
 
+    print(hparams)  # TODO: remove
+
     # Filter out incorrect or "out of our control" warnings
     # and elevate important ones we want to treat as errors.
     suppress_uncontrollable_warnings()
