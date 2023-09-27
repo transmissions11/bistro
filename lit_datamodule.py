@@ -40,7 +40,7 @@ class LitDataModule(L.LightningDataModule):
                     f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['inputs']}",
                     x["targets"],
                 ),
-                eos=True,
+                eos=True,  # Don't see why you wouldn't want to train with an eos_token.
             )
 
             return {
