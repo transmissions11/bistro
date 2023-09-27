@@ -97,6 +97,8 @@ def main(
         ),
         callbacks=[
             LearningRateMonitor(logging_interval="step"),
+        ]
+        + [
             ModelCheckpoint(
                 verbose=True,
                 monitor="val_loss",
@@ -104,9 +106,9 @@ def main(
                 dirpath=f"checkpoints/trained/{project}/{run_name}",
                 filename="{epoch}-{step}-{val_loss:.2f}",
             )
-            if save_checkpoints
-            else None,
-        ],
+        ]
+        if save_checkpoints
+        else [],
     )
 
     tokenizer = Tokenizer(base_model_dir)
