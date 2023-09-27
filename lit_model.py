@@ -173,7 +173,7 @@ class LitModel(L.LightningModule):
             g0_print(f"Toggled requires_grad on parameters in {time.time() - t0:.3f}s.")
 
         g0_print("Watching model gradients with W&B...")
-        cast(WandbLogger, self.trainer.logger).watch(self.model)
+        # cast(WandbLogger, self.trainer.logger).watch(self.model)
 
         g0_print("Done loading & configuring model.")
 
