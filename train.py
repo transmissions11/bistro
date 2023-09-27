@@ -52,9 +52,7 @@ def main(
     run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
 ):
     """
-    Bistro: ♪ The finest of the finer things
-    Twenty four hours a day, seven days a week
-    Three hundred and sixty five days a year ♪
+    Bistro: ♪ The finest of the finer things, 24 hours a day, 7 days a week. ♪
     """
 
     assert not (
