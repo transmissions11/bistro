@@ -80,32 +80,33 @@ def main(
 
     L.seed_everything(1337, workers=True)
 
-    checkpoint_callback = ModelCheckpoint(
-        verbose=True,
-        monitor="val_loss",
-        save_top_k=save_top_k_checkpoints,
-        dirpath=f"checkpoints/trained/{project}/{run_name}",
-        filename="{epoch}-{step}-{val_loss:.2f}",
-    )
-
-    wandb_logger = WandbLogger(
-        project=project,
-        name=run_name,
-        config=hparams,
-    )
-
     trainer = L.Trainer(
         devices=devices,
         strategy=strategy,
         max_epochs=epochs,
         deterministic="warn",
         precision=precision,
-        logger=wandb_logger,
         val_check_interval=val_check_interval,
+        enable_checkpointing=save_checkpoints,
         accumulate_grad_batches=gradient_accumulation_iters,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
-        enable_checkpointing=save_checkpoints,
-        callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
+        logger=WandbLogger(
+            project=project,
+            name=run_name,
+            config=hparams,
+        ),
+        callbacks=[
+            LearningRateMonitor(logging_interval="step"),
+            ModelCheckpoint(
+                verbose=True,
+                monitor="val_loss",
+                save_top_k=save_top_k_checkpoints,
+                dirpath=f"checkpoints/trained/{project}/{run_name}",
+                filename="{epoch}-{step}-{val_loss:.2f}",
+            )
+            if save_checkpoints
+            else None,
+        ],
     )
 
     tokenizer = Tokenizer(base_model_dir)
