@@ -141,6 +141,8 @@ class LitModel(L.LightningModule):
         }
 
     def configure_model(self):
+        # Ensure this function is idempotent, as
+        # the trainer may call it multiple times.
         if self.model is not None:
             return
 
@@ -189,5 +191,5 @@ class LitModel(L.LightningModule):
     def compute_loss(self, inputs, targets):
         logits = self.model(input_ids=inputs)
         return F.cross_entropy(
-            logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1
+            logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=ignored_tkn
         )
