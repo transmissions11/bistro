@@ -55,7 +55,7 @@ def main(
     hparams = {
         k: v
         for k, v in locals().items()
-        if isinstance(v, (int, float, str)) and not k.startswith("_")
+        if isinstance(v, (int, float, str, list, type(None))) and not k.startswith("_")
     }
 
     print(hparams)  # TODO: remove
