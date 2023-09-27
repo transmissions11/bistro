@@ -35,9 +35,6 @@ def main(
     #################################################################
     epochs: int = 1,
     #################################################################
-    num_soft_prompt_tkns: int = 20,
-    soft_prompt_tkn: str = "✅",
-    #################################################################
     learning_rate: float = 6e-2,
     warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
     weight_decay: float = 0.00,  # Generally not used for finetuning.
@@ -49,7 +46,7 @@ def main(
     # to freeze everything except specific parameters, or set both to None to
     # train everything. They are mutually exclusive, at least one must be None.
     params_to_freeze: Optional[List[str]] = None,
-    params_to_train: Optional[List[str]] = ["soft_prompt"],
+    params_to_train: Optional[List[str]] = None,
     #################################################################
     save_checkpoints: bool = True,
     save_top_k_checkpoints: int = 5,
@@ -122,8 +119,6 @@ def main(
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         weight_decay=weight_decay,
-        num_soft_prompt_tkns=num_soft_prompt_tkns,
-        soft_prompt_tkn=soft_prompt_tkn,
         requires_grad=(
             # If params_to_freeze is set, freeze all
             # params except those in params_to_freeze.
@@ -142,8 +137,6 @@ def main(
         tokenizer=tokenizer,
         micro_batch_size=micro_batch_size,
         val_split_ratio=val_split_ratio,
-        num_soft_prompt_tkns=num_soft_prompt_tkns,
-        soft_prompt_tkn=soft_prompt_tkn,
     )
 
     if trainer.is_global_zero:

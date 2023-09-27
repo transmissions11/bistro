@@ -20,9 +20,6 @@ class LitDataModule(L.LightningDataModule):
         tokenizer: Tokenizer,
         micro_batch_size: int,
         val_split_ratio: float,
-        ##########################
-        num_soft_prompt_tkns: int,
-        soft_prompt_tkn: str,
     ):
         super().__init__()
 
@@ -32,14 +29,9 @@ class LitDataModule(L.LightningDataModule):
     def load_mapped_datasets(self):
         # Note: This function cannot access any properties of self directly, or it
         # will mess up deterministic serialization. Instead, pass them as arguments.
-        def transform(
-            x, tokenizer: Tokenizer, soft_prompt_tkn: str, num_soft_prompt_tkns: int
-        ):
+        def transform(x, tokenizer: Tokenizer):
             seq = tokenizer.encode(
-                fmt_vicuna_input(
-                    f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['inputs']}",
-                    x["targets"],
-                ),
+                fmt_vicuna_input(x["inputs"], x["targets"]),  # Put in Vicuna format.
                 eos=True,  # Don't see why you wouldn't want to train with an eos_token.
             )
 
@@ -59,8 +51,6 @@ class LitDataModule(L.LightningDataModule):
                 partial(
                     transform,
                     tokenizer=self.hparams.tokenizer,
-                    soft_prompt_tkn=self.hparams.soft_prompt_tkn,
-                    num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
                 ),
                 num_proc=32,
             )
