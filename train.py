@@ -43,6 +43,9 @@ def main(
     val_split_ratio: float = 0.05,  # 5% of training dataset.
     val_check_interval: float = 0.05,  # After very 5% of training.
     #################################################################
+    # Set params_to_freeze to freeze specific parameters, set params_to_train
+    # to freeze everything except specific parameters, or set both to None to
+    # train everything. They are mutually exclusive, at least one must be None.
     params_to_freeze: Optional[List[str]] = None,
     params_to_train: Optional[List[str]] = ["soft_prompt"],
     #################################################################
