@@ -52,19 +52,19 @@ class LitDataModule(L.LightningDataModule):
         return (
             # All the data will be in the root level of data_dir,
             # so it's all considered part of the "train" split.
-            load_dataset("parquet", data_dir=self.data_dir, split="train")
+            load_dataset("parquet", data_dir=self.hparams.data_dir, split="train")
             .map(
                 partial(
                     transform,
-                    tokenizer=self.tokenizer,
-                    soft_prompt_tkn=self.soft_prompt_tkn,
-                    num_soft_prompt_tkns=self.num_soft_prompt_tkns,
+                    tokenizer=self.hparams.tokenizer,
+                    soft_prompt_tkn=self.hparams.soft_prompt_tkn,
+                    num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
                 ),
                 num_proc=32,
             )
             # After map so changing test_size doesn't bust the cache.
             # Seed so the auto shuffle is 100% idempotent, just in case.
-            .train_test_split(test_size=self.val_split_ratio, seed=1337)
+            .train_test_split(test_size=self.hparams.val_split_ratio, seed=1337)
             .with_format("torch")  # Convert relevant types to tensors.
         )
 
@@ -81,7 +81,7 @@ class LitDataModule(L.LightningDataModule):
         return DataLoader(
             self.hf_datasets["train"],
             collate_fn=pad_collate_fn,
-            batch_size=self.micro_batch_size,
+            batch_size=self.hparams.micro_batch_size,
             num_workers=8,
             pin_memory=True,
             shuffle=True,
@@ -94,7 +94,7 @@ class LitDataModule(L.LightningDataModule):
             collate_fn=pad_collate_fn,
             # Since we're not computing and storing gradients
             # while validating, we can use a larger batch size.
-            batch_size=self.micro_batch_size * 2,
+            batch_size=self.hparams.micro_batch_size * 2,
             num_workers=8,
             pin_memory=True,
         )
