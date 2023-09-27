@@ -19,39 +19,40 @@ from lit_model import LitModel
 from model import Config
 
 
-devices = 4
-micro_batch_size = 4
-gradient_accumulation_iters = 1
-
-epochs = 1
-
-num_soft_prompt_tkns = 20
-soft_prompt_tkn = "✅"
-
-learning_rate = 6e-2
-warmup_ratio = 0.05  # Spend 5% of training steps warming.
-weight_decay = 0.00  # Generally not used for finetuning.
-
-val_split_ratio = 0.05  # 5% of training dataset.
-val_check_interval = 0.05  # After very 5% of training.
-
-freeze_criteria = lambda name: "soft_prompt" not in name
-
-project = "bistro"
-run_name = datetime.now().strftime("%m-%d+%H:%M:%S")
-
-
-hparams = {
-    k: v
-    for k, v in locals().items()
-    if isinstance(v, (int, float, str)) and not k.startswith("_")
-}
-
-
 def main(
+    #################################################################
+    project: str = "bistro",
+    #################################################################
     data_dir: Path = Path("data"),
-    checkpoint_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
+    base_model_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
+    #################################################################
+    devices: int = 4,
+    micro_batch_size: int = 4,
+    gradient_accumulation_iters: int = 1,
+    #################################################################
+    epochs: int = 1,
+    #################################################################
+    num_soft_prompt_tkns: int = 20,
+    soft_prompt_tkn: str = "✅",
+    #################################################################
+    learning_rate: float = 6e-2,
+    warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
+    weight_decay: float = 0.00,  # Generally not used for finetuning.
+    #################################################################
+    val_split_ratio: float = 0.05,  # 5% of training dataset.
+    val_check_interval: float = 0.05,  # After very 5% of training.
+    #################################################################
+    # TODO: Refactor this into two optional args: params_to_freeze, params_to_train, make mutex.
+    freeze_criteria=lambda name: "soft_prompt" not in name,
+    #################################################################
+    run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
 ):
+    hparams = {
+        k: v
+        for k, v in locals().items()
+        if isinstance(v, (int, float, str)) and not k.startswith("_")
+    }
+
     # Filter out incorrect or "out of our control" warnings
     # and elevate important ones we want to treat as errors.
     suppress_uncontrollable_warnings()
@@ -73,7 +74,7 @@ def main(
     wandb_logger = WandbLogger(
         project=project,
         name=run_name,
-        config=hparams,  # TODO: Ensure this includes parameters passed to main!
+        config=hparams,
     )
 
     trainer = L.Trainer(
@@ -89,12 +90,12 @@ def main(
         callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
 
-    tokenizer = Tokenizer(checkpoint_dir)
+    tokenizer = Tokenizer(base_model_dir)
 
     model = LitModel(
-        model_config=Config.from_name(name=checkpoint_dir.name),
+        model_config=Config.from_name(name=base_model_dir.name),
         tokenizer=tokenizer,
-        checkpoint_path=checkpoint_dir / "lit_model.pth",
+        checkpoint_path=base_model_dir / "lit_model.pth",
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         weight_decay=weight_decay,
