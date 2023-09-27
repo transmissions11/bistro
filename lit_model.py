@@ -38,7 +38,7 @@ class LitModel(L.LightningModule):
         # If None, will use random weights.
         checkpoint_path: Optional[Path] = None,
         # If None, all parameters will be trained.
-        requires_grad: Callable[[str], bool] = None,
+        requires_grad: Optional[Callable[[str], bool]] = None,
     ):
         super().__init__()
 
