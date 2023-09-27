@@ -29,13 +29,13 @@ def main(
     #################################################################
     devices: int = 4,
     strategy: str = "auto",
-    micro_batch_size: int = 4,
-    gradient_accumulation_iters: int = 1,
+    micro_batch_size: int = 2,
+    gradient_accumulation_iters: int = 16,
     precision: str = "bf16-true",
     #################################################################
     epochs: int = 1,
     #################################################################
-    learning_rate: float = 6e-2,
+    learning_rate: float = 2e-5,
     warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
     weight_decay: float = 0.00,  # Generally not used for finetuning.
     #################################################################
