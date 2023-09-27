@@ -58,8 +58,6 @@ def main(
         if isinstance(v, (int, float, str, list, type(None))) and not k.startswith("_")
     }
 
-    print(hparams)  # TODO: remove
-
     # Filter out incorrect or "out of our control" warnings
     # and elevate important ones we want to treat as errors.
     suppress_uncontrollable_warnings()
@@ -129,6 +127,9 @@ def main(
         num_soft_prompt_tkns=num_soft_prompt_tkns,
         soft_prompt_tkn=soft_prompt_tkn,
     )
+
+    if trainer.is_global_zero:
+        print("Training with the following hparams:", hparams)
 
     trainer.validate(model, datamodule=datamodule)
     trainer.fit(model, datamodule=datamodule)
