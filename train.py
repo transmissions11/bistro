@@ -39,7 +39,6 @@ def main(
     warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
     weight_decay: float = 0.00,  # Generally not used for finetuning.
     #################################################################
-    log_every_n_steps: int = 50,
     val_split_ratio: float = 0.05,  # 5% of training dataset.
     val_check_interval: float = 0.05,  # After very 5% of training.
     #################################################################
@@ -48,6 +47,9 @@ def main(
     # train everything. They are mutually exclusive, at least one must be None.
     params_to_freeze: Optional[List[str]] = None,
     params_to_train: Optional[List[str]] = None,
+    #################################################################
+    log_every_n_steps: int = 50,
+    profiler: Optional[str] = None,  # Either simple, advanced, or None.
     #################################################################
     save_checkpoints: bool = True,
     save_top_k_checkpoints: int = 5,
@@ -82,6 +84,7 @@ def main(
         devices=devices,
         strategy=strategy,
         max_epochs=epochs,
+        profiler=profiler,
         deterministic="warn",
         precision=precision,
         val_check_interval=val_check_interval,
