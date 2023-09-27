@@ -13,12 +13,11 @@ from lightning.pytorch.loggers import WandbLogger
 
 from lit_gpt import Config, Tokenizer
 
-from utils.padding import strip_right_pad
 from utils.params import freeze_parameters
 from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
+from utils.padding import strip_right_pad, ignored_tkn
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
-
 
 from model import GPT
 
@@ -83,23 +82,15 @@ class LitModel(L.LightningModule):
         if batch_idx == 0:
             tokenizer = self.hparams.tokenizer
 
-            inputs_list = []
-            outputs_list = []
-            targets_list = []
+            prompt_end_tkns = tokenizer.encode(
+                VICUNA_END_OF_USER_PROMPT_SEQUENCE, device=self.device
+            )
 
-            for i in range(len(inputs)):
-                sample = strip_right_pad(inputs[i])
-                target = strip_right_pad(targets[i])
+            def process_val_sample(sample, target):
+                sample = strip_right_pad(sample)
+                target = strip_right_pad(target)
 
-                prompt_end_idx = find_subtensor_end(
-                    sample,
-                    tokenizer.encode(
-                        VICUNA_END_OF_USER_PROMPT_SEQUENCE, device=self.device
-                    ),
-                )
-
-                input_sample = sample[: prompt_end_idx + 1]
-                inputs_list.append(tokenizer.decode(input_sample))
+                input_sample = sample[: find_subtensor_end(sample, prompt_end_tkns) + 1]
 
                 output = inference_model(
                     self.model,
@@ -107,14 +98,23 @@ class LitModel(L.LightningModule):
                     temperature=0.00,  # Sample greedily.
                     max_new_tokens=self.hparams.tokens_to_sample,
                 )[-self.hparams.tokens_to_sample :]
-                outputs_list.append(tokenizer.decode(output))
-                # Note: This strips away ignored_tkn tokens entirely, which may
-                # lead to confusion if ignored_tkns are used between real tokens.
-                targets_list.append(tokenizer.decode(target[target != -1]))
 
-            columns = ["input", "output", "target"]
-            data = list(zip(inputs_list, outputs_list, targets_list))
-            self.logger.log_text(key="my_samples", columns=columns, data=data)
+                return (
+                    tokenizer.decode(input_sample),
+                    tokenizer.decode(output),
+                    # Note: target != ignored_tkn strips away ignored_tkn tokens entirely,
+                    # which may lead to confusion if ignored_tkn is used between real tokens.
+                    tokenizer.decode(target[target != ignored_tkn]),
+                )
+
+            self.logger.log_text(
+                key="val_samples",
+                columns=["input", "output", "target"],
+                data=[
+                    process_val_sample(inputs[i], targets[i])
+                    for i in range(len(inputs))  # Full batch.
+                ],
+            )
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
