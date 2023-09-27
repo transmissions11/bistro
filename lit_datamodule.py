@@ -24,12 +24,9 @@ class LitDataModule(L.LightningDataModule):
         soft_prompt_tkn: str,
     ):
         super().__init__()
-        self.data_dir = data_dir
-        self.tokenizer = tokenizer
-        self.micro_batch_size = micro_batch_size
-        self.val_split_ratio = val_split_ratio
-        self.num_soft_prompt_tkns = num_soft_prompt_tkns
-        self.soft_prompt_tkn = soft_prompt_tkn
+
+        # logger=False since we already log hparams manually in train.py.
+        self.save_hyperparameters(logger=False)
 
     def load_mapped_datasets(self):
         # Note: This function cannot access any properties of self directly, or it

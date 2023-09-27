@@ -51,7 +51,7 @@ class LitModel(L.LightningModule):
         self.freeze_criteria = freeze_criteria
         self.checkpoint_path = checkpoint_path
 
-        # Note: logger=False since we already log hparams it manually in fit.py.
+        # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(
             ignore=["freeze_criteria", "checkpoint_path"], logger=False
         )
