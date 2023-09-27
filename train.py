@@ -139,6 +139,8 @@ def main(
 
 
 if __name__ == "__main__":
-    from jsonargparse import CLI
+    from jsonargparse import ArgumentParser, CLI
 
-    CLI(main)
+    parser = ArgumentParser()
+    parser.add_function_arguments(main)
+    CLI(parser)
