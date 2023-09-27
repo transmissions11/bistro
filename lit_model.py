@@ -13,7 +13,6 @@ from lightning.pytorch.loggers import WandbLogger
 
 from lit_gpt import Config, Tokenizer
 
-from utils.params import freeze_parameters
 from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
 from utils.padding import strip_right_pad, ignored_tkn
@@ -36,8 +35,10 @@ class LitModel(L.LightningModule):
         num_soft_prompt_tkns: int,
         soft_prompt_tkn: str,
         ###############################
+        # If None, will use random weights.
         checkpoint_path: Optional[Path] = None,
-        freeze_criteria: Callable[[str], bool] = None,
+        # If None, all parameters will be trained.
+        requires_grad: Callable[[str], bool] = None,
     ):
         super().__init__()
 
@@ -45,7 +46,7 @@ class LitModel(L.LightningModule):
 
         # Assign these manually as they don't pickle well
         # or shouldn't be saved via save_hyperparameters.
-        self.freeze_criteria = freeze_criteria
+        self.requires_grad = requires_grad
         self.checkpoint_path = checkpoint_path
 
         # logger=False since we already log hparams manually in train.py.
@@ -174,10 +175,11 @@ class LitModel(L.LightningModule):
             )
             g0_print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
 
-        if self.freeze_criteria is not None:
-            t0 = g0_print("Freezing specified parameters...")
-            freeze_parameters(self.model, self.freeze_criteria)
-            g0_print(f"Froze specified parameters in {time.time() - t0:.3f}s.")
+        if self.requires_grad is not None:
+            t0 = g0_print("Toggling requires_grad on specified model parameters...")
+            for name, param in self.model.named_parameters():
+                param.requires_grad = self.requires_grad(name)
+            g0_print(f"Toggled requires_grad on parameters in {time.time() - t0:.3f}s.")
 
         g0_print("Watching model gradients with W&B...")
         cast(WandbLogger, self.trainer.logger).watch(self.model)

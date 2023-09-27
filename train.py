@@ -4,6 +4,8 @@ import lightning as L
 
 from pathlib import Path
 
+from typing import List, Optional
+
 from lit_gpt.tokenizer import Tokenizer
 
 from lightning.pytorch.loggers import WandbLogger
@@ -42,11 +44,15 @@ def main(
     val_split_ratio: float = 0.05,  # 5% of training dataset.
     val_check_interval: float = 0.05,  # After very 5% of training.
     #################################################################
-    # TODO: Refactor this into two optional args: params_to_freeze, params_to_train, make mutex.
-    freeze_criteria=lambda name: "soft_prompt" not in name,
+    params_to_freeze: Optional[List[str]] = None,
+    params_to_train: Optional[List[str]] = ["soft_prompt"],
     #################################################################
     run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
 ):
+    assert not (
+        params_to_freeze and params_to_train
+    ), "Provide either params_to_freeze or params_to_train, not both."
+
     hparams = {
         k: v
         for k, v in locals().items()
@@ -101,7 +107,17 @@ def main(
         weight_decay=weight_decay,
         num_soft_prompt_tkns=num_soft_prompt_tkns,
         soft_prompt_tkn=soft_prompt_tkn,
-        freeze_criteria=freeze_criteria,
+        requires_grad=(
+            # If params_to_freeze is set, freeze all
+            # params except those in params_to_freeze.
+            (lambda param: param.name not in params_to_freeze)
+            if params_to_freeze is not None
+            # If params_to_train is set, only train those params.
+            else (lambda param: param.name in params_to_train)
+            if params_to_train is not None
+            # Otherwise, train everything.
+            else None
+        ),
     )
 
     datamodule = LitDataModule(
