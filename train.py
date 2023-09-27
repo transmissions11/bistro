@@ -52,8 +52,11 @@ def main(
     run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
 ):
     """
-    Bistro.
+    Bistro: ♪ The finest of the finer things
+    Twenty four hours a day, seven days a week
+    Three hundred and sixty five days a year ♪
     """
+
     assert not (
         params_to_freeze and params_to_train
     ), "Provide either params_to_freeze or params_to_train, not both."
