@@ -51,7 +51,7 @@ class LitModel(L.LightningModule):
 
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(
-            ignore=["freeze_criteria", "checkpoint_path"], logger=False
+            ignore=["requires_grad", "checkpoint_path"], logger=False
         )
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
