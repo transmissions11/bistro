@@ -104,7 +104,7 @@ def main(
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
-        save_checkpoints=save_checkpoints,
+        enable_checkpointing=save_checkpoints,
         callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
 
