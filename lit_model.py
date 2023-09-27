@@ -73,7 +73,7 @@ class LitModel(L.LightningModule):
             # have very low precision with larger values (~256+)
             # that results in inaccurate accumulation w/ on_epoch.
             # https://github.com/Lightning-AI/lightning/issues/18620
-            loss.to(torch.float64),
+            loss.to(torch.float32),
             on_epoch=True,
             prog_bar=True,
             sync_dist=True,
