@@ -90,7 +90,6 @@ class LitDataModule(L.LightningDataModule):
         )
 
     def val_dataloader(self):
-        # TODO: double batch size?
         return DataLoader(
             self.hf_datasets["test"],
             collate_fn=pad_collate_fn,
