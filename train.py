@@ -28,8 +28,10 @@ def main(
     base_model_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
     #################################################################
     devices: int = 4,
+    strategy: str = "auto",
     micro_batch_size: int = 4,
     gradient_accumulation_iters: int = 1,
+    precision: str = "bf16-true",
     #################################################################
     epochs: int = 1,
     #################################################################
@@ -48,6 +50,9 @@ def main(
     # train everything. They are mutually exclusive, at least one must be None.
     params_to_freeze: Optional[List[str]] = None,
     params_to_train: Optional[List[str]] = ["soft_prompt"],
+    #################################################################
+    save_checkpoints: bool = True,
+    save_top_k_checkpoints: int = 5,
     #################################################################
     run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
 ):
@@ -77,8 +82,8 @@ def main(
 
     checkpoint_callback = ModelCheckpoint(
         verbose=True,
-        save_top_k=5,
         monitor="val_loss",
+        save_top_k=save_top_k_checkpoints,
         dirpath=f"checkpoints/trained/{project}/{run_name}",
         filename="{epoch}-{step}-{val_loss:.2f}",
     )
@@ -91,14 +96,15 @@ def main(
 
     trainer = L.Trainer(
         devices=devices,
-        strategy="auto",
+        strategy=strategy,
         max_epochs=epochs,
         deterministic="warn",
-        precision="bf16-true",
+        precision=precision,
         logger=wandb_logger,
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
+        save_checkpoints=save_checkpoints,
         callbacks=[LearningRateMonitor(logging_interval="step"), checkpoint_callback],
     )
 
@@ -136,7 +142,7 @@ def main(
     )
 
     if trainer.is_global_zero:
-        print("Training with the following hparams:", hparams)
+        print("Training with the following hyperparams:", hparams)
 
     trainer.validate(model, datamodule=datamodule)
     trainer.fit(model, datamodule=datamodule)
