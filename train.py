@@ -29,13 +29,11 @@ num_soft_prompt_tkns = 20
 soft_prompt_tkn = "✅"
 
 learning_rate = 6e-2
-warmup_ratio = 0.05  # Spend 5% of training steps warming up.
+warmup_ratio = 0.05  # Spend 5% of training steps warming.
 weight_decay = 0.00  # Generally not used for finetuning.
 
 val_split_ratio = 0.05  # 5% of training dataset.
-val_batches = 1.00  # 100% of validation dataset.
-tokens_to_sample = 8
-val_check_interval = 0.05  # After every 5% of training steps.
+val_check_interval = 0.05  # After very 5% of training.
 
 freeze_criteria = lambda name: "soft_prompt" not in name
 
@@ -85,7 +83,6 @@ def main(
         deterministic="warn",
         precision="bf16-true",
         logger=wandb_logger,
-        limit_val_batches=val_batches,
         val_check_interval=val_check_interval,
         accumulate_grad_batches=gradient_accumulation_iters,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
@@ -101,7 +98,6 @@ def main(
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         weight_decay=weight_decay,
-        tokens_to_sample=tokens_to_sample,
         num_soft_prompt_tkns=num_soft_prompt_tkns,
         soft_prompt_tkn=soft_prompt_tkn,
         freeze_criteria=freeze_criteria,
