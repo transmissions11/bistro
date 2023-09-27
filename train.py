@@ -111,10 +111,10 @@ def main(
         requires_grad=(
             # If params_to_freeze is set, freeze all
             # params except those in params_to_freeze.
-            (lambda param: param.name not in params_to_freeze)
+            (lambda name: name not in params_to_freeze)
             if params_to_freeze is not None
-            # If params_to_train is set, only train those params.
-            else (lambda param: param.name in params_to_train)
+            # If params_to_train is set, only train those.
+            else (lambda name: name in params_to_train)
             if params_to_train is not None
             # Otherwise, train everything.
             else None
