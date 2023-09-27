@@ -39,7 +39,8 @@ class LitDataModule(L.LightningDataModule):
                 fmt_vicuna_input(
                     f"{soft_prompt_tkn * num_soft_prompt_tkns} {x['inputs']}",
                     x["targets"],
-                )
+                ),
+                eos=True,
             )
 
             return {

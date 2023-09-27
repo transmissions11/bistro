@@ -33,8 +33,6 @@ class LitModel(L.LightningModule):
         ###############################
         weight_decay: float,
         ###############################
-        tokens_to_sample: int,
-        ###############################
         num_soft_prompt_tkns: int,
         soft_prompt_tkn: str,
         ###############################
@@ -79,6 +77,7 @@ class LitModel(L.LightningModule):
             sync_dist=True,
         )
 
+        # Log a few sample inferences from the validation set to W&B.
         if batch_idx == 0:
             tokenizer = self.hparams.tokenizer
 
@@ -90,18 +89,19 @@ class LitModel(L.LightningModule):
                 sample = strip_right_pad(sample)
                 target = strip_right_pad(target)
 
-                input_sample = sample[: find_subtensor_end(sample, prompt_end_tkns) + 1]
-
-                output = inference_model(
-                    self.model,
-                    idx=input_sample,
-                    temperature=0.00,  # Sample greedily.
-                    max_new_tokens=self.hparams.tokens_to_sample,
-                )[-self.hparams.tokens_to_sample :]
+                input_ids = sample[: find_subtensor_end(sample, prompt_end_tkns) + 1]
 
                 return (
-                    tokenizer.decode(input_sample),
-                    tokenizer.decode(output),
+                    tokenizer.decode(input_ids),
+                    tokenizer.decode(
+                        inference_model(
+                            self.model,
+                            input_ids,
+                            temperature=0.00,  # Sample 100% greedily.
+                            max_new_tokens=100,  # Should hit an eos token first.
+                            eos_id=tokenizer.eos_id,
+                        )
+                    ),
                     # Note: target != ignored_tkn strips away ignored_tkn tokens entirely,
                     # which may lead to confusion if ignored_tkn is used between real tokens.
                     tokenizer.decode(target[target != ignored_tkn]),

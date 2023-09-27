@@ -7,20 +7,20 @@ from typing import Optional
 @torch.inference_mode()
 def inference_model(
     model: torch.nn.Module,
-    idx: torch.Tensor,
+    input_ids: torch.Tensor,
     max_new_tokens: int,
     *,
     temperature: float = 0.7,
     eos_id: Optional[int] = None,
 ) -> torch.Tensor:
-    device, dtype = idx.device, idx.dtype
+    device, dtype = input_ids.device, input_ids.dtype
 
     # Create a tensor to hold the decoded tokens as we sample.
     decoded_tkns = torch.empty(0, device=device, dtype=dtype)
 
     for _ in range(max_new_tokens):
         # Forward pass through the model, unsqueeze to add a batch dimension.
-        logits = model(input_ids=torch.cat((idx, decoded_tkns)).unsqueeze(0))
+        logits = model(input_ids=torch.cat((input_ids, decoded_tkns)).unsqueeze(0))
 
         # Pluck the logits at the final step and scale by desired temperature.
         logits = logits[:, -1, :] / (
