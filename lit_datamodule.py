@@ -61,17 +61,13 @@ class LitDataModule(L.LightningDataModule):
         )
 
     def prepare_data(self):
-        print("preparing data")
         # Download the dataset and build caches on a
         # single process first to avoid waste w/ DDP.
         self.load_mapped_datasets()
-        print("prepared data")
 
     def setup(self, stage: str):
-        print("setup")
         # Load the dataset on each process, from cache.
         self.hf_datasets = self.load_mapped_datasets()
-        print("done setup")
 
     def train_dataloader(self):
         return DataLoader(
