@@ -37,10 +37,7 @@ class LitModel(L.LightningModule):
         # If None, all parameters will be trained.
         requires_grad: Optional[Callable[[str], bool]] = None,
         # If True, will watch & log gradients to W&B.
-        # TODO: MAKE SURE THIS IS THE SLOWDOWN CAUSE, IF SO MAKE A NOTE!!!!!!!!!!!!
-        # TODO: MAKE SURE THIS IS THE SLOWDOWN CAUSE, IF SO MAKE A NOTE!!!!!!!!!!!!
-        # TODO: MAKE SURE THIS IS THE SLOWDOWN CAUSE, IF SO MAKE A NOTE!!!!!!!!!!!!
-        # TODO: verify with profiler!!!!!!
+        # Will grind to a halt if training many params.
         watch_gradients: bool = False,
     ):
         super().__init__()
