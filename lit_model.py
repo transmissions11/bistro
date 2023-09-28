@@ -59,6 +59,47 @@ class LitModel(L.LightningModule):
         inputs, targets = batch["inputs"], batch["targets"]
         loss = self.compute_loss(inputs, targets)
 
+        # embed_weights = self.model.transformer.wte.weight
+
+        # # TODO: separate slice of input_ids
+
+        # one_hot = torch.zeros(
+        #     input_ids.shape[0],
+        #     embed_weights.shape[0],
+        #     device=self.device,
+        #     dtype=embed_weights.dtype,
+        # )
+
+        # one_hot.scatter_(
+        #     1,
+        #     input_ids.unsqueeze(1),
+        #     torch.ones(
+        #         one_hot.shape[0], 1, device=self.device, dtype=embed_weights.dtype
+        #     ),
+        # )
+
+        # one_hot.requires_grad_()
+
+        # input_embeds = (one_hot @ embed_weights).unsqueeze(0)
+
+        # # now stitch it together with the rest of the embeddings
+        # embeds = self.model.transformer.wte(input_ids.unsqueeze(0)).detach()
+        # full_embeds = torch.cat(
+        #     [
+        #         embeds[:, : input_slice.start, :],
+        #         input_embeds,
+        #         embeds[:, input_slice.stop :, :],
+        #     ],
+        #     dim=1,
+        # )
+
+        # loss = self.compute_loss(targets, input_embeds=full_embeds)
+
+        # # loss.backward()
+        # self.manual_backward(loss)
+
+        # grad = one_hot.grad.clone()
+
         self.log("train_loss", loss)
 
         return loss
