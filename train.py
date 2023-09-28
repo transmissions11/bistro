@@ -33,7 +33,8 @@ def main(
     gradient_accumulation_iters: int = 16,
     precision: str = "bf16-true",
     #################################################################
-    epochs: int = 1,
+    max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
+    epochs: int = 1,  # Make this -1 to train forever / until max_time.
     #################################################################
     learning_rate: float = 2e-5,
     warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
@@ -85,6 +86,7 @@ def main(
         devices=devices,
         strategy=strategy,
         max_epochs=epochs,
+        max_time=max_time,
         profiler=profiler,
         deterministic="warn",
         precision=precision,
