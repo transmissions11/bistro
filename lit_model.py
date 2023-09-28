@@ -39,6 +39,9 @@ class LitModel(L.LightningModule):
         checkpoint_path: Optional[Path] = None,
         # If None, all parameters will be trained.
         requires_grad: Optional[Callable[[str], bool]] = None,
+        # If True, will watch & log gradients to W&B.
+        # Will grind to a halt if training many params.
+        watch_gradients: bool = False,
     ):
         super().__init__()
 
@@ -48,10 +51,11 @@ class LitModel(L.LightningModule):
         # or shouldn't be saved via save_hyperparameters.
         self.requires_grad = requires_grad
         self.checkpoint_path = checkpoint_path
+        self.watch_gradients = watch_gradients
 
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(
-            ignore=["requires_grad", "checkpoint_path"], logger=False
+            ignore=["checkpoint_path", "requires_grad", "watch_gradients"], logger=False
         )
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
@@ -181,8 +185,9 @@ class LitModel(L.LightningModule):
                 param.requires_grad = self.requires_grad(name)
             g0_print(f"Toggled requires_grad on parameters in {time.time() - t0:.3f}s.")
 
-        g0_print("Watching model gradients with W&B...")
-        cast(WandbLogger, self.trainer.logger).watch(self.model)
+        if self.watch_gradients:
+            g0_print("Watching model gradients with W&B...")
+            cast(WandbLogger, self.trainer.logger).watch(self.model)
 
         g0_print("Done loading & configuring model.")
 

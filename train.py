@@ -51,6 +51,10 @@ def main(
     params_to_freeze: Optional[List[str]] = None,
     params_to_train: Optional[List[str]] = ["soft_prompt"],
     #################################################################
+    log_every_n_steps: int = 50,
+    watch_gradients: bool = False,  # Very slow if training many params.
+    profiler: Optional[str] = None,  # Either simple, advanced, or None.
+    #################################################################
     save_checkpoints: bool = True,
     save_top_k_checkpoints: int = 5,
     #################################################################
@@ -84,9 +88,11 @@ def main(
         devices=devices,
         strategy=strategy,
         max_epochs=epochs,
+        profiler=profiler,
         deterministic="warn",
         precision=precision,
         val_check_interval=val_check_interval,
+        log_every_n_steps=log_every_n_steps,
         enable_checkpointing=save_checkpoints,
         accumulate_grad_batches=gradient_accumulation_iters,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
@@ -135,6 +141,7 @@ def main(
             # Otherwise, train everything.
             else None
         ),
+        watch_gradients=watch_gradients,
     )
 
     datamodule = LitDataModule(
