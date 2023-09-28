@@ -52,10 +52,6 @@ def main(
     watch_gradients: bool = False,  # Very slow if training many params.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
     #################################################################
-    log_every_n_steps: int = 50,
-    watch_gradients: bool = False,  # Very slow if training many params.
-    profiler: Optional[str] = None,  # Either simple, advanced, or None.
-    #################################################################
     save_checkpoints: bool = True,
     save_top_k_checkpoints: int = 5,
     #################################################################
