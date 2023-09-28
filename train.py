@@ -50,6 +50,7 @@ def main(
     #################################################################
     log_every_n_steps: int = 50,
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
+    watch_gradients: bool = False,
     #################################################################
     save_checkpoints: bool = True,
     save_top_k_checkpoints: int = 5,
@@ -135,6 +136,7 @@ def main(
             # Otherwise, train everything.
             else None
         ),
+        watch_gradients=watch_gradients,
     )
 
     datamodule = LitDataModule(
