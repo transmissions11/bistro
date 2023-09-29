@@ -7,3 +7,4 @@ lit_gpt @ git+https://github.com/Lightning-AI/lit-gpt@main
 sentencepiece
 wandb
 datasets
+pprintjson
