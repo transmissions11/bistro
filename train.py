@@ -52,7 +52,7 @@ def main(
     watch_gradients: bool = False,  # Very slow if training many params.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
     #################################################################
-    save_checkpoints: bool = True,
+    save_checkpoints: bool = False,
     save_top_k_checkpoints: int = 5,
     #################################################################
     run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
