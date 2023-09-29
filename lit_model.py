@@ -7,9 +7,7 @@ import lightning as L
 
 from pathlib import Path
 
-from typing import Callable, Optional, cast
-
-from lightning.pytorch.loggers import WandbLogger
+from typing import Optional
 
 from lit_gpt import Config, Tokenizer
 
@@ -27,18 +25,8 @@ class LitModel(L.LightningModule):
         model_config: Config,
         tokenizer: Tokenizer,
         ###############################
-        learning_rate: float,
-        warmup_ratio: float,
-        ###############################
-        weight_decay: float,
-        ###############################
         # If None, will use random weights.
         checkpoint_path: Optional[Path] = None,
-        # If None, all parameters will be trained.
-        requires_grad: Optional[Callable[[str], bool]] = None,
-        # If True, will watch & log gradients to W&B.
-        # Will grind to a halt if training many params.
-        watch_gradients: bool = False,
     ):
         super().__init__()
 
@@ -46,16 +34,12 @@ class LitModel(L.LightningModule):
 
         # Assign these manually as they don't pickle well
         # or shouldn't be saved via save_hyperparameters.
-        self.requires_grad = requires_grad
         self.checkpoint_path = checkpoint_path
-        self.watch_gradients = watch_gradients
 
         self.automatic_optimization = False  # We'll handle it ourselves.
 
         # logger=False since we already log hparams manually in train.py.
-        self.save_hyperparameters(
-            ignore=["checkpoint_path", "requires_grad", "watch_gradients"], logger=False
-        )
+        self.save_hyperparameters(ignore=["checkpoint_path"], logger=False)
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
@@ -161,30 +145,6 @@ class LitModel(L.LightningModule):
                 ],
             )
 
-    def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(
-            self.model.parameters(),
-            lr=self.hparams.learning_rate,
-            weight_decay=self.hparams.weight_decay,
-        )
-
-        lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
-            optimizer,
-            max_lr=self.hparams.learning_rate,
-            pct_start=self.hparams.warmup_ratio,
-            total_steps=self.trainer.estimated_stepping_batches,
-            div_factor=1e10,  # Large number, so we start at 0.
-            cycle_momentum=False,
-        )
-
-        return {
-            "optimizer": optimizer,
-            "lr_scheduler": {
-                "scheduler": lr_scheduler,
-                "interval": "step",
-            },
-        }
-
     def configure_model(self):
         # Ensure this function is idempotent, as
         # the trainer may call it multiple times.
@@ -212,16 +172,6 @@ class LitModel(L.LightningModule):
                 assign=True,
             )
             g0_print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
-
-        if self.requires_grad is not None:
-            t0 = g0_print("Toggling requires_grad on specified model parameters...")
-            for name, param in self.model.named_parameters():
-                param.requires_grad = self.requires_grad(name)
-            g0_print(f"Toggled requires_grad on parameters in {time.time() - t0:.3f}s.")
-
-        if self.watch_gradients:
-            g0_print("Watching model gradients with W&B...")
-            cast(WandbLogger, self.trainer.logger).watch(self.model)
 
         g0_print("Done loading & configuring model.")
 

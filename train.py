@@ -4,12 +4,11 @@ import lightning as L
 
 from pathlib import Path
 
-from typing import List, Optional
+from typing import Optional
 
 from lit_gpt.tokenizer import Tokenizer
 
 from lightning.pytorch.loggers import WandbLogger
-from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 
 from utils.warnings import suppress_uncontrollable_warnings, elevate_important_warnings
 
@@ -35,35 +34,17 @@ def main(
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
     epochs: int = 1,  # Make this -1 to train forever / until max_time.
     #################################################################
-    learning_rate: float = 2e-5,
-    warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
-    weight_decay: float = 0.00,  # Generally not used for finetuning.
-    #################################################################
     val_split_ratio: float = 0.01,  # 1% of training dataset.
     val_check_interval: float = 0.01,  # After every 1% of training.
     #################################################################
-    # Set params_to_freeze to freeze specific parameters, set params_to_train
-    # to freeze everything except specific parameters, or set both to None to
-    # train everything. They are mutually exclusive, at least one must be None.
-    params_to_freeze: Optional[List[str]] = None,
-    params_to_train: Optional[List[str]] = [],  # Train nothing.
-    #################################################################
     log_every_n_steps: int = 10,
-    watch_gradients: bool = False,  # Very slow if training many params.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
-    #################################################################
-    save_checkpoints: bool = False,
-    save_top_k_checkpoints: int = 5,
     #################################################################
     run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
 ):
     """
     Bistro: ♪ The finest of the finer things, 24 hours a day, 7 days a week ♪
     """
-
-    assert not (
-        params_to_freeze and params_to_train
-    ), "Provide either params_to_freeze or params_to_train, not both."
 
     hparams = {
         k: v
@@ -91,28 +72,11 @@ def main(
         precision=precision,
         val_check_interval=val_check_interval,
         log_every_n_steps=log_every_n_steps,
-        enable_checkpointing=save_checkpoints,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
         logger=WandbLogger(
             project=project,
             name=run_name,
             config=hparams,
-        ),
-        callbacks=[
-            LearningRateMonitor(logging_interval="step"),
-        ]
-        + (
-            [
-                ModelCheckpoint(
-                    verbose=True,
-                    monitor="val_loss",
-                    save_top_k=save_top_k_checkpoints,
-                    dirpath=f"checkpoints/trained/{project}/{run_name}",
-                    filename="{epoch}-{step}-{val_loss:.2f}",
-                )
-            ]
-            if save_checkpoints
-            else []
         ),
     )
 
@@ -122,21 +86,6 @@ def main(
         model_config=Config.from_name(name=base_model_dir.name),
         tokenizer=tokenizer,
         checkpoint_path=base_model_dir / "lit_model.pth",
-        learning_rate=learning_rate,
-        warmup_ratio=warmup_ratio,
-        weight_decay=weight_decay,
-        requires_grad=(
-            # If params_to_freeze is set, freeze all
-            # params except those in params_to_freeze.
-            (lambda name: name not in params_to_freeze)
-            if params_to_freeze is not None
-            # If params_to_train is set, only train those.
-            else (lambda name: name in params_to_train)
-            if params_to_train is not None
-            # Otherwise, train everything.
-            else None
-        ),
-        watch_gradients=watch_gradients,
     )
 
     datamodule = LitDataModule(
