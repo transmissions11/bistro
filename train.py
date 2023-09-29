@@ -22,15 +22,14 @@ from model import Config
 
 
 def main(
-    project: str = "bistro",
+    project: str = "hard-prompting",
     #################################################################
     data_dir: Path = Path("data"),
     base_model_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
     #################################################################
-    devices: int = 4,
+    devices: int = 1,
     strategy: str = "auto",
-    micro_batch_size: int = 2,
-    gradient_accumulation_iters: int = 16,
+    micro_batch_size: int = 4,
     precision: str = "bf16-true",
     #################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
@@ -93,7 +92,6 @@ def main(
         val_check_interval=val_check_interval,
         log_every_n_steps=log_every_n_steps,
         enable_checkpointing=save_checkpoints,
-        accumulate_grad_batches=gradient_accumulation_iters,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
         logger=WandbLogger(
             project=project,
