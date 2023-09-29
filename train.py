@@ -46,7 +46,7 @@ def main(
     # to freeze everything except specific parameters, or set both to None to
     # train everything. They are mutually exclusive, at least one must be None.
     params_to_freeze: Optional[List[str]] = None,
-    params_to_train: Optional[List[str]] = None,
+    params_to_train: Optional[List[str]] = [],  # Train nothing.
     #################################################################
     log_every_n_steps: int = 50,
     watch_gradients: bool = False,  # Very slow if training many params.
