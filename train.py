@@ -41,7 +41,7 @@ def main(
     weight_decay: float = 0.00,  # Generally not used for finetuning.
     #################################################################
     val_split_ratio: float = 0.05,  # 5% of training dataset.
-    val_check_interval: float = 0.05,  # After very 5% of training.
+    val_check_interval: float = 0.05,  # After every 5% of training.
     #################################################################
     # Set params_to_freeze to freeze specific parameters, set params_to_train
     # to freeze everything except specific parameters, or set both to None to
