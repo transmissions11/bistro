@@ -74,9 +74,9 @@ class LitDataModule(L.LightningDataModule):
             self.hf_datasets["train"],
             collate_fn=pad_collate_fn,
             batch_size=self.hparams.micro_batch_size,
-            # num_workers=8,
-            # pin_memory=True,
-            # shuffle=True,
+            num_workers=8,
+            pin_memory=True,
+            shuffle=True,
         )
 
     def val_dataloader(self):
@@ -86,6 +86,6 @@ class LitDataModule(L.LightningDataModule):
             # Since we're not computing and storing gradients
             # while validating, we can use a larger batch size.
             batch_size=self.hparams.micro_batch_size * 2,
-            # num_workers=8,
-            # pin_memory=True,
+            num_workers=8,
+            pin_memory=True,
         )
