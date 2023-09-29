@@ -50,6 +50,8 @@ class LitModel(L.LightningModule):
         self.checkpoint_path = checkpoint_path
         self.watch_gradients = watch_gradients
 
+        self.automatic_optimization = False  # We'll handle it ourselves.
+
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(
             ignore=["checkpoint_path", "requires_grad", "watch_gradients"], logger=False
