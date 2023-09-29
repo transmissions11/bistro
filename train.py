@@ -151,7 +151,7 @@ def main(
     )
 
     if trainer.is_global_zero:
-        print("Training with the following hyperparams:")
+        print("Training with the following hyperparameters:")
         pprintjson(hparams)
 
     trainer.validate(model, datamodule=datamodule)
