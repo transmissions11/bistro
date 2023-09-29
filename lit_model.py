@@ -146,7 +146,7 @@ class LitModel(L.LightningModule):
             )
 
     def configure_optimizers(self):
-        return None  # We don't need an optimizer.
+        ...  # We don't need an optimizer.
 
     def configure_model(self):
         # Ensure this function is idempotent, as
