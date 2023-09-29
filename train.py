@@ -6,6 +6,8 @@ from pathlib import Path
 
 from typing import Optional
 
+from pprintjson import pprintjson
+
 from lit_gpt.tokenizer import Tokenizer
 
 from lightning.pytorch.loggers import WandbLogger
@@ -96,7 +98,8 @@ def main(
     )
 
     if trainer.is_global_zero:
-        print("Training with the following hyperparams:", hparams)
+        print("Training with the following hyperparameters:")
+        pprintjson(hparams)
 
     trainer.validate(model, datamodule=datamodule)
     trainer.fit(model, datamodule=datamodule)
