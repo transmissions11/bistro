@@ -74,8 +74,8 @@ class LitDataModule(L.LightningDataModule):
             self.hf_datasets["train"],
             collate_fn=pad_collate_fn,
             batch_size=self.hparams.micro_batch_size,
-            num_workers=8,
-            pin_memory=True,
+            # num_workers=8,
+            # pin_memory=True,
             shuffle=True,
         )
 
