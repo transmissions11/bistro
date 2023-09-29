@@ -29,7 +29,7 @@ def main(
     #################################################################
     devices: int = 1,
     strategy: str = "auto",
-    micro_batch_size: int = 4,
+    micro_batch_size: int = 3,
     precision: str = "bf16-true",
     #################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
