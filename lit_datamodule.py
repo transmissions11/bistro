@@ -76,7 +76,7 @@ class LitDataModule(L.LightningDataModule):
             batch_size=self.hparams.micro_batch_size,
             # num_workers=8,
             # pin_memory=True,
-            shuffle=True,
+            # shuffle=True,
         )
 
     def val_dataloader(self):
