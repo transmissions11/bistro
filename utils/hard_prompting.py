@@ -13,7 +13,7 @@ def token_gradients(model: GPT, input_ids, target_ids):
     embed_weights = model.transformer.wte.weight
 
     # find the position of the first occurrence of the soft_prompt_tkn in idx
-    hard_prompt_positions = torch.where(input_ids == hard_prompt_template_tkn)[1]
+    hard_prompt_positions = torch.where(input_ids == hard_prompt_template_tkn)
     hard_prompt_start_pos = hard_prompt_positions[0]
     hard_prompt_end_pos = hard_prompt_positions[-1]
 
@@ -46,7 +46,7 @@ def token_gradients(model: GPT, input_ids, target_ids):
                 # The hard prompt, undetached w/ grads.
                 (one_hot @ embed_weights).unsqueeze(0),
                 # Everything after the hard prompt.
-                detached_embeds[:, hard_prompt_end_pos:, :],
+                detached_embeds[:, hard_prompt_end_pos + 1 :, :],
             ],
             dim=1,
         ),
