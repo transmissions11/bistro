@@ -1,60 +1,31 @@
 import torch
 
+from utils.loss import compute_loss
+
 from model import GPT
 
+hard_prompt_template_tkn = (
+    -1
+)  # TODO (https://github.com/transmissions11/bistro/blob/soft-prompting/lit_model.py)
 
-def token_gradients(model: GPT, input_ids, input_slice, target_ids):
-    # embed_weights = self.model.transformer.wte.weight
 
-    # # TODO: separate slice of input_ids
-
-    # one_hot = torch.zeros(
-    #     input_ids.shape[0],
-    #     embed_weights.shape[0],
-    #     device=self.device,
-    #     dtype=embed_weights.dtype,
-    # )
-
-    # one_hot.scatter_(
-    #     1,
-    #     input_ids.unsqueeze(1),
-    #     torch.ones(
-    #         one_hot.shape[0], 1, device=self.device, dtype=embed_weights.dtype
-    #     ),
-    # )
-
-    # one_hot.requires_grad_()
-
-    # input_embeds = (one_hot @ embed_weights).unsqueeze(0)
-
-    # # now stitch it together with the rest of the embeddings
-    # embeds = self.model.transformer.wte(input_ids.unsqueeze(0)).detach()
-    # full_embeds = torch.cat(
-    #     [
-    #         embeds[:, : input_slice.start, :],
-    #         input_embeds,
-    #         embeds[:, input_slice.stop :, :],
-    #     ],
-    #     dim=1,
-    # )
-
-    # loss = self.compute_loss(targets, input_embeds=full_embeds)
-
-    # # loss.backward()
-    # self.manual_backward(loss)
-
-    # grad = one_hot.grad.clone()
-
+def token_gradients(model: GPT, input_ids, target_ids):
     embed_weights = model.transformer.wte.weight
+
+    # find the position of the first occurrence of the soft_prompt_tkn in idx
+    hard_prompt_positions = torch.where(input_ids == hard_prompt_template_tkn)[1]
+    hard_prompt_start_pos = hard_prompt_positions[0]
+    hard_prompt_end_pos = hard_prompt_positions[-1]
+
     one_hot = torch.zeros(
-        input_ids[input_slice].size(0),
+        input_ids[hard_prompt_start_pos:hard_prompt_end_pos].size(0),
         embed_weights.size(0),  # Vocab size.
         device=model.device,
         dtype=embed_weights.dtype,
     )
     one_hot.scatter_(
         1,
-        input_ids[input_slice].unsqueeze(1),
+        input_ids[hard_prompt_start_pos:hard_prompt_end_pos].unsqueeze(1),
         torch.ones(one_hot.size(0), 1, device=model.device, dtype=embed_weights.dtype),
     )
     one_hot.requires_grad_()
@@ -66,18 +37,21 @@ def token_gradients(model: GPT, input_ids, input_slice, target_ids):
         input_ids.unsqueeze(0)
     ).detach()  # Detaching to prevent updates during backpropagation
 
-    full_embeds = torch.cat(
-        [
-            detached_embeds[:, : input_slice.start, :],
-            (one_hot @ embed_weights).unsqueeze(0),
-            detached_embeds[:, input_slice.stop :, :],
-        ],
-        dim=1,
+    loss = compute_loss(
+        model,
+        input_embs=torch.cat(
+            [
+                # Everything before the hard prompt.
+                detached_embeds[:, :hard_prompt_start_pos, :],
+                # The hard prompt, undetached w/ grads.
+                (one_hot @ embed_weights).unsqueeze(0),
+                # Everything after the hard prompt.
+                detached_embeds[:, hard_prompt_end_pos:, :],
+            ],
+            dim=1,
+        ),
+        targets=target_ids,
     )
-
-    logits = model(inputs_embeds=full_embeds).logits
-    targets = input_ids[target_slice]
-    loss = nn.CrossEntropyLoss()(logits[0, loss_slice, :], targets)
 
     # so my understanding is input slice is what part to treat as the control sequence,
     #  loss slice is basically a poor mans mask over the input, and targets is a poor mans mask to get targets all from one long input seq
@@ -85,8 +59,6 @@ def token_gradients(model: GPT, input_ids, input_slice, target_ids):
 
     loss.backward()
 
-    # why are we grad norming
     grad = one_hot.grad.clone()
-    grad = grad / grad.norm(dim=-1, keepdim=True)
 
-    return grad
+    return grad / grad.norm(dim=-1, keepdim=True)
