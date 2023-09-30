@@ -1,8 +1,6 @@
 import time
 import torch
 
-from torch.nn import functional as F
-
 import lightning as L
 
 from pathlib import Path
@@ -13,6 +11,7 @@ from lightning.pytorch.loggers import WandbLogger
 
 from lit_gpt import Config, Tokenizer
 
+from utils.loss import compute_loss
 from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
 from utils.padding import strip_right_pad, ignored_tkn
@@ -57,7 +56,7 @@ class LitModel(L.LightningModule):
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
-        loss = self.compute_loss(inputs, targets)
+        loss = compute_loss(self.model, inputs, targets)
 
         self.log("train_loss", loss)
 
@@ -65,7 +64,7 @@ class LitModel(L.LightningModule):
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
-        loss = self.compute_loss(inputs, targets)
+        loss = compute_loss(self.model, inputs, targets)
 
         self.log(
             "val_loss",
@@ -185,9 +184,3 @@ class LitModel(L.LightningModule):
     def on_train_start(self):
         self.print(f"\nResetting model caches for training...\n")
         self.model.reset_caches()
-
-    def compute_loss(self, inputs, targets):
-        logits = self.model(input_ids=inputs)
-        return F.cross_entropy(
-            logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=ignored_tkn
-        )
