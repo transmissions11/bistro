@@ -56,7 +56,7 @@ class LitModel(L.LightningModule):
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
-        loss = compute_loss(self.model, inputs, targets)
+        loss = compute_loss(self.model, input_ids=inputs, targets=targets)
 
         self.log("train_loss", loss)
 
@@ -64,7 +64,7 @@ class LitModel(L.LightningModule):
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
-        loss = compute_loss(self.model, inputs, targets)
+        loss = compute_loss(self.model, input_ids=inputs, targets=targets)
 
         self.log(
             "val_loss",
