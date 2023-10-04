@@ -9,7 +9,7 @@ hard_prompt_template_tkn = (
 )  # TODO (https://github.com/transmissions11/bistro/blob/soft-prompting/lit_model.py)
 
 
-def token_gradients(model: GPT, input_ids, target_ids):
+def token_gradients(model: GPT, input_ids: torch.Tensor, target_ids: torch.Tensor):
     embed_weights = model.transformer.wte.weight
 
     # find the position of the first occurrence of the soft_prompt_tkn in idx
@@ -51,7 +51,7 @@ def token_gradients(model: GPT, input_ids, target_ids):
             ],
             dim=1,
         ),
-        targets=target_ids,
+        target_ids=target_ids,
     )
 
     # so my understanding is input slice is what part to treat as the control sequence,
