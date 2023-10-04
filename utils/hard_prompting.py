@@ -68,4 +68,6 @@ def token_gradients(
 
     grad = one_hot.grad.clone()
 
+    print(grad.shape)
+
     return grad / grad.norm(dim=-1, keepdim=True)
