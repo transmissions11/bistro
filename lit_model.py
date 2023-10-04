@@ -44,7 +44,7 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
-        print(token_gradients(self.model, input_ids=inputs, targets_ids=targets))
+        print(token_gradients(self.model, input_ids=inputs, target_ids=targets))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
