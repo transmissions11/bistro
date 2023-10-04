@@ -40,6 +40,7 @@ def main(
     #################################################################
     val_split_ratio: float = 0.01,  # 1% of training dataset.
     val_check_interval: float = 0.01,  # After every 1% of training.
+    skip_starting_validation: bool = False,  # Useful for debugging.
     #################################################################
     log_every_n_steps: int = 10,
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
@@ -105,7 +106,9 @@ def main(
         print("Training with the following hyperparameters:")
         pprintjson(hparams)
 
-    trainer.validate(model, datamodule=datamodule)
+    if not skip_starting_validation:
+        trainer.validate(model, datamodule=datamodule)
+
     trainer.fit(model, datamodule=datamodule)
 
 
