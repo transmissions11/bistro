@@ -9,13 +9,15 @@ def token_gradients(
     model: GPT,
     *,  # Force keyword arguments.
     hard_prompt_tkn: int,
-    input_ids: torch.Tensor,
-    target_ids: torch.Tensor,
+    input_ids: torch.Tensor,  # (b = 1, t)
+    target_ids: torch.Tensor,  # (b = 1, t)
 ):
+    input_ids = input_ids.squeeze(0)  # (t)
+
     embed_weights = model.transformer.wte.weight
 
     # find the position of the first occurrence of the hard_prompt_tkn in idx
-    hard_prompt_positions = torch.where(input_ids == hard_prompt_tkn)[1]
+    hard_prompt_positions = torch.where(input_ids == hard_prompt_tkn)
     hard_prompt_start_pos = hard_prompt_positions[0].item()
     hard_prompt_end_pos = hard_prompt_positions[-1].item()
 
