@@ -99,8 +99,8 @@ def main(
         tokenizer=tokenizer,
         micro_batch_size=micro_batch_size,
         val_split_ratio=val_split_ratio,
-        num_soft_prompt_tkns=num_hard_prompt_tkns,
-        soft_prompt_tkn=hard_prompt_tkn,
+        num_hard_prompt_tkns=num_hard_prompt_tkns,
+        hard_prompt_tkn=hard_prompt_tkn,
     )
 
     if trainer.is_global_zero:
