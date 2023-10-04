@@ -18,7 +18,6 @@ class LitDataModule(L.LightningDataModule):
         self,
         data_dir: str,
         tokenizer: Tokenizer,
-        micro_batch_size: int,
         val_split_ratio: float,
         ##########################
         num_hard_prompt_tkns: int,
@@ -83,7 +82,7 @@ class LitDataModule(L.LightningDataModule):
         return DataLoader(
             self.hf_datasets["train"],
             collate_fn=pad_collate_fn,
-            batch_size=self.hparams.micro_batch_size,
+            batch_size=1,  # Can only compute hard prompt grads on 1 batch at a time.
             num_workers=8,
             pin_memory=True,
             shuffle=True,
@@ -95,7 +94,7 @@ class LitDataModule(L.LightningDataModule):
             collate_fn=pad_collate_fn,
             # Since we're not computing and storing gradients
             # while validating, we can use a larger batch size.
-            batch_size=self.hparams.micro_batch_size * 2,
+            batch_size=6,
             num_workers=8,
             pin_memory=True,
         )

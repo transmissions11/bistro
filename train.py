@@ -30,7 +30,6 @@ def main(
     #################################################################
     devices: int = 1,
     strategy: str = "auto",
-    micro_batch_size: int = 3,
     precision: str = "bf16-true",
     #################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
@@ -97,7 +96,6 @@ def main(
     datamodule = LitDataModule(
         data_dir=str(data_dir),
         tokenizer=tokenizer,
-        micro_batch_size=micro_batch_size,
         val_split_ratio=val_split_ratio,
         num_hard_prompt_tkns=num_hard_prompt_tkns,
         hard_prompt_tkn=hard_prompt_tkn,
