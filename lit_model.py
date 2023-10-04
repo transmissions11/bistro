@@ -12,6 +12,7 @@ from lit_gpt import Config, Tokenizer
 from utils.loss import compute_loss
 from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
+from utils.hard_prompting import token_gradients
 from utils.padding import strip_right_pad, ignored_tkn
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 
@@ -42,13 +43,8 @@ class LitModel(L.LightningModule):
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
-        loss = compute_loss(self.model, input_ids=inputs, targets=targets)
 
-        print("hello, training")
-
-        self.log("train_loss", loss)
-
-        return loss
+        print(token_gradients(self.model, input_ids=inputs, targets=targets))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
