@@ -44,6 +44,7 @@ def main(
     #################################################################
     val_split_ratio: float = 0.05,  # 5% of training dataset.
     val_check_interval: float = 0.05,  # After every 5% of training.
+    skip_starting_validation: bool = False,  # Useful for debugging.
     #################################################################
     # Set params_to_freeze to freeze specific parameters, set params_to_train
     # to freeze everything except specific parameters, or set both to None to
@@ -154,7 +155,9 @@ def main(
         print("Training with the following hyperparameters:")
         pprintjson(hparams)
 
-    trainer.validate(model, datamodule=datamodule)
+    if not skip_starting_validation:
+        trainer.validate(model, datamodule=datamodule)
+
     trainer.fit(model, datamodule=datamodule)
 
 
