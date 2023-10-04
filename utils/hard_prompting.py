@@ -19,7 +19,7 @@ def token_gradients(
     # find the position of the first occurrence of the hard_prompt_tkn in idx
     hard_prompt_positions = torch.where(input_ids == hard_prompt_tkn)
     print(input_ids, hard_prompt_positions)
-    print("TF", hard_prompt_positions[0])
+    print("TF", hard_prompt_positions[0], hard_prompt_positions[0][0])
     hard_prompt_start_pos = hard_prompt_positions[0].item()
     hard_prompt_end_pos = hard_prompt_positions[-1].item()
 
