@@ -21,13 +21,15 @@ def token_gradients(model: GPT, input_ids: torch.Tensor, target_ids: torch.Tenso
         # The length of the hard prompt.
         (hard_prompt_end_pos - hard_prompt_start_pos + 1),
         embed_weights.size(0),  # Vocab size.
-        device=model.device,
+        device=input_ids.device,
         dtype=embed_weights.dtype,
     )
     one_hot.scatter_(
         1,
         input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1].unsqueeze(1),
-        torch.ones(one_hot.size(0), 1, device=model.device, dtype=embed_weights.dtype),
+        torch.ones(
+            one_hot.size(0), 1, device=input_ids.device, dtype=embed_weights.dtype
+        ),
     )
     one_hot.requires_grad_()
 
