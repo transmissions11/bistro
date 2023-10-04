@@ -24,8 +24,8 @@ class LitModel(L.LightningModule):
         self,
         model_config: Config,
         tokenizer: Tokenizer,
-        ###############################
-        # If None, will use random weights.
+        hard_prompt_tkn: int,
+        #######################################
         checkpoint_path: Optional[Path] = None,
     ):
         super().__init__()
@@ -44,7 +44,14 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
-        print(token_gradients(self.model, input_ids=inputs, target_ids=targets))
+        print(
+            token_gradients(
+                self.model,
+                hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                input_ids=inputs,
+                target_ids=targets,
+            )
+        )
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]

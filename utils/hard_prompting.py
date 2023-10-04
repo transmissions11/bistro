@@ -4,16 +4,18 @@ from utils.loss import compute_loss
 
 from model import GPT
 
-hard_prompt_template_tkn = (
-    -1
-)  # TODO (https://github.com/transmissions11/bistro/blob/soft-prompting/lit_model.py)
 
-
-def token_gradients(model: GPT, input_ids: torch.Tensor, target_ids: torch.Tensor):
+def token_gradients(
+    model: GPT,
+    *,  # Force keyword arguments.
+    hard_prompt_tkn: int,
+    input_ids: torch.Tensor,
+    target_ids: torch.Tensor,
+):
     embed_weights = model.transformer.wte.weight
 
-    # find the position of the first occurrence of the soft_prompt_tkn in idx
-    hard_prompt_positions = torch.where(input_ids == hard_prompt_template_tkn)
+    # find the position of the first occurrence of the hard_prompt_tkn in idx
+    hard_prompt_positions = torch.where(input_ids == hard_prompt_tkn)
     hard_prompt_start_pos = hard_prompt_positions[0].item()
     hard_prompt_end_pos = hard_prompt_positions[-1].item()
 

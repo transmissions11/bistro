@@ -36,6 +36,9 @@ def main(
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
     epochs: int = 1,  # Make this -1 to train forever / until max_time.
     #################################################################
+    num_hard_prompt_tkns: int = 20,
+    hard_prompt_tkn: str = "✅",
+    #################################################################
     val_split_ratio: float = 0.01,  # 1% of training dataset.
     val_check_interval: float = 0.01,  # After every 1% of training.
     #################################################################
@@ -87,6 +90,7 @@ def main(
     model = LitModel(
         model_config=Config.from_name(name=base_model_dir.name),
         tokenizer=tokenizer,
+        hard_prompt_tkn=tokenizer.token_to_id(hard_prompt_tkn),
         checkpoint_path=base_model_dir / "lit_model.pth",
     )
 
@@ -95,6 +99,8 @@ def main(
         tokenizer=tokenizer,
         micro_batch_size=micro_batch_size,
         val_split_ratio=val_split_ratio,
+        num_soft_prompt_tkns=num_hard_prompt_tkns,
+        soft_prompt_tkn=hard_prompt_tkn,
     )
 
     if trainer.is_global_zero:
