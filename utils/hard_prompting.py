@@ -21,6 +21,8 @@ def token_gradients(
     hard_prompt_start_pos = hard_prompt_positions[0].item()
     hard_prompt_end_pos = hard_prompt_positions[-1].item()
 
+    print(hard_prompt_start_pos, hard_prompt_end_pos)
+
     one_hot = torch.zeros(
         # The length of the hard prompt.
         (hard_prompt_end_pos - hard_prompt_start_pos + 1),
