@@ -44,14 +44,16 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
-        print(
-            token_gradients(
-                self.model,
-                hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-                input_ids=inputs,
-                target_ids=targets,
-            )
+        token_grads = token_gradients(
+            self.model,
+            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+            input_ids=inputs,
+            target_ids=targets,
         )
+
+        print(token_grads.shape)  # will print: torch.Size([20, 32000])
+        # get the most likely token for all 20
+        print(token_grads.argmax(dim=-1))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
