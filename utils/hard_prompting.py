@@ -17,6 +17,10 @@ def token_gradients(model: GPT, input_ids: torch.Tensor, target_ids: torch.Tenso
     hard_prompt_start_pos = hard_prompt_positions[0]
     hard_prompt_end_pos = hard_prompt_positions[-1]
 
+    print(
+        f"hard_prompt_start_pos: {hard_prompt_start_pos}, hard_prompt_end_pos: {hard_prompt_end_pos}"
+    )
+
     one_hot = torch.zeros(
         # The length of the hard prompt.
         (hard_prompt_end_pos - hard_prompt_start_pos + 1),
