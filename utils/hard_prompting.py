@@ -14,8 +14,8 @@ def token_gradients(model: GPT, input_ids: torch.Tensor, target_ids: torch.Tenso
 
     # find the position of the first occurrence of the soft_prompt_tkn in idx
     hard_prompt_positions = torch.where(input_ids == hard_prompt_template_tkn)
-    hard_prompt_start_pos = hard_prompt_positions[0]
-    hard_prompt_end_pos = hard_prompt_positions[-1]
+    hard_prompt_start_pos = hard_prompt_positions[0].item()
+    hard_prompt_end_pos = hard_prompt_positions[-1].item()
 
     print(
         f"hard_prompt_start_pos: {hard_prompt_start_pos}, hard_prompt_end_pos: {hard_prompt_end_pos}"
