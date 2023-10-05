@@ -15,7 +15,7 @@ def token_gradients(
 ):
     input_ids = input_ids.squeeze(0)  # (t)
 
-    embed_weights = model.transformer.wte.weight
+    embed_weights = model.transformer.wte.weight  # (vocab_size, emb_dim)
 
     # find the position of the first occurrence of the hard_prompt_tkn in idx
     hard_prompt_positions = torch.where(input_ids == hard_prompt_tkn)[0]
