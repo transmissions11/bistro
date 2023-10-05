@@ -47,7 +47,10 @@ class LitModel(L.LightningModule):
             "current_hard_prompt",
             tokenizer.encode(
                 "Please multiply these two 3 digit numbers as best you possibly can. No talk; just go.",
-            ).to(torch.int64),
+            ).to(
+                # HuggingFace datasets converts all integers to int64, so we have to here as well.
+                torch.int64
+            ),
         )
 
         assert (
