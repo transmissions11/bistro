@@ -68,7 +68,13 @@ def token_gradients(
 
     print(decoded_tokens)
 
-    print(model.transformer.wte(tokenizer.encode("Hello").to(input_ids)))
+    print(
+        tokenizer.decode(
+            model.lm_head(
+                model.transformer.wte(tokenizer.encode("Hello").to(input_ids))
+            ).argmax(dim=-1)
+        )
+    )
 
     loss = compute_loss(
         model,
