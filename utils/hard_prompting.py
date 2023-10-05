@@ -12,6 +12,7 @@ def token_gradients(
     current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
     input_ids: torch.Tensor,  # (b = 1, t)
     target_ids: torch.Tensor,  # (b = 1, t)
+    tokenizer,
 ):
     input_ids = input_ids.squeeze(0)  # (t)
 
@@ -63,7 +64,7 @@ def token_gradients(
 
     decoded = model.lm_head(input_embs)  # size -  torch.Size([1, 77, 32000])
 
-    decoded_tokens = decoded.argmax(dim=-1).squeeze(0)
+    decoded_tokens = tokenizer.decode(decoded.argmax(dim=-1).squeeze(0))
 
     print(decoded_tokens)
 

@@ -66,6 +66,7 @@ class LitModel(L.LightningModule):
             current_hard_prompt=self.current_hard_prompt,
             input_ids=inputs,
             target_ids=targets,
+            tokenizer=self.hparams.tokenizer,
         )
 
         print(token_grads.shape)  # will print: torch.Size([20, 32000])
