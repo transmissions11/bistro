@@ -65,9 +65,7 @@ def token_gradients(
     transposed_weights = model.transformer.wte.weight.transpose(0, 1)
 
     # print the shaped of transposed input weights
-    print(
-        input_embs.squeeze(0).shape, (input_embs.squeeze(0) @ transposed_weights).shape
-    )
+    print((input_embs.squeeze(0) @ transposed_weights).argmax(dim=-1))
     loss = compute_loss(
         model,
         input_embs=input_embs,
