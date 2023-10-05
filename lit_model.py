@@ -42,11 +42,13 @@ class LitModel(L.LightningModule):
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(ignore=["checkpoint_path"], logger=False)
 
-        self.current_hard_prompt = tokenizer.encode("")
+        self.current_hard_prompt = tokenizer.encode(
+            "Please multiply these two 3 digit numbers as best you possibly can. No talk; just go."
+        )
 
         assert (
             self.current_hard_prompt.size(0) == num_hard_prompt_tkns
-        ), "hard prompt size mismatch"
+        ), f"hard prompt size mismatch {self.current_hard_prompt.size(0)} != {num_hard_prompt_tkns}"
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
