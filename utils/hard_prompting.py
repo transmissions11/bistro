@@ -42,12 +42,8 @@ def token_gradients(
     )
     one_hot.requires_grad_()
 
-    # now stitch it together with the rest of the embeddings
-    # TODO: can we re-use embed_weights?
-    # TODO: do we actually need to detach given we've turned off grads for everything earlier?
-    detached_embeds = model.transformer.wte(
-        input_ids.unsqueeze(0)
-    ).detach()  # Detaching to prevent updates during backpropagation
+    # Detached to prevent updates during backpropagation.
+    detached_embeds = embed_weights[input_ids.unsqueeze(0)].detach()
 
     loss = compute_loss(
         model,
@@ -64,10 +60,6 @@ def token_gradients(
         ),
         target_ids=target_ids,
     )
-
-    # so my understanding is input slice is what part to treat as the control sequence,
-    #  loss slice is basically a poor mans mask over the input, and targets is a poor mans mask to get targets all from one long input seq
-    # can verify by just running
 
     loss.backward()
 
