@@ -67,7 +67,7 @@ class LitModel(L.LightningModule):
 
         print(token_grads.shape)  # will print: torch.Size([20, 32000])
         # get the most likely token for all 20
-        argmaxed = token_grads.abs().argmax(dim=-1)
+        argmaxed = token_grads.argmax(dim=-1)
         for tkn in argmaxed:
             print("|" + self.hparams.tokenizer.decode(tkn) + "|")
 
