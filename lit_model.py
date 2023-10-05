@@ -47,8 +47,7 @@ class LitModel(L.LightningModule):
             "current_hard_prompt",
             tokenizer.encode(
                 "Please multiply these two 3 digit numbers as best you possibly can. No talk; just go.",
-                dtype=torch.int64,
-            ),
+            ).to(torch.int64),
         )
 
         assert (
