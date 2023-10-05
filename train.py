@@ -53,6 +53,7 @@ def main(
     params_to_train: Optional[List[str]] = None,
     #################################################################
     log_every_n_steps: int = 50,
+    disable_wandb: bool = False,  # Also useful for debugging.
     watch_gradients: bool = False,  # Very slow if training many params.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
     #################################################################
@@ -98,10 +99,14 @@ def main(
         enable_checkpointing=save_checkpoints,
         accumulate_grad_batches=gradient_accumulation_iters,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
-        logger=WandbLogger(
-            project=project,
-            name=run_name,
-            config=hparams,
+        logger=(
+            WandbLogger(
+                project=project,
+                name=run_name,
+                config=hparams,
+            )
+            if not disable_wandb
+            else None
         ),
         callbacks=[
             LearningRateMonitor(logging_interval="step"),
