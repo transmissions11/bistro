@@ -12,9 +12,9 @@ from lit_gpt import Config, Tokenizer
 from utils.loss import compute_loss
 from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
-from utils.hard_prompting import token_gradients
 from utils.padding import strip_right_pad, ignored_tkn
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
+from utils.hard_prompting import sample_hard_prompt, token_gradients
 
 from model import GPT
 
@@ -67,6 +67,15 @@ class LitModel(L.LightningModule):
             input_ids=inputs,
             target_ids=targets,
         )
+
+        new_hard_prompt = sample_hard_prompt(
+            hard_prompt_tkns=self.current_hard_prompt,
+            grad=token_grads,
+            batch_size=inputs.size(0),
+            topk=256,
+        )
+
+        print(new_hard_prompt)
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
