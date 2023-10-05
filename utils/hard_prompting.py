@@ -68,14 +68,8 @@ def token_gradients(
 
     print(decoded_tokens)
 
-    print(
-        tokenizer.decode(
-            model.lm_head(
-                model.transformer.wte(tokenizer.encode("Hello").to(input_ids))
-            ).argmax(dim=-1)
-        )
-    )
-
+    # check that lm_head transposed is the same as the embedding weights
+    print(model.lm_head.weight.transpose(0, 1).allclose(embed_weights))
     loss = compute_loss(
         model,
         input_embs=input_embs,
