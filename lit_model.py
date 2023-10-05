@@ -46,7 +46,7 @@ class LitModel(L.LightningModule):
         self.register_buffer(
             "current_hard_prompt",
             tokenizer.encode(
-                "Please✅ these two 3 digit numbers as best you possibly can. No talk; just go.",
+                "Please multiply these two 3 digit numbers as best you possibly can. No talk; just go.",
             ).to(
                 # HuggingFace datasets converts all integers to int64, so we have to here as well.
                 torch.int64
@@ -67,9 +67,6 @@ class LitModel(L.LightningModule):
             input_ids=inputs,
             target_ids=targets,
         )
-
-        most_likely = token_grads.argmax(dim=-1)
-        print("|" + self.hparams.tokenizer.decode(most_likely[1]) + "|")
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
