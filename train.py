@@ -86,7 +86,7 @@ def main(
                 config=hparams,
             )
             if not disable_wandb
-            else None
+            else False
         ),
     )
 
