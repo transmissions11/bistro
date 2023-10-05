@@ -12,7 +12,6 @@ def token_gradients(
     current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
     input_ids: torch.Tensor,  # (b = 1, t)
     target_ids: torch.Tensor,  # (b = 1, t)
-    tokenizer,
 ):
     input_ids = input_ids.squeeze(0)  # (t)
 
@@ -50,25 +49,19 @@ def token_gradients(
         input_ids.unsqueeze(0)
     ).detach()  # Detaching to prevent updates during backpropagation
 
-    input_embs = torch.cat(
-        [
-            # Everything before the hard prompt.
-            detached_embeds[:, :hard_prompt_start_pos, :],
-            # The hard prompt, undetached w/ grads.
-            (one_hot @ embed_weights).unsqueeze(0),
-            # Everything after the hard prompt.
-            detached_embeds[:, hard_prompt_end_pos + 1 :, :],
-        ],
-        dim=1,
-    )
-
-    transposed_weights = model.transformer.wte.weight.transpose(0, 1)
-
-    # print the shaped of transposed input weights
-    print(tokenizer.decode((input_embs.squeeze(0) @ transposed_weights).argmax(dim=-1)))
     loss = compute_loss(
         model,
-        input_embs=input_embs,
+        input_embs=torch.cat(
+            [
+                # Everything before the hard prompt.
+                detached_embeds[:, :hard_prompt_start_pos, :],
+                # The hard prompt, undetached w/ grads.
+                (one_hot @ embed_weights).unsqueeze(0),
+                # Everything after the hard prompt.
+                detached_embeds[:, hard_prompt_end_pos + 1 :, :],
+            ],
+            dim=1,
+        ),
         target_ids=target_ids,
     )
 
