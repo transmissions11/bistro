@@ -42,6 +42,8 @@ class LitModel(L.LightningModule):
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(ignore=["checkpoint_path"], logger=False)
 
+        print(self.device)
+
         self.current_hard_prompt = tokenizer.encode(
             "Please multiply these two 3 digit numbers as best you possibly can. No talk; just go.",
             device=self.device,
