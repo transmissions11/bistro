@@ -66,7 +66,7 @@ class LitDataModule(L.LightningDataModule):
             # After map so changing test_size doesn't bust the cache.
             # Seed so the auto shuffle is 100% idempotent, just in case.
             .train_test_split(test_size=self.hparams.val_split_ratio, seed=1337)
-            # Note: This will convert all int32s to be int64s.
+            # Convert all relevant types to tensors. All int32s will become int64s.
             .with_format("torch")
         )
 
