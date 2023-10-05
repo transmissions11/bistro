@@ -61,7 +61,11 @@ def token_gradients(
         dim=1,
     )
 
-    print("DECODED", model.lm_head(input_embs).shape)
+    decoded = model.lm_head(input_embs)  # size -  torch.Size([1, 77, 32000])
+
+    decoded_tokens = decoded.argmax(dim=-1).squeeze(0)
+
+    print(decoded_tokens)
 
     loss = compute_loss(
         model,
