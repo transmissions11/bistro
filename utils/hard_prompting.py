@@ -9,9 +9,9 @@ def token_gradients(
     model: GPT,
     *,  # Force keyword arguments.
     hard_prompt_tkn: int,
+    current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
     input_ids: torch.Tensor,  # (b = 1, t)
     target_ids: torch.Tensor,  # (b = 1, t)
-    current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
 ):
     input_ids = input_ids.squeeze(0)  # (t)
 
