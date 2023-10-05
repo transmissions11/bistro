@@ -42,6 +42,8 @@ class LitDataModule(L.LightningDataModule):
                 eos=True,  # Don't see why you wouldn't want to train with an eos_token.
             )
 
+            print("TRANFORM", seq.dtype)
+
             return {
                 "inputs": seq[:-1],
                 # Mask everything before the assistant response.
