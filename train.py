@@ -43,6 +43,7 @@ def main(
     skip_starting_validation: bool = False,  # Useful for debugging.
     #################################################################
     log_every_n_steps: int = 10,
+    disable_wandb: bool = False,  # Also useful for debugging.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
     #################################################################
     run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
@@ -78,10 +79,14 @@ def main(
         val_check_interval=val_check_interval,
         log_every_n_steps=log_every_n_steps,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
-        logger=WandbLogger(
-            project=project,
-            name=run_name,
-            config=hparams,
+        logger=(
+            WandbLogger(
+                project=project,
+                name=run_name,
+                config=hparams,
+            )
+            if not disable_wandb
+            else None
         ),
     )
 
