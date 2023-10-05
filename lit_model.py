@@ -71,7 +71,7 @@ class LitModel(L.LightningModule):
         new_hard_prompt = sample_hard_prompt(
             hard_prompt_tkns=self.current_hard_prompt,
             grad=token_grads,
-            batch_siz=13,
+            batch_size=13,
             topk=256,
         )
 
