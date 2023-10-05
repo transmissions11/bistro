@@ -13,6 +13,8 @@ def token_gradients(
     input_ids: torch.Tensor,  # (b = 1, t)
     target_ids: torch.Tensor,  # (b = 1, t)
 ):
+    print("DTYPES", current_hard_prompt.dtype, input_ids.dtype, target_ids.dtype)
+
     input_ids = input_ids.squeeze(0)  # (t)
 
     embed_weights = model.transformer.wte.weight
