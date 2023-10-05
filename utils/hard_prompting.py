@@ -49,19 +49,23 @@ def token_gradients(
         input_ids.unsqueeze(0)
     ).detach()  # Detaching to prevent updates during backpropagation
 
+    input_embs = torch.cat(
+        [
+            # Everything before the hard prompt.
+            detached_embeds[:, :hard_prompt_start_pos, :],
+            # The hard prompt, undetached w/ grads.
+            (one_hot @ embed_weights).unsqueeze(0),
+            # Everything after the hard prompt.
+            detached_embeds[:, hard_prompt_end_pos + 1 :, :],
+        ],
+        dim=1,
+    )
+
+    print("DECODED", model.lm_head(input_embs).shape)
+
     loss = compute_loss(
         model,
-        input_embs=torch.cat(
-            [
-                # Everything before the hard prompt.
-                detached_embeds[:, :hard_prompt_start_pos, :],
-                # The hard prompt, undetached w/ grads.
-                (one_hot @ embed_weights).unsqueeze(0),
-                # Everything after the hard prompt.
-                detached_embeds[:, hard_prompt_end_pos + 1 :, :],
-            ],
-            dim=1,
-        ),
+        input_embs=input_embs,
         target_ids=target_ids,
     )
 
