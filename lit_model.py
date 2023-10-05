@@ -68,11 +68,8 @@ class LitModel(L.LightningModule):
             target_ids=targets,
         )
 
-        print(token_grads.shape)  # will print: torch.Size([20, 32000])
-        # get the most likely token for all 20
-        argmaxed = token_grads.argmin(dim=-1)
-        for tkn in argmaxed:
-            print("|" + self.hparams.tokenizer.decode(tkn) + "|")
+        most_likely = token_grads.argmax(dim=-1)
+        print("|" + self.hparams.tokenizer.decode(most_likely[0]) + "|")
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
