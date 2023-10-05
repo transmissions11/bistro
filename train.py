@@ -78,6 +78,7 @@ def main(
         precision=precision,
         val_check_interval=val_check_interval,
         log_every_n_steps=log_every_n_steps,
+        enable_checkpointing=False,
         num_sanity_val_steps=0,  # We run validate() before fit() already, so no need.
         logger=(
             WandbLogger(
