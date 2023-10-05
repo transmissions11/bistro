@@ -43,7 +43,8 @@ class LitModel(L.LightningModule):
         self.save_hyperparameters(ignore=["checkpoint_path"], logger=False)
 
         self.current_hard_prompt = tokenizer.encode(
-            "Please multiply these two 3 digit numbers as best you possibly can. No talk; just go."
+            "Please multiply these two 3 digit numbers as best you possibly can. No talk; just go.",
+            device=self.device,
         )
 
         assert (
