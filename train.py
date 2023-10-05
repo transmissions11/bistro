@@ -106,7 +106,7 @@ def main(
                 config=hparams,
             )
             if not disable_wandb
-            else None
+            else False
         ),
         callbacks=[
             LearningRateMonitor(logging_interval="step"),
