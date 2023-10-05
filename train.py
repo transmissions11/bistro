@@ -91,6 +91,7 @@ def main(
         model_config=Config.from_name(name=base_model_dir.name),
         tokenizer=tokenizer,
         hard_prompt_tkn=tokenizer.token_to_id(hard_prompt_tkn),
+        num_hard_prompt_tkns=num_hard_prompt_tkns,
         checkpoint_path=base_model_dir / "lit_model.pth",
     )
 

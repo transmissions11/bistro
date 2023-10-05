@@ -11,6 +11,7 @@ def token_gradients(
     hard_prompt_tkn: int,
     input_ids: torch.Tensor,  # (b = 1, t)
     target_ids: torch.Tensor,  # (b = 1, t)
+    current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
 ):
     input_ids = input_ids.squeeze(0)  # (t)
 
@@ -21,18 +22,20 @@ def token_gradients(
     hard_prompt_start_pos = hard_prompt_positions[0].item()
     hard_prompt_end_pos = hard_prompt_positions[-1].item()
 
-    print(hard_prompt_start_pos, hard_prompt_end_pos)
+    # ensure that the hard prompt template is the same length as the current hard prompt
+    assert hard_prompt_end_pos - hard_prompt_start_pos + 1 == current_hard_prompt.size(
+        0
+    ), "mismatch between the calculated hard prompt length and current hard prompt length"
 
     one_hot = torch.zeros(
-        # The length of the hard prompt.
-        (hard_prompt_end_pos - hard_prompt_start_pos + 1),
+        current_hard_prompt.size(0),
         embed_weights.size(0),  # Vocab size.
         device=input_ids.device,
         dtype=embed_weights.dtype,
     )
     one_hot.scatter_(
         1,
-        input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1].unsqueeze(1),
+        current_hard_prompt.unsqueeze(1),
         torch.ones(
             one_hot.size(0), 1, device=input_ids.device, dtype=embed_weights.dtype
         ),
