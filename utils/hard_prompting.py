@@ -68,9 +68,11 @@ def token_gradients(
 
     print(decoded_tokens)
 
-    # check that lm_head transposed is the same as the embedding weights
-    print(model.lm_head.weight.shape, embed_weights.shape)
-    print(model.lm_head.weight, embed_weights)
+    # print the shaped of transposed input weights
+    print(
+        model.transformer.wte.weight.shape,
+        model.transformer.wte.weight.transpose(0, 1).shape,
+    )
     loss = compute_loss(
         model,
         input_embs=input_embs,
