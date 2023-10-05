@@ -1,5 +1,7 @@
 import torch
 
+from typing import Optional
+
 from utils.loss import compute_loss
 
 from model import GPT
@@ -66,3 +68,38 @@ def token_gradients(
     grad = one_hot.grad.clone()
 
     return grad / grad.norm(dim=-1, keepdim=True)
+
+
+def sample_hard_prompt(
+    hard_prompt_tkns: torch.Tensor,
+    grad: torch.Tensor,
+    batch_size: int,
+    topk: int = 256,
+    not_allowed_tokens: Optional[torch.Tensor] = None,
+):
+    if not_allowed_tokens is not None:
+        grad[:, not_allowed_tokens.to(grad.device)] = float("inf")
+
+    top_indices = (-grad).topk(topk, dim=1).indices
+    hard_prompt_tkns = hard_prompt_tkns.to(grad.device)
+
+    original_hard_prompt_tkns = hard_prompt_tkns.repeat(batch_size, 1)
+
+    new_token_pos = torch.arange(
+        0, len(hard_prompt_tkns), len(hard_prompt_tkns) / batch_size, device=grad.device
+    ).type(torch.int64)
+
+    new_token_val = torch.gather(
+        top_indices[new_token_pos],
+        1,
+        torch.randint(0, topk, (batch_size, 1), device=grad.device),
+    )
+
+    new_hard_prompt_tkns = original_hard_prompt_tkns.scatter_(
+        1, new_token_pos.unsqueeze(-1), new_token_val
+    )
+
+    print("SHAPE", new_hard_prompt_tkns.shape)
+    print(f"{batch_size=}, {topk=}, {not_allowed_tokens=}")
+
+    return new_hard_prompt_tkns
