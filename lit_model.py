@@ -75,7 +75,8 @@ class LitModel(L.LightningModule):
             topk=256,
         )
 
-        print(new_hard_prompt)
+        for i in range(new_hard_prompt.size(0)):
+            print(self.hparams.tokenizer.decode(new_hard_prompt[i]))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
