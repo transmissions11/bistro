@@ -68,6 +68,8 @@ def token_gradients(
 
     print(decoded_tokens)
 
+    print(model.transformer.wte(tokenizer.encode("Hello")))
+
     loss = compute_loss(
         model,
         input_embs=input_embs,
