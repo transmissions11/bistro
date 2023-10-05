@@ -1,6 +1,7 @@
 import lightning.pytorch as L
 
 from functools import partial
+import torch
 
 from torch.utils.data import DataLoader
 
@@ -42,8 +43,6 @@ class LitDataModule(L.LightningDataModule):
                 eos=True,  # Don't see why you wouldn't want to train with an eos_token.
             )
 
-            print("TRANFORM", seq.dtype)
-
             return {
                 "inputs": seq[:-1],
                 # Mask everything before the assistant response.
@@ -68,7 +67,9 @@ class LitDataModule(L.LightningDataModule):
             # After map so changing test_size doesn't bust the cache.
             # Seed so the auto shuffle is 100% idempotent, just in case.
             .train_test_split(test_size=self.hparams.val_split_ratio, seed=1337)
-            .with_format("torch")  # Convert relevant types to tensors.
+            .with_format(
+                "torch", dtype=torch.int32
+            )  # Convert relevant types to tensors.
         )
 
     def prepare_data(self):
