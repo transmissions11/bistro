@@ -78,15 +78,11 @@ class LitModel(L.LightningModule):
             batch_size=13,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
         )
 
-        print("CANDS", hard_prompt_candidates)
-
         hard_prompt_candidates = filter_hard_prompt_candidates(
             self.hparams.tokenizer,
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_candidates=hard_prompt_candidates,
         )
-
-        print("FILTERED", hard_prompt_candidates)
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
