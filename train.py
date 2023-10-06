@@ -33,7 +33,7 @@ def main(
     precision: str = "bf16-true",
     #################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
-    epochs: int = 1,  # Make this -1 to train forever / until max_time.
+    epochs: int = -1,  # Make this -1 to train forever / until max_time.
     #################################################################
     num_hard_prompt_tkns: int = 20,
     hard_prompt_tkn: str = "✅",
