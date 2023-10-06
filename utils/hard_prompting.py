@@ -99,7 +99,7 @@ def create_hard_prompt_candidates(
     # Get the ids of the top-k tokens that would most decrease the loss.
     top_indices = (-hard_prompt_grads).topk(topk, dim=1).indices
 
-    original_hard_prompt_tkns = current_hard_prompt.repeat(batch_size, 1)
+    candidates_batch = current_hard_prompt.repeat(batch_size, 1)
 
     new_token_pos = torch.arange(
         0,
@@ -114,12 +114,9 @@ def create_hard_prompt_candidates(
         torch.randint(0, topk, (batch_size, 1), device=hard_prompt_grads.device),
     )
 
-    new_hard_prompt_tkns = original_hard_prompt_tkns.scatter_(
+    new_hard_prompt_tkns = candidates_batch.scatter_(
         1, new_token_pos.unsqueeze(-1), new_token_val
     )
-
-    print("SHAPE", new_hard_prompt_tkns.shape)
-    print(f"{batch_size=}, {topk=}, {not_allowed_tokens=}")
 
     return new_hard_prompt_tkns
 
