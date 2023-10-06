@@ -14,7 +14,10 @@ from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
 from utils.padding import strip_right_pad, ignored_tkn
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
-from utils.hard_prompting import sample_hard_prompt, token_gradients
+from utils.hard_prompting import (
+    get_hard_prompt_gradients,
+    create_hard_prompt_candidates,
+)
 
 from model import GPT
 
@@ -60,19 +63,18 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
-        token_grads = token_gradients(
+        hard_prompt_grads = get_hard_prompt_gradients(
             self.model,
-            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
             current_hard_prompt=self.current_hard_prompt,
+            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
             input_ids=inputs,
             target_ids=targets,
         )
 
-        new_hard_prompt = sample_hard_prompt(
-            hard_prompt_tkns=self.current_hard_prompt,
-            grad=token_grads,
-            batch_size=13,
-            topk=256,
+        new_hard_prompt = create_hard_prompt_candidates(
+            current_hard_prompt=self.current_hard_prompt,
+            hard_prompt_grads=hard_prompt_grads,
+            batch_size=13,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
         )
 
         for i in range(new_hard_prompt.size(0)):
