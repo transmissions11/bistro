@@ -77,9 +77,6 @@ class LitModel(L.LightningModule):
             batch_size=13,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
         )
 
-        for i in range(new_hard_prompt.size(0)):
-            print(self.hparams.tokenizer.decode(new_hard_prompt[i]))
-
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
         loss = compute_loss(self.model, input_ids=inputs, target_ids=targets)
