@@ -151,6 +151,7 @@ class LitModel(L.LightningModule):
         #             for i in range(len(inputs))  # Full batch.
         #         ],
         #     )
+        ...
 
     def configure_optimizers(self):
         ...  # We don't need an optimizer.
