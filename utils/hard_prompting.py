@@ -1,6 +1,6 @@
 import torch
 
-from typing import Optional
+from typing import Optional, Tuple
 
 from lit_gpt import Tokenizer
 
@@ -156,9 +156,9 @@ def test_hard_prompt_candidates(
     hard_prompt_tkn: int,
     input_ids: torch.Tensor,  # (b = 1, t)
     target_ids: torch.Tensor,  # (b = 1, t)
-) -> int:
+) -> Tuple[float, int]:
     """
-    Returns the index of the hard prompt candidate that yields the lowest loss when inserted into the input_ids sequence.
+    Returns the minimum loss and the index of the hard prompt candidate that yields the lowest loss when inserted into the input_ids sequence.
     """
 
     input_ids = input_ids.squeeze(0)  # (t)
@@ -186,4 +186,4 @@ def test_hard_prompt_candidates(
             min_loss = loss
             min_loss_idx = idx
 
-    return min_loss_idx
+    return min_loss, min_loss_idx
