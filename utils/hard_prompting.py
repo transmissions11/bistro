@@ -101,7 +101,7 @@ def create_hard_prompt_candidates(
 
     candidates_batch = current_hard_prompt.repeat(batch_size, 1)
 
-    # Generate positions for new tokens in the hard prompt by creating a tensor of evenly spaced values.
+    # Generate a 1d tensor of an index to replace in each row of the batch.
     new_token_pos = torch.arange(
         0,
         len(current_hard_prompt),
@@ -109,17 +109,13 @@ def create_hard_prompt_candidates(
         device=hard_prompt_grads.device,
     ).type(torch.int64)
 
-    print("SHAPERINO", new_token_pos.shape)
-
-    # TODO: ADD A COMMENT AFTER PRINTING THIS
-    print(new_token_pos)  # TODO: ADD A COMMENT AFTER PRINTING THIS
-    # TODO: ADD A COMMENT AFTER PRINTING THIS
-
     new_token_val = torch.gather(
         top_indices[new_token_pos],
         1,
         torch.randint(0, topk, (batch_size, 1), device=hard_prompt_grads.device),
     )
+
+    print("new token val", new_token_val)
 
     new_hard_prompt_tkns = candidates_batch.scatter_(
         1, new_token_pos.unsqueeze(-1), new_token_val
