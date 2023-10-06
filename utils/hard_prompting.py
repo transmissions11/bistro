@@ -169,6 +169,8 @@ def test_hard_prompt_candidates(
     min_loss = float("inf")
     min_loss_idx = -1
 
+    print(hard_prompt_candidates.shape, hard_prompt_candidates)
+
     for idx, candidate in enumerate(hard_prompt_candidates):
         # Replace the hard prompt in the input sequence with the candidate
         new_input_ids = input_ids.clone()
