@@ -142,11 +142,6 @@ def filter_hard_prompt_candidates(
         and candidate.size(0) == tokenizer.encode(tokenizer.decode(candidate)).size(0)
     ]
 
-    if len(hard_prompt_candidates) - len(filtered):
-        print(
-            f"WARNING: {len(hard_prompt_candidates) - len(filtered)} hard prompt candidates were filtered out."
-        )
-
     # If the number of filtered candidates is less than the number of hard
     # prompt candidates, pad the list with the last candidate and return.
     return torch.stack(
