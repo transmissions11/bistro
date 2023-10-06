@@ -177,7 +177,9 @@ def test_hard_prompt_candidates(
         new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
 
         # Compute the loss
-        loss = compute_loss(model, input_ids=new_input_ids, target_ids=target_ids)
+        loss = compute_loss(
+            model, input_ids=new_input_ids.unsqueeze(0), target_ids=target_ids
+        )
 
         # Update the minimum loss and the corresponding index
         if loss < min_loss:
