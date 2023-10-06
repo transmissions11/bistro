@@ -110,6 +110,8 @@ def create_hard_prompt_candidates(
         dtype=torch.int64,
     )
 
+    print("SHAPERINO", new_token_pos.shape)
+
     # TODO: ADD A COMMENT AFTER PRINTING THIS
     print(new_token_pos)  # TODO: ADD A COMMENT AFTER PRINTING THIS
     # TODO: ADD A COMMENT AFTER PRINTING THIS
