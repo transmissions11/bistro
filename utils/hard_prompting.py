@@ -147,3 +147,39 @@ def filter_hard_prompt_candidates(
     return torch.stack(
         filtered + [filtered[-1]] * (len(hard_prompt_candidates) - len(filtered))
     )
+
+
+def test_hard_prompt_candidates(
+    model: GPT,
+    *,  # Force keyword arguments.
+    hard_prompt_candidates: torch.Tensor,  # (batch_size, num_hard_prompt_tkns)
+    hard_prompt_tkn: int,
+    input_ids: torch.Tensor,  # (b = 1, t)
+    target_ids: torch.Tensor,  # (b = 1, t)
+) -> int:
+    """
+    Returns the index of the hard prompt candidate that yields the lowest loss when inserted into the input_ids sequence.
+    """
+
+    # find the position of the first occurrence of the hard_prompt_tkn in idx
+    hard_prompt_positions = torch.where(input_ids == hard_prompt_tkn)[0]
+    hard_prompt_start_pos = hard_prompt_positions[0].item()
+    hard_prompt_end_pos = hard_prompt_positions[-1].item()
+
+    min_loss = float("inf")
+    min_loss_idx = -1
+
+    for idx, candidate in enumerate(hard_prompt_candidates):
+        # Replace the hard prompt in the input sequence with the candidate
+        new_input_ids = input_ids.clone()
+        new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
+
+        # Compute the loss
+        loss = compute_loss(model, input_ids=new_input_ids, target_ids=target_ids)
+
+        # Update the minimum loss and the corresponding index
+        if loss < min_loss:
+            min_loss = loss
+            min_loss_idx = idx
+
+    return min_loss_idx

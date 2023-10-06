@@ -18,6 +18,7 @@ from utils.hard_prompting import (
     get_hard_prompt_gradients,
     create_hard_prompt_candidates,
     filter_hard_prompt_candidates,
+    test_hard_prompt_candidates,
 )
 
 from model import GPT
@@ -83,6 +84,16 @@ class LitModel(L.LightningModule):
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_candidates=hard_prompt_candidates,
         )
+
+        best_candidate_idx = test_hard_prompt_candidates(
+            self.model,
+            hard_prompt_candidates=hard_prompt_candidates,
+            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+            input_ids=inputs,
+            target_ids=targets,
+        )
+        self.current_hard_prompt = hard_prompt_candidates[best_candidate_idx]
+        print("NEW PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
