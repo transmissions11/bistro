@@ -98,59 +98,59 @@ class LitModel(L.LightningModule):
         print("NEW PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
-        inputs, targets = batch["inputs"], batch["targets"]
-        loss = compute_loss(self.model, input_ids=inputs, target_ids=targets)
+        # inputs, targets = batch["inputs"], batch["targets"]
+        # loss = compute_loss(self.model, input_ids=inputs, target_ids=targets)
 
-        self.log(
-            "val_loss",
-            # Need to upcast precision as types like bfloat16
-            # have very low precision with larger values (~256+)
-            # that results in inaccurate accumulation w/ on_epoch.
-            # https://github.com/Lightning-AI/lightning/issues/18620
-            loss.to(torch.float32),
-            on_epoch=True,
-            prog_bar=True,
-            sync_dist=True,
-        )
+        # self.log(
+        #     "val_loss",
+        #     # Need to upcast precision as types like bfloat16
+        #     # have very low precision with larger values (~256+)
+        #     # that results in inaccurate accumulation w/ on_epoch.
+        #     # https://github.com/Lightning-AI/lightning/issues/18620
+        #     loss.to(torch.float32),
+        #     on_epoch=True,
+        #     prog_bar=True,
+        #     sync_dist=True,
+        # )
 
-        # Log a few sample inferences from the validation set to W&B.
-        if batch_idx == 0:
-            tokenizer = self.hparams.tokenizer
+        # # Log a few sample inferences from the validation set to W&B.
+        # if batch_idx == 0:
+        #     tokenizer = self.hparams.tokenizer
 
-            prompt_end_tkns = tokenizer.encode(
-                VICUNA_END_OF_USER_PROMPT_SEQUENCE, device=self.device
-            )
+        #     prompt_end_tkns = tokenizer.encode(
+        #         VICUNA_END_OF_USER_PROMPT_SEQUENCE, device=self.device
+        #     )
 
-            def process_val_sample(sample, target):
-                sample = strip_right_pad(sample)
-                target = strip_right_pad(target)
+        #     def process_val_sample(sample, target):
+        #         sample = strip_right_pad(sample)
+        #         target = strip_right_pad(target)
 
-                input_ids = sample[: find_subtensor_end(sample, prompt_end_tkns) + 1]
+        #         input_ids = sample[: find_subtensor_end(sample, prompt_end_tkns) + 1]
 
-                return (
-                    tokenizer.decode(input_ids),
-                    tokenizer.decode(
-                        inference_model(
-                            self.model,
-                            input_ids,
-                            temperature=0.00,  # Sample 100% greedily.
-                            max_new_tokens=100,  # Should hit an eos token first.
-                            eos_id=tokenizer.eos_id,
-                        )
-                    ),
-                    # Note: target != ignored_tkn strips away ignored_tkn tokens entirely,
-                    # which may lead to confusion if ignored_tkn is used between real tokens.
-                    tokenizer.decode(target[target != ignored_tkn]),
-                )
+        #         return (
+        #             tokenizer.decode(input_ids),
+        #             tokenizer.decode(
+        #                 inference_model(
+        #                     self.model,
+        #                     input_ids,
+        #                     temperature=0.00,  # Sample 100% greedily.
+        #                     max_new_tokens=100,  # Should hit an eos token first.
+        #                     eos_id=tokenizer.eos_id,
+        #                 )
+        #             ),
+        #             # Note: target != ignored_tkn strips away ignored_tkn tokens entirely,
+        #             # which may lead to confusion if ignored_tkn is used between real tokens.
+        #             tokenizer.decode(target[target != ignored_tkn]),
+        #         )
 
-            self.logger.log_text(
-                key="val_samples",
-                columns=["input", "output", "target"],
-                data=[
-                    process_val_sample(inputs[i], targets[i])
-                    for i in range(len(inputs))  # Full batch.
-                ],
-            )
+        #     self.logger.log_text(
+        #         key="val_samples",
+        #         columns=["input", "output", "target"],
+        #         data=[
+        #             process_val_sample(inputs[i], targets[i])
+        #             for i in range(len(inputs))  # Full batch.
+        #         ],
+        #     )
 
     def configure_optimizers(self):
         ...  # We don't need an optimizer.
