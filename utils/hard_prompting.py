@@ -25,12 +25,12 @@ def get_hard_prompt_gradients(
 
     embed_weights = model.transformer.wte.weight  # (vocab_size, emb_dim)
 
-    # find the position of the first occurrence of the hard_prompt_tkn in idx
+    # Find the position of the hard prompt template in input_ids.
     hard_prompt_positions = torch.where(input_ids == hard_prompt_tkn)[0]
     hard_prompt_start_pos = hard_prompt_positions[0].item()
     hard_prompt_end_pos = hard_prompt_positions[-1].item()
 
-    # ensure that the hard prompt template is the same length as the current hard prompt
+    # Ensure that the hard prompt template is the same length as the current hard prompt.
     assert hard_prompt_end_pos - hard_prompt_start_pos + 1 == current_hard_prompt.size(
         0
     ), "mismatch between the calculated hard prompt length and current hard prompt length"
@@ -161,7 +161,9 @@ def test_hard_prompt_candidates(
     Returns the index of the hard prompt candidate that yields the lowest loss when inserted into the input_ids sequence.
     """
 
-    # find the position of the first occurrence of the hard_prompt_tkn in idx
+    input_ids = input_ids.squeeze(0)  # (t)
+
+    # Find the position of the hard prompt template in input_ids.
     hard_prompt_positions = torch.where(input_ids == hard_prompt_tkn)[0]
     hard_prompt_start_pos = hard_prompt_positions[0].item()
     hard_prompt_end_pos = hard_prompt_positions[-1].item()
@@ -170,10 +172,6 @@ def test_hard_prompt_candidates(
     min_loss_idx = -1
 
     for idx, candidate in enumerate(hard_prompt_candidates):
-        print(
-            f"{candidate.shape=} {hard_prompt_start_pos=} {hard_prompt_end_pos=} {input_ids.shape=} {target_ids.shape=}"
-        )
-
         # Replace the hard prompt in the input sequence with the candidate
         new_input_ids = input_ids.clone()
         new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
