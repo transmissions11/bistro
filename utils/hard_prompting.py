@@ -107,8 +107,7 @@ def create_hard_prompt_candidates(
         len(current_hard_prompt),
         len(current_hard_prompt) / batch_size,
         device=hard_prompt_grads.device,
-        dtype=torch.int64,
-    )
+    ).type(torch.int64)
 
     print("SHAPERINO", new_token_pos.shape)
 
