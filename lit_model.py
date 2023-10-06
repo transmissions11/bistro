@@ -17,6 +17,7 @@ from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 from utils.hard_prompting import (
     get_hard_prompt_gradients,
     create_hard_prompt_candidates,
+    filter_hard_prompt_candidates,
 )
 
 from model import GPT
@@ -71,11 +72,21 @@ class LitModel(L.LightningModule):
             target_ids=targets,
         )
 
-        new_hard_prompt = create_hard_prompt_candidates(
+        hard_prompt_candidates = create_hard_prompt_candidates(
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_grads=hard_prompt_grads,
             batch_size=13,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
         )
+
+        print("CANDS", hard_prompt_candidates)
+
+        hard_prompt_candidates = filter_hard_prompt_candidates(
+            self.hparams.tokenizer,
+            current_hard_prompt=self.current_hard_prompt,
+            hard_prompt_candidates=hard_prompt_candidates,
+        )
+
+        print("FILTERED", hard_prompt_candidates)
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
