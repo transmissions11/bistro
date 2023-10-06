@@ -92,41 +92,37 @@ def create_hard_prompt_candidates(
     filter_hard_prompt_candidates to ensure the length of the candidates doesn't explode.
     """
 
-    # Set the gradients of not allowed tokens to infinity.
     if not_allowed_tokens is not None:
-        hard_prompt_grads[:, not_allowed_tokens] = float("inf")
+        hard_prompt_grads[:, not_allowed_tokens.to(hard_prompt_grads.device)] = float(
+            "inf"
+        )
 
-    # Get the ids of the top-k tokens that would most decrease the loss.
     top_indices = (-hard_prompt_grads).topk(topk, dim=1).indices
+    current_hard_prompt = current_hard_prompt.to(hard_prompt_grads.device)
 
-    # Initialize the batch of candidates by just repeating the current hard prompt.
-    candidates_batch = current_hard_prompt.repeat(batch_size, 1)
+    original_hard_prompt_tkns = current_hard_prompt.repeat(batch_size, 1)
 
-    # Generate positions for new tokens in the hard prompt by creating a tensor of evenly spaced values.
     new_token_pos = torch.arange(
         0,
         len(current_hard_prompt),
         len(current_hard_prompt) / batch_size,
         device=hard_prompt_grads.device,
-        dtype=torch.int64,
-    )
+    ).type(torch.int64)
 
-    # TODO: ADD A COMMENT AFTER PRINTING THIS
-    print(new_token_pos)  # TODO: ADD A COMMENT AFTER PRINTING THIS
-    # TODO: ADD A COMMENT AFTER PRINTING THIS
-
-    # TODO comment
-    # For each new token position, select a random token from the top-k tokens.
     new_token_val = torch.gather(
         top_indices[new_token_pos],
         1,
-        # Randomly select a token from the top-k tokens.
         torch.randint(0, topk, (batch_size, 1), device=hard_prompt_grads.device),
     )
 
-    # TODO comment
-    # Return the original hard prompt tokens at the new token positions with the new token values.
-    return candidates_batch.scatter_(1, new_token_pos.unsqueeze(-1), new_token_val)
+    new_hard_prompt_tkns = original_hard_prompt_tkns.scatter_(
+        1, new_token_pos.unsqueeze(-1), new_token_val
+    )
+
+    print("SHAPE", new_hard_prompt_tkns.shape)
+    print(f"{batch_size=}, {topk=}, {not_allowed_tokens=}")
+
+    return new_hard_prompt_tkns
 
 
 def filter_hard_prompt_candidates(
