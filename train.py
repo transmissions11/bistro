@@ -78,6 +78,7 @@ def main(
         precision=precision,
         #########################
         limit_train_batches=1,
+        limit_val_batches=0,
         ##########################
         val_check_interval=val_check_interval,
         log_every_n_steps=log_every_n_steps,
