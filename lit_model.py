@@ -71,15 +71,15 @@ class LitModel(L.LightningModule):
             target_ids=targets,
         )
 
-        # TODO: wait what do these look like when batch_size > topk
-
         # TODO: support grad accum iters essentially (split into multiple batches)
         hard_prompt_candidates = create_hard_prompt_candidates(
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_grads=hard_prompt_grads,
-            batch_size=100,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
-            topk=128,
+            batch_size=10,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
+            topk=5,
         )
+
+        print("CANDIDATES", hard_prompt_candidates)
 
         hard_prompt_candidates = clean_hard_prompt_candidates(
             self.hparams.tokenizer,
