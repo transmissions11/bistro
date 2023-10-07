@@ -50,6 +50,8 @@ class LitModel(L.LightningModule):
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(ignore=["checkpoint_path"], logger=False)
 
+        # TODO: benchmark this
+
         self.register_buffer(
             "not_allowed_tokens",
             get_non_ascii_tkns(tokenizer) if only_ascii_tkns else None,
@@ -71,19 +73,15 @@ class LitModel(L.LightningModule):
 
         # TODO: ablate these for performance
 
-        hard_prompt_grads = get_hard_prompt_gradients(
-            self.model,
-            current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-            input_ids=inputs,
-            target_ids=targets,
-        )
-
-        merged_grads = self.all_gather(hard_prompt_grads)
-
-        self.print(merged_grads.shape, merged_grads.mean(dim=0).shape)
-
-        # TODO: limit to ascii
+        hard_prompt_grads = self.all_gather(
+            get_hard_prompt_gradients(
+                self.model,
+                current_hard_prompt=self.current_hard_prompt,
+                hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                input_ids=inputs,
+                target_ids=targets,
+            )
+        ).mean(dim=0)
 
         # TODO: support grad accum iters essentially (split into multiple batches)
         hard_prompt_candidates = create_hard_prompt_candidates(
