@@ -75,10 +75,11 @@ class LitModel(L.LightningModule):
 
         # TODO: wait what do these look like when batch_size > topk
 
+        # TODO: support grad accum iters essentially (split into multiple batches)
         hard_prompt_candidates = create_hard_prompt_candidates(
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_grads=hard_prompt_grads,
-            batch_size=100,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
+            batch_size=128,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
             topk=128,
         )
 
