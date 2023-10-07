@@ -192,9 +192,9 @@ def test_hard_prompt_candidates(
         input_ids=batch["inputs"],
         target_ids=batch["targets"],
         reduce=False,
-    )
+    ).view(hard_prompt_candidates.size(0), -1)
 
-    print(loss.view(hard_prompt_candidates.size(0), -1).shape)
+    print(loss)
 
     # Find the index of the sequence with the minimum loss
     min_loss_idx = torch.argmin(loss).item()
