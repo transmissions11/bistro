@@ -137,9 +137,9 @@ def filter_hard_prompt_candidates(
         candidate
         for candidate in hard_prompt_candidates
         # Ensure the candidate is not the same as the current hard prompt.
-        # if not torch.equal(candidate, current_hard_prompt)
+        if not torch.equal(candidate, current_hard_prompt)
         # Ensure the candidate is the same length after decoding and encoding.
-        if candidate.size(0) == tokenizer.encode(tokenizer.decode(candidate)).size(0)
+        and candidate.size(0) == tokenizer.encode(tokenizer.decode(candidate)).size(0)
     ]
 
     # If the number of filtered candidates is less than the number of hard
