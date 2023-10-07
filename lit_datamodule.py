@@ -94,9 +94,7 @@ class LitDataModule(L.LightningDataModule):
         return DataLoader(
             self.hf_datasets["test"],
             collate_fn=pad_collate_fn,
-            # Since we're not computing and storing gradients
-            # while validating, we can use a larger batch size.
-            batch_size=6,
+            batch_size=1,
             num_workers=8,
             pin_memory=True,
         )
