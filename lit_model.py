@@ -51,12 +51,10 @@ class LitModel(L.LightningModule):
         self.register_buffer(
             "current_hard_prompt",
             torch.tensor(
-                [2] * num_hard_prompt_tkns,
+                [hard_prompt_tkn] * num_hard_prompt_tkns,
                 dtype=torch.int64,
             ),
         )
-
-        print(self.current_hard_prompt)
 
         assert (
             self.current_hard_prompt.size(0) == num_hard_prompt_tkns
