@@ -93,9 +93,11 @@ class LitModel(L.LightningModule):
             )
         ).mean(dim=0)
 
+        self.print("bidx", batch_idx)
+
         # If it is time to update the model parameters:
         if (batch_idx + 1) % self.hparams.grad_accumulation_steps == 0:
-            print("done accumulating, updating now!")
+            self.print("done accumulating, updating now!")
 
             # Use the accumulated gradients for the update.
             hard_prompt_grads = (
@@ -135,10 +137,6 @@ class LitModel(L.LightningModule):
 
             if batch_idx % 20 == 0:
                 print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
-        else:
-            print(
-                f"percent done accumulating: {(batch_idx + 1) / self.hparams.grad_accumulation_steps}"
-            )
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
