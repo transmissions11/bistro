@@ -76,7 +76,7 @@ class LitModel(L.LightningModule):
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_grads=hard_prompt_grads,
             batch_size=10,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
-            topk=5,
+            topk=1,
         )
 
         print("CANDIDATES", hard_prompt_candidates.sum(dim=-1))
