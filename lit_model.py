@@ -78,7 +78,7 @@ class LitModel(L.LightningModule):
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_grads=hard_prompt_grads,
             batch_size=100,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
-            topk=100,
+            topk=128,
         )
 
         hard_prompt_candidates = clean_hard_prompt_candidates(
