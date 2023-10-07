@@ -236,12 +236,14 @@ class LitModel(L.LightningModule):
         self.print("\nResetting model caches for training...\n")
         self.model.reset_caches()
 
-        self.print("\Registering gradients accumulation buffer...\n")
+        self.print("\nRegistering gradients accumulation buffer...\n")
         self.register_buffer(
             "accumulated_grads",
             torch.zeros(
                 self.trainer.world_size,
                 self.hparams.num_hard_prompt_tkns,
                 self.hparams.tokenizer.vocab_size,
+                device=self.device,
             ),
+            persistent=False,
         )
