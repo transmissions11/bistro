@@ -98,8 +98,9 @@ class LitModel(L.LightningModule):
         )
         self.current_hard_prompt = hard_prompt_candidates[best_candidate_idx]
 
-        print("NEW LOSS", min_loss)
-        print("NEW PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
+        if batch_idx % 20 == 0:
+            print("LOSS", min_loss)
+            print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         # inputs, targets = batch["inputs"], batch["targets"]
