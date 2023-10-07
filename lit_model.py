@@ -91,13 +91,6 @@ class LitModel(L.LightningModule):
 
         gathered_grads = self.all_gather(local_grads)
 
-        print(
-            "SHAPES (l,g,a)",
-            local_grads.shape,
-            gathered_grads.shape,
-            self.accumulated_grads.shape,
-        )
-
         # Compute, gather, and accumulate the gradients for the hard prompt.
         self.accumulated_grads += gathered_grads.mean(dim=0)
 
