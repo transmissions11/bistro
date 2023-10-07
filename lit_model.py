@@ -191,13 +191,6 @@ class LitModel(L.LightningModule):
         self.model = GPT(config=self.hparams.model_config)
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
-        #############################################
-
-        for param in self.model.parameters():
-            param.requires_grad = False
-
-        #############################################
-
         if self.checkpoint_path is not None:
             t0 = g0_print(f"Loading checkpoint weights from {self.checkpoint_path}...")
             self.model.load_state_dict(
