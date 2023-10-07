@@ -69,15 +69,6 @@ class LitModel(L.LightningModule):
             self.current_hard_prompt.size(0) == num_hard_prompt_tkns
         ), f"hard prompt size mismatch {self.current_hard_prompt.size(0)} != {num_hard_prompt_tkns}"
 
-        self.register_buffer(
-            "accumulated_grads",
-            torch.zeros(
-                self.trainer.world_size,
-                num_hard_prompt_tkns,
-                tokenizer.vocab_size,
-            ),
-        )
-
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
@@ -236,3 +227,13 @@ class LitModel(L.LightningModule):
     def on_train_start(self):
         self.print(f"\nResetting model caches for training...\n")
         self.model.reset_caches()
+
+        self.print("\nResetting accumulated gradients...\n")
+        self.register_buffer(
+            "accumulated_grads",
+            torch.zeros(
+                self.trainer.world_size,
+                self.hparams.num_hard_prompt_tkns,
+                self.hparams.tokenizer.vocab_size,
+            ),
+        )
