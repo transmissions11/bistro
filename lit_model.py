@@ -115,20 +115,27 @@ class LitModel(L.LightningModule):
             print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
-        # inputs, targets = batch["inputs"], batch["targets"]
-        # loss = compute_loss(self.model, input_ids=inputs, target_ids=targets)
+        inputs, targets = batch["inputs"], batch["targets"]
 
-        # self.log(
-        #     "val_loss",
-        #     # Need to upcast precision as types like bfloat16
-        #     # have very low precision with larger values (~256+)
-        #     # that results in inaccurate accumulation w/ on_epoch.
-        #     # https://github.com/Lightning-AI/lightning/issues/18620
-        #     loss.to(torch.float32),
-        #     on_epoch=True,
-        #     prog_bar=True,
-        #     sync_dist=True,
-        # )
+        (loss,) = test_hard_prompt_candidates(
+            self.model,
+            hard_prompt_candidates=self.current_hard_prompt.unsqueeze(0),
+            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+            input_ids=inputs,
+            target_ids=targets,
+        )
+
+        self.log(
+            "val_loss",
+            # Need to upcast precision as types like bfloat16
+            # have very low precision with larger values (~256+)
+            # that results in inaccurate accumulation w/ on_epoch.
+            # https://github.com/Lightning-AI/lightning/issues/18620
+            loss.to(torch.float32),
+            on_epoch=True,
+            prog_bar=True,
+            sync_dist=True,
+        )
 
         # # Log a few sample inferences from the validation set to W&B.
         # if batch_idx == 0:
@@ -168,7 +175,6 @@ class LitModel(L.LightningModule):
         #             for i in range(len(inputs))  # Full batch.
         #         ],
         #     )
-        ...
 
     def configure_optimizers(self):
         ...  # We don't need an optimizer.
