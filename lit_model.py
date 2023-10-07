@@ -81,7 +81,7 @@ class LitModel(L.LightningModule):
 
         merged_grads = self.all_gather(hard_prompt_grads)
 
-        print(merged_grads)
+        self.print(merged_grads.shape)
 
         # TODO: limit to ascii
 
