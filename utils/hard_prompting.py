@@ -100,8 +100,6 @@ def create_hard_prompt_candidates(
     # Get the ids of the top-k tokens that would most decrease the loss.
     top_indices = (-hard_prompt_grads).topk(topk, dim=1).indices
 
-    print("TOP INDICES", top_indices)
-
     candidates_batch = current_hard_prompt.repeat(batch_size, 1)
 
     # Generate a (batch_size) tensor of an index to replace in each row of the batch.
