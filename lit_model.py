@@ -136,7 +136,7 @@ class LitModel(L.LightningModule):
                 print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
         else:
             print(
-                f"percent done accumulating: {(batch_idx + 1) / self.grad_accumulation_steps}"
+                f"percent done accumulating: {(batch_idx + 1) / self.hparams.grad_accumulation_steps}"
             )
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
