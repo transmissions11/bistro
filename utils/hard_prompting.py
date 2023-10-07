@@ -178,7 +178,7 @@ def test_hard_prompt_candidates(
     hard_prompt_tkn: int,
     input_ids: torch.Tensor,  # (b = 1, t)
     target_ids: torch.Tensor,  # (b = 1, t)
-) -> Tuple[float, int]:
+) -> torch.Tensor:
     """Returns the minimum loss and the index of the hard prompt candidate that yields the lowest loss when inserted into the input_ids sequence."""
 
     input_ids = input_ids.squeeze(0)  # (t)
@@ -216,10 +216,5 @@ def test_hard_prompt_candidates(
         reduction="none",
     ).view(hard_prompt_candidates.size(0), -1)
 
-    # Ignore losses of 0, as they are due to padding, and take the mean of the rest.
-    loss = loss[loss != 0].view(loss.size(0), -1).mean(dim=-1)  # (batch_size)
-
-    # Find the index of the sequence with the minimum loss
-    min_loss_idx = torch.argmin(loss).item()
-
-    return loss[min_loss_idx], min_loss_idx
+    # Ignore losses of 0, as they are due to padding, return take the mean of the rest.
+    return loss[loss != 0].view(loss.size(0), -1).mean(dim=-1)  # (batch_size)

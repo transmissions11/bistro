@@ -93,8 +93,6 @@ class LitModel(L.LightningModule):
             )
         ).mean(dim=0)
 
-        self.print("bidx", batch_idx)
-
         # If it is time to update the model parameters:
         if (batch_idx + 1) % self.hparams.grad_accumulation_steps == 0:
             self.print("done accumulating, updating now!")
@@ -122,20 +120,30 @@ class LitModel(L.LightningModule):
                 hard_prompt_candidates=hard_prompt_candidates,
             )
 
-            (min_loss, best_candidate_idx) = test_hard_prompt_candidates(
-                self.model,
-                hard_prompt_candidates=hard_prompt_candidates,
-                hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-                input_ids=inputs,
-                target_ids=targets,
-            )
+            # TODO: ensure every proc has the same cands!!!
+            # TODO: ensure every proc has the same cands!!!
+            # TODO: ensure every proc has the same cands!!!
+            # TODO: ensure every proc has the same cands!!!
+
+            # TODO: this should return a tensor of losses, then we should all_gather
+            gathered_candidate_losses = self.all_gather(
+                test_hard_prompt_candidates(
+                    self.model,
+                    hard_prompt_candidates=hard_prompt_candidates,
+                    hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                    input_ids=inputs,
+                    target_ids=targets,
+                )
+            ).mean(dim=0)
+
+            min_loss_candidate_idx = torch.argmin(gathered_candidate_losses).item()
+
+            min_loss = gathered_candidate_losses[min_loss_candidate_idx]
 
             # TODO: have rank zero do this? hm can test w/ print
-            self.current_hard_prompt = hard_prompt_candidates[best_candidate_idx]
+            self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
 
             self.log("train_loss", min_loss)
-
-        self.print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
