@@ -134,7 +134,7 @@ def filter_hard_prompt_candidates(
     """
 
     filtered = [
-        candidate
+        tokenizer.encode(tokenizer.decode(candidate))
         for candidate in hard_prompt_candidates
         # Ensure the candidate is not the same as the current hard prompt.
         if not torch.equal(candidate, current_hard_prompt)
