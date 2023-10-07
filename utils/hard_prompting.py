@@ -194,6 +194,11 @@ def test_hard_prompt_candidates(
 
     for idx, candidate in enumerate(hard_prompt_candidates):
         # Replace the hard prompt in the input sequence with the candidate
+
+        print(
+            f"{hard_prompt_candidates.shape=}, {candidate.shape=}, {hard_prompt_start_pos=}, {hard_prompt_end_pos=}, {input_ids.shape=}"
+        )
+
         new_input_ids = input_ids.clone()
         new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
 
