@@ -189,9 +189,13 @@ def test_hard_prompt_candidates(
     print(batch["inputs"][0], batch["targets"][0])
 
     # Compute the loss for the entire batch
-    loss = compute_loss(model, input_ids=batch["inputs"], target_ids=batch["targets"])
-
-    print(loss.shape, loss)
+    loss = compute_loss(
+        # reduce=False to get the loss for each sequence in the batch.
+        model,
+        input_ids=batch["inputs"],
+        target_ids=batch["targets"],
+        reduce=False,
+    )
 
     # Find the index of the sequence with the minimum loss
     min_loss_idx = torch.argmin(loss).item()
