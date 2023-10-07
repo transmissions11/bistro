@@ -57,10 +57,9 @@ class LitModel(L.LightningModule):
 
         self.register_buffer(
             "current_hard_prompt",
-            torch.tensor(
-                [hard_prompt_tkn] * num_hard_prompt_tkns,
-                dtype=torch.int64,
-            ),
+            tokenizer.encode(
+                "Rewrite mathematical simplilySettingsContact details Couritory Indiana(*halfAddress selbstMessages ich Amerika Publish Scienceshausen"
+            ).to(torch.int64),
         )
 
         assert (
