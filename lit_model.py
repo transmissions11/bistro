@@ -51,7 +51,7 @@ class LitModel(L.LightningModule):
         self.register_buffer(
             "current_hard_prompt",
             torch.tensor(
-                tokenizer.token_to_id(hard_prompt_tkn) * num_hard_prompt_tkns,
+                [hard_prompt_tkn] * num_hard_prompt_tkns,
                 dtype=torch.int64,
             ),
         )
