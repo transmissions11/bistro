@@ -81,18 +81,17 @@ class LitModel(L.LightningModule):
         inputs, targets = batch["inputs"], batch["targets"]
 
         # TODO: ablate these for performance
-        local_grads = get_hard_prompt_gradients(
-            self.model,
-            current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-            input_ids=inputs,
-            target_ids=targets,
-        )
-
-        gathered_grads = self.all_gather(local_grads)
 
         # Compute, gather, and accumulate the gradients for the hard prompt.
-        self.accumulated_grads += gathered_grads.mean(dim=0)
+        self.accumulated_grads += self.all_gather(
+            get_hard_prompt_gradients(
+                self.model,
+                current_hard_prompt=self.current_hard_prompt,
+                hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                input_ids=inputs,
+                target_ids=targets,
+            ).mean(dim=0)
+        )
 
         # If it is time to update the model parameters:
         if (batch_idx + 1) % self.hparams.grad_accumulation_steps == 0:
