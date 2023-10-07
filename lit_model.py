@@ -109,7 +109,7 @@ class LitModel(L.LightningModule):
         # TODO: have rank zero do this? hm can test w/ print
         self.current_hard_prompt = hard_prompt_candidates[best_candidate_idx]
 
-        self.log("train_loss", min_loss, prog_bar=True)
+        self.log("train_loss", min_loss)
 
         if batch_idx % 20 == 0:
             print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
