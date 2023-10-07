@@ -186,15 +186,19 @@ def test_hard_prompt_candidates(
     batch = pad_collate_fn(new_input_ids_list)
 
     # Compute the loss for the entire batch
-    loss = compute_loss(
-        # reduce=False to get the loss for each sequence in the batch.
-        model,
-        input_ids=batch["inputs"],
-        target_ids=batch["targets"],
-        reduce=False,
-    ).view(hard_prompt_candidates.size(0), -1)
+    loss = (
+        compute_loss(
+            # reduce=False to get the loss for each sequence in the batch.
+            model,
+            input_ids=batch["inputs"],
+            target_ids=batch["targets"],
+            reduce=False,
+        )
+        .view(hard_prompt_candidates.size(0), -1)
+        .mean(dim=-1)
+    )
 
-    print(loss)
+    print(loss.shape, loss)
 
     # Find the index of the sequence with the minimum loss
     min_loss_idx = torch.argmin(loss).item()
