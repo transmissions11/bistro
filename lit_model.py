@@ -50,11 +50,9 @@ class LitModel(L.LightningModule):
         # Have to register a buffer to make sure it gets moved to the right device.
         self.register_buffer(
             "current_hard_prompt",
-            tokenizer.encode(
-                "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅",
-            ).to(
-                # HuggingFace datasets converts all integers to int64, so we have to here as well.
-                torch.int64
+            torch.tensor(
+                tokenizer.token_to_id(hard_prompt_tkn) * num_hard_prompt_tkns,
+                dtype=torch.int64,
             ),
         )
 
