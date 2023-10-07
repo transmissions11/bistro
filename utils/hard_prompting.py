@@ -196,7 +196,7 @@ def test_hard_prompt_candidates(
         model,
         input_ids=batch["inputs"],
         target_ids=batch["targets"],
-        reduce=False,
+        reduction="none",
     ).view(hard_prompt_candidates.size(0), -1)
 
     # Ignore losses of 0, as they are due to padding, and take the mean of the rest.
