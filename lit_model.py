@@ -71,6 +71,10 @@ class LitModel(L.LightningModule):
 
         # TODO: ablate these for performance
 
+        ranks = self.all_gather(self.global_rank)
+
+        print(ranks)
+
         hard_prompt_grads = get_hard_prompt_gradients(
             self.model,
             current_hard_prompt=self.current_hard_prompt,
