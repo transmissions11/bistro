@@ -117,7 +117,7 @@ class LitModel(L.LightningModule):
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
 
-        (loss,) = test_hard_prompt_candidates(
+        (loss, _) = test_hard_prompt_candidates(
             self.model,
             hard_prompt_candidates=self.current_hard_prompt.unsqueeze(0),
             hard_prompt_tkn=self.hparams.hard_prompt_tkn,
