@@ -149,10 +149,6 @@ def filter_hard_prompt_candidates(
     )
 
 
-from utils.padding import pad_collate_fn
-from utils.padding import pad_collate_fn
-
-
 def test_hard_prompt_candidates(
     model: GPT,
     *,  # Force keyword arguments.
@@ -172,22 +168,22 @@ def test_hard_prompt_candidates(
     hard_prompt_start_pos = hard_prompt_positions[0].item()
     hard_prompt_end_pos = hard_prompt_positions[-1].item()
 
-    # Create a list to store the new input sequences
-    new_input_ids_list = []
+    min_loss = float("inf")
+    min_loss_idx = -1
 
     for idx, candidate in enumerate(hard_prompt_candidates):
         # Replace the hard prompt in the input sequence with the candidate
         new_input_ids = input_ids.clone()
         new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
-        new_input_ids_list.append({"inputs": new_input_ids, "targets": target_ids})
 
-    # Pad the sequences and convert them to a tensor
-    batch = pad_collate_fn(new_input_ids_list)
+        # Compute the loss
+        loss = compute_loss(
+            model, input_ids=new_input_ids.unsqueeze(0), target_ids=target_ids
+        )
 
-    # Compute the loss for the entire batch
-    loss = compute_loss(model, input_ids=batch["inputs"], target_ids=batch["targets"])
+        # Update the minimum loss and the corresponding index
+        if loss < min_loss:
+            min_loss = loss
+            min_loss_idx = idx
 
-    # Find the index of the sequence with the minimum loss
-    min_loss_idx = torch.argmin(loss).item()
-
-    return loss[min_loss_idx].item(), min_loss_idx
+    return min_loss, min_loss_idx
