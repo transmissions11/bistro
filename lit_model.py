@@ -90,8 +90,8 @@ class LitModel(L.LightningModule):
                 hard_prompt_tkn=self.hparams.hard_prompt_tkn,
                 input_ids=inputs,
                 target_ids=targets,
-            ).mean(dim=0)
-        )
+            )
+        ).mean(dim=0)
 
         # If it is time to update the model parameters:
         if (batch_idx + 1) % self.hparams.grad_accumulation_steps == 0:
