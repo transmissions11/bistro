@@ -13,11 +13,14 @@ from model import GPT
 def get_non_ascii_tkns(tokenizer: Tokenizer):
     """Returns a tensor of all non-ASCII token ids in the tokenizer's vocabulary."""
 
+    def is_ascii(s):
+        return s.isascii() and s.isprintable()
+
     return torch.tensor(
         [
             i
             for i in range(3, tokenizer.vocab_size)
-            if not tokenizer.decode([i]).isascii()
+            if not is_ascii(tokenizer.decode(torch.tensor(i)))
         ]
     )
 
