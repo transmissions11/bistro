@@ -79,7 +79,7 @@ class LitModel(L.LightningModule):
             topk=5,
         )
 
-        print("CANDIDATES", hard_prompt_candidates)
+        print("CANDIDATES", hard_prompt_candidates.sum(dim=-1))
 
         hard_prompt_candidates = clean_hard_prompt_candidates(
             self.hparams.tokenizer,
