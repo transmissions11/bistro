@@ -180,25 +180,27 @@ def test_hard_prompt_candidates(
         new_input_ids = input_ids.clone()
         new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
 
+        # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
+        # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
+        # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
+        # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
+        # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
         new_input_ids_list.append({"inputs": new_input_ids, "targets": target_ids})
 
     # Pad the sequences and convert them to a tensor
     batch = pad_collate_fn(new_input_ids_list)
 
-    # Compute the loss for the entire batch
-    loss = (
-        compute_loss(
-            # reduce=False to get the loss for each sequence in the batch.
-            model,
-            input_ids=batch["inputs"],
-            target_ids=batch["targets"],
-            reduce=False,
-        )
-        .view(hard_prompt_candidates.size(0), -1)
-        .mean(dim=-1)
-    )
+    # Compute the loss for the entire batch (batch_size, t)
+    loss = compute_loss(
+        # reduce=False to get the loss for each sequence in the batch.
+        model,
+        input_ids=batch["inputs"],
+        target_ids=batch["targets"],
+        reduce=False,
+    ).view(hard_prompt_candidates.size(0), -1)
 
     print(loss.shape, loss)
+    print(loss[loss.nonzero(as_tuple=True)])
 
     # Find the index of the sequence with the minimum loss
     min_loss_idx = torch.argmin(loss).item()
