@@ -228,7 +228,7 @@ class LitModel(L.LightningModule):
         self.print("\nResetting model caches for training...\n")
         self.model.reset_caches()
 
-        self.print("\nResetting accumulated gradients...\n")
+        self.print("\Registering gradients accumulation buffer...\n")
         self.register_buffer(
             "accumulated_grads",
             torch.zeros(
