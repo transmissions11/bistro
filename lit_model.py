@@ -182,5 +182,5 @@ class LitModel(L.LightningModule):
         g0_print("Done loading & configuring model.")
 
     def on_train_start(self):
-        self.print(f"\nResetting model caches for training...\n")
+        self.print("\nResetting model caches for training...\n")
         self.model.reset_caches()
