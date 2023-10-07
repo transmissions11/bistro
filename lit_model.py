@@ -51,8 +51,16 @@ class LitModel(L.LightningModule):
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(ignore=["checkpoint_path"], logger=False)
 
-        # TODO: benchmark this
+        self.register_buffer(
+            "accumulated_grads",
+            torch.zeros(
+                self.hparams.num_hard_prompt_tkns,
+                self.hparams.tokenizer.vocab_size,
+            ),
+            persistent=False,
+        )
 
+        # TODO: benchmark this
         self.register_buffer(
             "not_allowed_tokens",
             get_non_ascii_tkns(tokenizer) if only_ascii_tkns else None,
@@ -86,7 +94,7 @@ class LitModel(L.LightningModule):
         print(
             "SHAPES (l,g,a)",
             local_grads.shape,
-            gathered_grads.device,
+            gathered_grads.shape,
             self.accumulated_grads.shape,
         )
 
@@ -96,12 +104,11 @@ class LitModel(L.LightningModule):
         # If it is time to update the model parameters:
         if (batch_idx + 1) % self.hparams.grad_accumulation_steps == 0:
             print("done accumulating, updating now!")
+
             # Use the accumulated gradients for the update.
             hard_prompt_grads = (
                 self.accumulated_grads / self.hparams.grad_accumulation_steps
             )
-
-            print("FINAL SHAPE", hard_prompt_grads.shape)
 
             # Reset the accumulated gradients for the next accumulation.
             self.accumulated_grads.zero_()
@@ -239,15 +246,3 @@ class LitModel(L.LightningModule):
     def on_train_start(self):
         self.print("\nResetting model caches for training...\n")
         self.model.reset_caches()
-
-        self.print("\nRegistering gradients accumulation buffer...\n")
-        self.register_buffer(
-            "accumulated_grads",
-            torch.zeros(
-                self.trainer.world_size,
-                self.hparams.num_hard_prompt_tkns,
-                self.hparams.tokenizer.vocab_size,
-                device=self.device,
-            ),
-            persistent=False,
-        )
