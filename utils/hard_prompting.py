@@ -186,6 +186,7 @@ def test_hard_prompt_candidates(
     batch = pad_collate_fn(new_input_ids_list)
 
     print(batch["inputs"].shape, batch["targets"].shape)
+    print(batch["inputs"][0], batch["targets"][0])
 
     # Compute the loss for the entire batch
     loss = compute_loss(model, input_ids=batch["inputs"], target_ids=batch["targets"])
