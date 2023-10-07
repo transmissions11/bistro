@@ -185,9 +185,6 @@ def test_hard_prompt_candidates(
     # Pad the sequences and convert them to a tensor
     batch = pad_collate_fn(new_input_ids_list)
 
-    print(batch["inputs"].shape, batch["targets"].shape)
-    print(batch["inputs"][0], batch["targets"][0])
-
     # Compute the loss for the entire batch
     loss = compute_loss(
         # reduce=False to get the loss for each sequence in the batch.
@@ -197,7 +194,7 @@ def test_hard_prompt_candidates(
         reduce=False,
     )
 
-    print(loss)
+    print(loss.shape)
 
     # Find the index of the sequence with the minimum loss
     min_loss_idx = torch.argmin(loss).item()
