@@ -17,7 +17,7 @@ from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 from utils.hard_prompting import (
     get_hard_prompt_gradients,
     create_hard_prompt_candidates,
-    filter_hard_prompt_candidates,
+    clean_hard_prompt_candidates,
     test_hard_prompt_candidates,
 )
 
@@ -81,7 +81,7 @@ class LitModel(L.LightningModule):
             topk=128,
         )
 
-        hard_prompt_candidates = filter_hard_prompt_candidates(
+        hard_prompt_candidates = clean_hard_prompt_candidates(
             self.hparams.tokenizer,
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_candidates=hard_prompt_candidates,
@@ -94,6 +94,7 @@ class LitModel(L.LightningModule):
             input_ids=inputs,
             target_ids=targets,
         )
+
         self.current_hard_prompt = hard_prompt_candidates[best_candidate_idx]
 
         if batch_idx % 20 == 0:

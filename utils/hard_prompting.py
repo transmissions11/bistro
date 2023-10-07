@@ -121,17 +121,17 @@ def create_hard_prompt_candidates(
     return candidates_batch.scatter_(1, new_token_pos.unsqueeze(-1), new_token_val)
 
 
-def filter_hard_prompt_candidates(
+def clean_hard_prompt_candidates(
     tokenizer: Tokenizer,
     *,  # Force keyword arguments.
     current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
     hard_prompt_candidates: torch.Tensor,  # (batch_size, num_hard_prompt_tkns)
 ) -> torch.Tensor:
     """
-    Filters candidates that don't match the current hard prompt's length.
+    Filters candidates that don't match the current hard prompt's length and cleans others
+    so that candidates can be decoded and encoded again without changing their tokenization.
 
-    This is due to the non-invertibility of tokenizers, where
-    encode(decode(tkns)) might yield a different tokenization.
+    Needed since encode(decode(tkns)) might yield a different tokenization.
     """
 
     filtered = []
@@ -144,12 +144,14 @@ def filter_hard_prompt_candidates(
         # Decode and encode it again, to ensure we can use the
         # hard prompt on a model that only accepts text inputs.
         reencoded_candidate = tokenizer.encode(tokenizer.decode(candidate)).to(
-            hard_prompt_candidates
+            hard_prompt_candidates  # Move to same device and dtype as candidates.
         )
 
         # Ensure the candidate is the same length after decoding and encoding.
         if candidate.size(0) == reencoded_candidate.size(0):
             filtered.append(reencoded_candidate)
+        else:
+            print(candidate.size(0), reencoded_candidate.size(0))
 
     # If the number of filtered candidates is less than the number of hard
     # prompt candidates, pad the list with the last candidate and return.
