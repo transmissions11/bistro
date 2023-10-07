@@ -73,7 +73,7 @@ class LitModel(L.LightningModule):
             "accumulated_grads",
             torch.zeros(
                 self.trainer.world_size,
-                self.current_hard_prompt.size(0),
+                num_hard_prompt_tkns,
                 tokenizer.vocab_size,
             ),
         )
