@@ -84,10 +84,10 @@ class LitModel(L.LightningModule):
         gathered_grads = self.all_gather(local_grads)
 
         print(
-            "DEVICES (l,g,a)",
-            local_grads.device,
+            "SHAPES (l,g,a)",
+            local_grads.shape,
             gathered_grads.device,
-            self.accumulated_grads.device,
+            self.accumulated_grads.shape,
         )
 
         # Compute, gather, and accumulate the gradients for the hard prompt.
@@ -100,6 +100,8 @@ class LitModel(L.LightningModule):
             hard_prompt_grads = (
                 self.accumulated_grads / self.hparams.grad_accumulation_steps
             )
+
+            print("FINAL SHAPE", hard_prompt_grads.shape)
 
             # Reset the accumulated gradients for the next accumulation.
             self.accumulated_grads.zero_()
