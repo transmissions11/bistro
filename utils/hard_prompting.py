@@ -149,9 +149,6 @@ def filter_hard_prompt_candidates(
     )
 
 
-from utils.padding import pad_right, ignored_tkn
-
-
 def test_hard_prompt_candidates(
     model: GPT,
     *,  # Force keyword arguments.
@@ -171,36 +168,22 @@ def test_hard_prompt_candidates(
     hard_prompt_start_pos = hard_prompt_positions[0].item()
     hard_prompt_end_pos = hard_prompt_positions[-1].item()
 
-    # Create a tensor to hold all new input sequences
-    new_input_ids_batch = torch.stack(
-        [
-            pad_right(
-                torch.cat(
-                    [
-                        input_ids[:hard_prompt_start_pos],
-                        candidate,
-                        input_ids[hard_prompt_end_pos + 1 :],
-                    ]
-                ),
-                len(input_ids),
-            )
-            for candidate in hard_prompt_candidates
-        ]
-    )
+    min_loss = float("inf")
+    min_loss_idx = -1
 
-    # Pad target_ids to match the dimensions of new_input_ids_batch
-    target_ids_padded = pad_right(
-        target_ids.repeat(len(hard_prompt_candidates), 1),
-        len(input_ids),
-        pad_id=ignored_tkn,
-    )
+    for idx, candidate in enumerate(hard_prompt_candidates):
+        # Replace the hard prompt in the input sequence with the candidate
+        new_input_ids = input_ids.clone()
+        new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
 
-    # Compute the loss for all sequences
-    losses = compute_loss(
-        model, input_ids=new_input_ids_batch, target_ids=target_ids_padded
-    )
+        # Compute the loss
+        loss = compute_loss(
+            model, input_ids=new_input_ids.unsqueeze(0), target_ids=target_ids
+        )
 
-    # Find the index of the minimum loss
-    min_loss_idx = torch.argmin(losses).item()
+        # Update the minimum loss and the corresponding index
+        if loss < min_loss:
+            min_loss = loss
+            min_loss_idx = idx
 
-    return losses[min_loss_idx].item(), min_loss_idx
+    return min_loss, min_loss_idx
