@@ -76,7 +76,8 @@ class LitModel(L.LightningModule):
         hard_prompt_candidates = create_hard_prompt_candidates(
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_grads=hard_prompt_grads,
-            batch_size=13,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
+            batch_size=20,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
+            # topk=40,
         )
 
         hard_prompt_candidates = filter_hard_prompt_candidates(
@@ -93,6 +94,7 @@ class LitModel(L.LightningModule):
             target_ids=targets,
         )
         self.current_hard_prompt = hard_prompt_candidates[best_candidate_idx]
+
         print("INPUTS", self.hparams.tokenizer.decode(inputs[0]))
         print("NEW LOSS", min_loss)
         print("NEW PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
