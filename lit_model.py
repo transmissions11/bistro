@@ -69,9 +69,14 @@ class LitModel(L.LightningModule):
             self.current_hard_prompt.size(0) == num_hard_prompt_tkns
         ), f"hard prompt size mismatch {self.current_hard_prompt.size(0)} != {num_hard_prompt_tkns}"
 
-        self.accumulated_grads = torch.zeros_like(
-            self.current_hard_prompt
-        )  # TODO: is this size right
+        self.register_buffer(
+            "accumulated_grads",
+            torch.zeros(
+                self.trainer.world_size,
+                self.current_hard_prompt.size(0),
+                tokenizer.vocab_size,
+            ),
+        )
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
