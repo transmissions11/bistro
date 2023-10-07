@@ -143,6 +143,11 @@ class LitModel(L.LightningModule):
             # TODO: have rank zero do this? hm can test w/ print
             self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
 
+            #########################################################################
+            # they should all be the same??
+            print(self.hparams.tokenizer.decode(self.current_hard_prompt))
+            #########################################################################
+
             self.log("train_loss", min_loss)
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
