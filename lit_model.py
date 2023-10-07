@@ -34,6 +34,7 @@ class LitModel(L.LightningModule):
         hard_prompt_tkn: int,
         num_hard_prompt_tkns: int,
         only_ascii_tkns: bool = True,
+        grad_accumulation_steps: int = 10,
         #######################################
         checkpoint_path: Optional[Path] = None,
     ):
@@ -68,12 +69,17 @@ class LitModel(L.LightningModule):
             self.current_hard_prompt.size(0) == num_hard_prompt_tkns
         ), f"hard prompt size mismatch {self.current_hard_prompt.size(0)} != {num_hard_prompt_tkns}"
 
+        self.accumulated_grads = torch.zeros_like(
+            self.current_hard_prompt
+        )  # TODO: is this size right
+
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
         # TODO: ablate these for performance
 
-        hard_prompt_grads = self.all_gather(
+        # Compute, gather, and accumulate the gradients for the hard prompt.
+        self.accumulated_grads += self.all_gather(
             get_hard_prompt_gradients(
                 self.model,
                 current_hard_prompt=self.current_hard_prompt,
@@ -83,36 +89,49 @@ class LitModel(L.LightningModule):
             )
         ).mean(dim=0)
 
-        # TODO: support grad accum iters essentially (split into multiple batches)
-        hard_prompt_candidates = create_hard_prompt_candidates(
-            current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_grads=hard_prompt_grads,
-            batch_size=72,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
-            not_allowed_tokens=self.not_allowed_tokens,
-            topk=10,
-        )
+        # If it is time to update the model parameters:
+        if (batch_idx + 1) % self.grad_accumulation_steps == 0:
+            print("done accumulating, updating now!")
+            # Use the accumulated gradients for the update.
+            hard_prompt_grads = self.accumulated_grads / self.grad_accumulation_steps
 
-        hard_prompt_candidates = clean_hard_prompt_candidates(
-            self.hparams.tokenizer,
-            current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_candidates=hard_prompt_candidates,
-        )
+            # Reset the accumulated gradients for the next accumulation.
+            self.accumulated_grads.zero_()
 
-        (min_loss, best_candidate_idx) = test_hard_prompt_candidates(
-            self.model,
-            hard_prompt_candidates=hard_prompt_candidates,
-            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-            input_ids=inputs,
-            target_ids=targets,
-        )
+            # TODO: support grad accum iters essentially (split into multiple batches)
+            hard_prompt_candidates = create_hard_prompt_candidates(
+                current_hard_prompt=self.current_hard_prompt,
+                hard_prompt_grads=hard_prompt_grads,
+                batch_size=72,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
+                not_allowed_tokens=self.not_allowed_tokens,
+                topk=10,
+            )
 
-        # TODO: have rank zero do this? hm can test w/ print
-        self.current_hard_prompt = hard_prompt_candidates[best_candidate_idx]
+            hard_prompt_candidates = clean_hard_prompt_candidates(
+                self.hparams.tokenizer,
+                current_hard_prompt=self.current_hard_prompt,
+                hard_prompt_candidates=hard_prompt_candidates,
+            )
 
-        self.log("train_loss", min_loss)
+            (min_loss, best_candidate_idx) = test_hard_prompt_candidates(
+                self.model,
+                hard_prompt_candidates=hard_prompt_candidates,
+                hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                input_ids=inputs,
+                target_ids=targets,
+            )
 
-        if batch_idx % 20 == 0:
-            print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
+            # TODO: have rank zero do this? hm can test w/ print
+            self.current_hard_prompt = hard_prompt_candidates[best_candidate_idx]
+
+            self.log("train_loss", min_loss)
+
+            if batch_idx % 20 == 0:
+                print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
+        else:
+            print(
+                f"percent done accumulating: {(batch_idx + 1) / self.grad_accumulation_steps}"
+            )
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
