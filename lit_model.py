@@ -135,8 +135,7 @@ class LitModel(L.LightningModule):
 
             self.log("train_loss", min_loss)
 
-            if batch_idx % 20 == 0:
-                print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
+        self.print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
