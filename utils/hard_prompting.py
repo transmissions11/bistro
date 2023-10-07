@@ -10,6 +10,18 @@ from utils.padding import pad_collate_fn
 from model import GPT
 
 
+def get_non_ascii_tkns(tokenizer: Tokenizer):
+    """Returns a tensor of all non-ASCII token ids in the tokenizer's vocabulary."""
+
+    return torch.tensor(
+        [
+            i
+            for i in range(3, tokenizer.vocab_size)
+            if not tokenizer.decode([i]).isascii()
+        ]
+    )
+
+
 def get_hard_prompt_gradients(
     model: GPT,
     *,  # Force keyword arguments.
@@ -18,9 +30,7 @@ def get_hard_prompt_gradients(
     input_ids: torch.Tensor,  # (b = 1, t)
     target_ids: torch.Tensor,  # (b = 1, t)
 ) -> torch.Tensor:
-    """
-    Calculates the gradients of the hard prompt with respect to the loss.
-    """
+    """Calculates the gradients of the hard prompt with respect to the loss."""
 
     input_ids = input_ids.squeeze(0)  # (t)
 
@@ -166,9 +176,7 @@ def test_hard_prompt_candidates(
     input_ids: torch.Tensor,  # (b = 1, t)
     target_ids: torch.Tensor,  # (b = 1, t)
 ) -> Tuple[float, int]:
-    """
-    Returns the minimum loss and the index of the hard prompt candidate that yields the lowest loss when inserted into the input_ids sequence.
-    """
+    """Returns the minimum loss and the index of the hard prompt candidate that yields the lowest loss when inserted into the input_ids sequence."""
 
     input_ids = input_ids.squeeze(0)  # (t)
     target_ids = target_ids.squeeze(0)  # (t)

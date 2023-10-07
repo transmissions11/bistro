@@ -15,6 +15,7 @@ from utils.tensors import find_subtensor_end
 from utils.padding import strip_right_pad, ignored_tkn
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 from utils.hard_prompting import (
+    get_non_ascii_tkns,
     get_hard_prompt_gradients,
     create_hard_prompt_candidates,
     clean_hard_prompt_candidates,
@@ -29,8 +30,10 @@ class LitModel(L.LightningModule):
         self,
         model_config: Config,
         tokenizer: Tokenizer,
+        #######################################
         hard_prompt_tkn: int,
         num_hard_prompt_tkns: int,
+        only_ascii_tkns: bool = True,
         #######################################
         checkpoint_path: Optional[Path] = None,
     ):
@@ -47,7 +50,11 @@ class LitModel(L.LightningModule):
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(ignore=["checkpoint_path"], logger=False)
 
-        # Have to register a buffer to make sure it gets moved to the right device.
+        self.register_buffer(
+            "not_allowed_tokens",
+            get_non_ascii_tkns(tokenizer) if only_ascii_tkns else None,
+        )
+
         self.register_buffer(
             "current_hard_prompt",
             torch.tensor(
@@ -80,6 +87,7 @@ class LitModel(L.LightningModule):
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_grads=hard_prompt_grads,
             batch_size=100,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
+            not_allowed_tokens=self.not_allowed_tokens,
             topk=128,
         )
 
@@ -102,11 +110,6 @@ class LitModel(L.LightningModule):
         self.log("train_loss", min_loss, prog_bar=True)
 
         if batch_idx % 20 == 0:
-            print("PROMPT TKNS", self.current_hard_prompt)
-            print(
-                "PROMPT CLEAN",
-                repr(self.hparams.tokenizer.decode(self.current_hard_prompt)),
-            )
             print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
