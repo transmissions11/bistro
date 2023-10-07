@@ -5,6 +5,7 @@ from typing import Optional, Tuple
 from lit_gpt import Tokenizer
 
 from utils.loss import compute_loss
+from utils.padding import pad_collate_fn
 
 from model import GPT
 
@@ -133,23 +134,26 @@ def filter_hard_prompt_candidates(
     encode(decode(tkns)) might yield a different tokenization.
     """
 
-    filtered = [
-        tokenizer.encode(tokenizer.decode(candidate))
-        for candidate in hard_prompt_candidates
+    filtered = []
+
+    for candidate in hard_prompt_candidates:
         # Ensure the candidate is not the same as the current hard prompt.
-        if not torch.equal(candidate, current_hard_prompt)
+        if torch.equal(candidate, current_hard_prompt):
+            continue
+
+        # Decode and encode it again, to ensure we can use the
+        # hard prompt on a model that only accepts text inputs.
+        reencoded_candidate = tokenizer.encode(tokenizer.decode(candidate))
+
         # Ensure the candidate is the same length after decoding and encoding.
-        and candidate.size(0) == tokenizer.encode(tokenizer.decode(candidate)).size(0)
-    ]
+        if candidate.size(0) == reencoded_candidate.size(0):
+            filtered.append(reencoded_candidate)
 
     # If the number of filtered candidates is less than the number of hard
     # prompt candidates, pad the list with the last candidate and return.
     return torch.stack(
         filtered + [filtered[-1]] * (len(hard_prompt_candidates) - len(filtered))
     )
-
-
-from utils.padding import pad_collate_fn
 
 
 def test_hard_prompt_candidates(
