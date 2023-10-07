@@ -94,7 +94,7 @@ class LitModel(L.LightningModule):
         self.accumulated_grads += gathered_grads.mean(dim=0)
 
         # If it is time to update the model parameters:
-        if (batch_idx + 1) % self.grad_accumulation_steps == 0:
+        if (batch_idx + 1) % self.hparams.grad_accumulation_steps == 0:
             print("done accumulating, updating now!")
             # Use the accumulated gradients for the update.
             hard_prompt_grads = self.accumulated_grads / self.grad_accumulation_steps
@@ -236,10 +236,14 @@ class LitModel(L.LightningModule):
         self.print("\nResetting model caches for training...\n")
         self.model.reset_caches()
 
-        self.print("\Setting up for gradient accumulation...\n")
-        self.accumulated_grads = torch.zeros(
-            self.trainer.world_size,
-            self.hparams.num_hard_prompt_tkns,
-            self.hparams.tokenizer.vocab_size,
-            device=self.device,
+        self.print("\nRegistering gradients accumulation buffer...\n")
+        self.register_buffer(
+            "accumulated_grads",
+            torch.zeros(
+                self.trainer.world_size,
+                self.hparams.num_hard_prompt_tkns,
+                self.hparams.tokenizer.vocab_size,
+                device=self.device,
+            ),
+            persistent=False,
         )
