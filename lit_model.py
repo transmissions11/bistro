@@ -97,7 +97,9 @@ class LitModel(L.LightningModule):
         if (batch_idx + 1) % self.hparams.grad_accumulation_steps == 0:
             print("done accumulating, updating now!")
             # Use the accumulated gradients for the update.
-            hard_prompt_grads = self.accumulated_grads / self.grad_accumulation_steps
+            hard_prompt_grads = (
+                self.accumulated_grads / self.hparams.grad_accumulation_steps
+            )
 
             # Reset the accumulated gradients for the next accumulation.
             self.accumulated_grads.zero_()
