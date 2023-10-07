@@ -51,7 +51,7 @@ class LitModel(L.LightningModule):
         self.register_buffer(
             "current_hard_prompt",
             tokenizer.encode(
-                "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅",
+                "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅",
             ).to(
                 # HuggingFace datasets converts all integers to int64, so we have to here as well.
                 torch.int64
