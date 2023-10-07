@@ -150,7 +150,6 @@ def filter_hard_prompt_candidates(
 
 
 from utils.padding import pad_collate_fn
-from utils.padding import pad_collate_fn
 
 
 def test_hard_prompt_candidates(
@@ -179,10 +178,13 @@ def test_hard_prompt_candidates(
         # Replace the hard prompt in the input sequence with the candidate
         new_input_ids = input_ids.clone()
         new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
+
         new_input_ids_list.append({"inputs": new_input_ids, "targets": target_ids})
 
     # Pad the sequences and convert them to a tensor
     batch = pad_collate_fn(new_input_ids_list)
+
+    print(batch)
 
     # Compute the loss for the entire batch
     loss = compute_loss(model, input_ids=batch["inputs"], target_ids=batch["targets"])
