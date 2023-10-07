@@ -75,9 +75,11 @@ class LitModel(L.LightningModule):
         hard_prompt_candidates = create_hard_prompt_candidates(
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_grads=hard_prompt_grads,
-            batch_size=100,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
-            topk=128,
+            batch_size=50,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
+            topk=1,
         )
+
+        print("CANDIDATES", hard_prompt_candidates.sum(dim=-1))
 
         hard_prompt_candidates = clean_hard_prompt_candidates(
             self.hparams.tokenizer,
