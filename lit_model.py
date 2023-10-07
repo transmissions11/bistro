@@ -58,6 +58,8 @@ class LitModel(L.LightningModule):
             ),
         )
 
+        print(self.current_hard_prompt)
+
         assert (
             self.current_hard_prompt.size(0) == num_hard_prompt_tkns
         ), f"hard prompt size mismatch {self.current_hard_prompt.size(0)} != {num_hard_prompt_tkns}"
