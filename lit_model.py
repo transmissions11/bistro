@@ -71,6 +71,8 @@ class LitModel(L.LightningModule):
             target_ids=targets,
         )
 
+        # TODO: limit to ascii
+
         # TODO: support grad accum iters essentially (split into multiple batches)
         hard_prompt_candidates = create_hard_prompt_candidates(
             current_hard_prompt=self.current_hard_prompt,
@@ -95,8 +97,9 @@ class LitModel(L.LightningModule):
 
         self.current_hard_prompt = hard_prompt_candidates[best_candidate_idx]
 
+        self.log("train_loss", min_loss, prog_bar=True)
+
         if batch_idx % 20 == 0:
-            print("LOSS", min_loss)
             print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
