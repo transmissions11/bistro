@@ -150,8 +150,6 @@ def clean_hard_prompt_candidates(
         # Ensure the candidate is the same length after decoding and encoding.
         if candidate.size(0) == reencoded_candidate.size(0):
             filtered.append(reencoded_candidate)
-        else:
-            print(candidate.size(0), reencoded_candidate.size(0))
 
     # If the number of filtered candidates is less than the number of hard
     # prompt candidates, pad the list with the last candidate and return.
