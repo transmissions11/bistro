@@ -165,6 +165,7 @@ def test_hard_prompt_candidates(
     """
 
     input_ids = input_ids.squeeze(0)  # (t)
+    target_ids = target_ids.squeeze(0)  # (t)
 
     # Find the position of the hard prompt template in input_ids.
     hard_prompt_positions = torch.where(input_ids == hard_prompt_tkn)[0]
