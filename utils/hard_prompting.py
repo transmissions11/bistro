@@ -199,8 +199,8 @@ def test_hard_prompt_candidates(
         reduce=False,
     ).view(hard_prompt_candidates.size(0), -1)
 
-    print(loss.shape, loss)
-    print(loss[loss.nonzero(as_tuple=True)])
+    # Ignore losses of 0, as they are due to padding, and take the mean of the rest.
+    loss = loss[loss != 0].view(loss.size(0), -1).mean(dim=-1)  # (batch_size)
 
     # Find the index of the sequence with the minimum loss
     min_loss_idx = torch.argmin(loss).item()
