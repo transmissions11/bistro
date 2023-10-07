@@ -184,7 +184,7 @@ def test_hard_prompt_candidates(
     # Pad the sequences and convert them to a tensor
     batch = pad_collate_fn(new_input_ids_list)
 
-    print(batch)
+    print(batch["inputs"].shape, batch["targets"].shape)
 
     # Compute the loss for the entire batch
     loss = compute_loss(model, input_ids=batch["inputs"], target_ids=batch["targets"])
