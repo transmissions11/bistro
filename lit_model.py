@@ -63,6 +63,8 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
+        # TODO: ablate these for performance
+
         hard_prompt_grads = get_hard_prompt_gradients(
             self.model,
             current_hard_prompt=self.current_hard_prompt,
@@ -99,8 +101,8 @@ class LitModel(L.LightningModule):
 
         self.log("train_loss", min_loss, prog_bar=True)
 
-        if batch_idx % 20 == 0:
-            print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
+        # if batch_idx % 20 == 0:
+        #     print("PROMPT", self.hparams.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         # inputs, targets = batch["inputs"], batch["targets"]
