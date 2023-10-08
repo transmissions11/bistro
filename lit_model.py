@@ -82,6 +82,7 @@ class LitModel(L.LightningModule):
 
         # TODO: ablate these for performance
 
+        # TODO; we could support input ids with batches here, just mean properly
         # Compute, gather, and accumulate the gradients for the hard prompt.
         self.accumulated_grads += self.all_gather(
             get_hard_prompt_gradients(
