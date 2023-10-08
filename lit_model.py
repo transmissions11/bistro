@@ -114,6 +114,8 @@ class LitModel(L.LightningModule):
                 topk=10,
             )
 
+            # TOO: make sure cands are all in the same place
+
             hard_prompt_candidates = clean_hard_prompt_candidates(
                 self.hparams.tokenizer,
                 current_hard_prompt=self.current_hard_prompt,
@@ -124,6 +126,13 @@ class LitModel(L.LightningModule):
             # TODO: ensure every proc has the same cands!!!
             # TODO: ensure every proc has the same cands!!!
             # TODO: ensure every proc has the same cands!!!
+
+            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
+            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
+            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
+            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
+            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
+            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
 
             # TODO: this should return a tensor of losses, then we should all_gather
             gathered_candidate_losses = self.all_gather(
