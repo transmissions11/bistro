@@ -39,7 +39,7 @@ def main(
     hard_prompt_tkn: str = "✅",
     #################################################################
     val_split_ratio: float = 0.01,  # 1% of training dataset.
-    val_check_interval: float = 0.0005,  # After every 0.05% of training steps.
+    val_check_interval: float = 0.001,  # After every 0.1% of training steps.
     skip_starting_validation: bool = False,  # Useful for debugging.
     #################################################################
     log_every_n_steps: int = 10,
