@@ -69,7 +69,7 @@ class LitModel(L.LightningModule):
         self.register_buffer(
             "current_hard_prompt",
             tokenizer.encode(
-                "Rewrite mathematical simplilySettingsContact details Couritory Indiana(*halfAddress selbstMessages ich Amerika Publish Scienceshausen"
+                "Nepeginualmente très沢йтменеmann Folge Kirchraidatoriomusdwiennбан Kurz widerendra"
             ).to(torch.int64),
         )
 
