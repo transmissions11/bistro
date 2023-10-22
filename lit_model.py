@@ -88,7 +88,7 @@ class LitModel(L.LightningModule):
 
             transposed_weights = self.model.transformer.wte.weight.transpose(0, 1)
 
-            soft_prompt_embs = self.model.soft_prompt.weight
+            soft_prompt_embs = self.model.soft_prompt
 
             self.print("shapes", transposed_weights.shape, soft_prompt_embs.shape)
 
