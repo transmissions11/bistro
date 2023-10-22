@@ -84,6 +84,21 @@ class LitModel(L.LightningModule):
 
         # Log a few sample inferences from the validation set to W&B.
         if batch_idx == 0:
+            soft_prompt_weights = self.model.soft_prompt.weight
+
+            # we want to decode the soft prompt embeddings back into nearest tokens
+            # to do this, we'll multiply the embeddings by the transpose of the embedding matrix
+            # and then argmax the resulting tensor
+            # this will give us the index of the nearest token to the embedding
+            transposed_embedding_matrix = self.model.transformer.wte.weight.transpose(
+                0, 1
+            )
+            nearest_tokens = torch.argmax(
+                soft_prompt_weights @ transposed_embedding_matrix, dim=-1
+            )
+
+            self.print(tokenizer.decode(nearest_tokens))
+
             tokenizer = self.hparams.tokenizer
 
             prompt_end_tkns = tokenizer.encode(
