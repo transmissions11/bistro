@@ -92,14 +92,14 @@ class LitModel(L.LightningModule):
 
             self.print("shapes", transposed_weights.shape, soft_prompt_embs.shape)
 
+            tkn_ids = (soft_prompt_embs.squeeze(0) @ transposed_weights).argmax(dim=-1)
+
+            self.print("tkn_ids", tkn_ids)
+
             # we want to decode the soft prompt embeddings back into nearest tokens
             # to do this, we'll multiply the embeddings by the transpose of the embedding matrix
             # and then argmax the resulting tensor
-            self.print(
-                self.hparams.tokenizer.decode(
-                    (soft_prompt_embs.squeeze(0) @ transposed_weights).argmax(dim=-1)
-                )
-            )
+            self.print("decoded", self.hparams.tokenizer.decode(tkn_ids))
 
             #########################################################################
 
