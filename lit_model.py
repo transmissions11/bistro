@@ -68,9 +68,7 @@ class LitModel(L.LightningModule):
 
         self.register_buffer(
             "current_hard_prompt",
-            tokenizer.encode(
-                "Nepeginualmente très沢йтменеmann Folge Kirchraidatoriomusdwiennбан Kurz widerendra"
-            ).to(torch.int64),
+            tokenizer.encode("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅").to(torch.int64),
         )
 
         assert (
