@@ -198,10 +198,6 @@ def test_hard_prompt_candidates(
         new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
 
         # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
-        # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
-        # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
-        # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
-        # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
         new_input_ids_list.append({"inputs": new_input_ids, "targets": target_ids})
 
     # Pad the sequences and convert them to a tensor
