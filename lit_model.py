@@ -108,7 +108,7 @@ class LitModel(L.LightningModule):
             hard_prompt_candidates = create_hard_prompt_candidates(
                 current_hard_prompt=self.current_hard_prompt,
                 hard_prompt_grads=hard_prompt_grads,
-                batch_size=80,  # TODO: FIND A GOOD VALUE!!!! MAKE THIS CONFIG
+                batch_size=80,  # TODO: find a good value and make this configurable
                 not_allowed_tokens=self.not_allowed_tokens,
                 topk=10,
             )
@@ -121,19 +121,7 @@ class LitModel(L.LightningModule):
                 hard_prompt_candidates=hard_prompt_candidates,
             )
 
-            # TODO: ensure every proc has the same cands!!!
-            # TODO: ensure every proc has the same cands!!!
-            # TODO: ensure every proc has the same cands!!!
-            # TODO: ensure every proc has the same cands!!!
-
-            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
-            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
-            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
-            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
-            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
-            ## AHH WIAT I DONT THINK THEY HAVE the same cands ##
-
-            # TODO: this should return a tensor of losses, then we should all_gather
+            # TODO: ensure every proc has the same cands
             gathered_candidate_losses = self.all_gather(
                 test_hard_prompt_candidates(
                     self.model,
@@ -150,11 +138,6 @@ class LitModel(L.LightningModule):
 
             # TODO: have rank zero do this? hm can test w/ print
             self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
-
-            #########################################################################
-            # they should all be the same??
-            print(self.hparams.tokenizer.decode(self.current_hard_prompt))
-            #########################################################################
 
             self.log("train_loss", min_loss)
 
