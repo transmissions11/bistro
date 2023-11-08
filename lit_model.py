@@ -96,7 +96,7 @@ class LitModel(L.LightningModule):
         ).mean(dim=0)
 
         # If it is time to update the model parameters:
-        if (batch_idx + 1) % self.hparams.grad_accumulation_steps == 0:
+        if True:
             self.print("done accumulating, updating now!")
 
             # Use the accumulated gradients for the update.
