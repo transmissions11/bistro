@@ -88,7 +88,7 @@ class LitModel(L.LightningModule):
 
         # If it is time to update the model parameters:
 
-        hard_prompt_grads = get_hard_prompt_gradients(
+        self.accumulated_grads += get_hard_prompt_gradients(
             self.model,
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_tkn=self.hparams.hard_prompt_tkn,
@@ -96,41 +96,50 @@ class LitModel(L.LightningModule):
             target_ids=targets,
         )
 
-        # TODO: support grad accum iters essentially (split into multiple batches)
-        hard_prompt_candidates = create_hard_prompt_candidates(
-            current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_grads=hard_prompt_grads,
-            batch_size=100,  # TODO: find a good value and make this configurable
-            not_allowed_tokens=self.not_allowed_tokens,
-            topk=50,
-        )
+        # If it is time to update the model parameters:
+        if (batch_idx + 1) % self.hparams.grad_accumulation_steps == 0:
+            # TODO: support grad accum iters essentially (split into multiple batches)
+            hard_prompt_candidates = create_hard_prompt_candidates(
+                current_hard_prompt=self.current_hard_prompt,
+                hard_prompt_grads=hard_prompt_grads,
+                batch_size=100,  # TODO: find a good value and make this configurable
+                not_allowed_tokens=self.not_allowed_tokens,
+                topk=50,
+            )
 
-        # TOO: make sure cands are all in the same place
+            # Use the accumulated gradients for the update.
+            hard_prompt_grads = (
+                self.accumulated_grads / self.hparams.grad_accumulation_steps
+            )
 
-        hard_prompt_candidates = clean_hard_prompt_candidates(
-            self.hparams.tokenizer,
-            current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_candidates=hard_prompt_candidates,
-        )
+            self.accumulated_grads.zero_()
 
-        # TODO: ensure every proc has the same cands
+            # TODO: make sure cands are all in the same place
 
-        gathered_candidate_losses = test_hard_prompt_candidates(
-            self.model,
-            hard_prompt_candidates=hard_prompt_candidates,
-            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-            input_ids=inputs,
-            target_ids=targets,
-        )
+            hard_prompt_candidates = clean_hard_prompt_candidates(
+                self.hparams.tokenizer,
+                current_hard_prompt=self.current_hard_prompt,
+                hard_prompt_candidates=hard_prompt_candidates,
+            )
 
-        min_loss_candidate_idx = torch.argmin(gathered_candidate_losses).item()
+            # TODO: ensure every proc has the same cands
 
-        min_loss = gathered_candidate_losses[min_loss_candidate_idx]
+            gathered_candidate_losses = test_hard_prompt_candidates(
+                self.model,
+                hard_prompt_candidates=hard_prompt_candidates,
+                hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                input_ids=inputs,
+                target_ids=targets,
+            )
 
-        # TODO: have rank zero do this? hm can test w/ print
-        self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
+            min_loss_candidate_idx = torch.argmin(gathered_candidate_losses).item()
 
-        self.log("train_loss", min_loss)
+            min_loss = gathered_candidate_losses[min_loss_candidate_idx]
+
+            # TODO: have rank zero do this? hm can test w/ print
+            self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
+
+            self.log("train_loss", min_loss)
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
