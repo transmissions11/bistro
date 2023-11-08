@@ -85,64 +85,52 @@ class LitModel(L.LightningModule):
 
         # TODO; we could support input ids with batches here, just mean properly
         # Compute, gather, and accumulate the gradients for the hard prompt.
-        self.accumulated_grads += self.all_gather(
-            get_hard_prompt_gradients(
-                self.model,
-                current_hard_prompt=self.current_hard_prompt,
-                hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-                input_ids=inputs,
-                target_ids=targets,
-            )
-        ).mean(dim=0)
 
         # If it is time to update the model parameters:
-        if True:
-            self.print("done accumulating, updating now!")
 
-            # Use the accumulated gradients for the update.
-            hard_prompt_grads = (
-                self.accumulated_grads / self.hparams.grad_accumulation_steps
-            )
+        hard_prompt_grads = get_hard_prompt_gradients(
+            self.model,
+            current_hard_prompt=self.current_hard_prompt,
+            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+            input_ids=inputs,
+            target_ids=targets,
+        )
 
-            # Reset the accumulated gradients for the next accumulation.
-            self.accumulated_grads.zero_()
+        # TODO: support grad accum iters essentially (split into multiple batches)
+        hard_prompt_candidates = create_hard_prompt_candidates(
+            current_hard_prompt=self.current_hard_prompt,
+            hard_prompt_grads=hard_prompt_grads,
+            batch_size=80,  # TODO: find a good value and make this configurable
+            not_allowed_tokens=self.not_allowed_tokens,
+            topk=50,
+        )
 
-            # TODO: support grad accum iters essentially (split into multiple batches)
-            hard_prompt_candidates = create_hard_prompt_candidates(
-                current_hard_prompt=self.current_hard_prompt,
-                hard_prompt_grads=hard_prompt_grads,
-                batch_size=80,  # TODO: find a good value and make this configurable
-                not_allowed_tokens=self.not_allowed_tokens,
-                topk=50,
-            )
+        # TOO: make sure cands are all in the same place
 
-            # TOO: make sure cands are all in the same place
+        hard_prompt_candidates = clean_hard_prompt_candidates(
+            self.hparams.tokenizer,
+            current_hard_prompt=self.current_hard_prompt,
+            hard_prompt_candidates=hard_prompt_candidates,
+        )
 
-            hard_prompt_candidates = clean_hard_prompt_candidates(
-                self.hparams.tokenizer,
-                current_hard_prompt=self.current_hard_prompt,
-                hard_prompt_candidates=hard_prompt_candidates,
-            )
+        # TODO: ensure every proc has the same cands
 
-            # TODO: ensure every proc has the same cands
-            gathered_candidate_losses = self.all_gather(
-                test_hard_prompt_candidates(
-                    self.model,
-                    hard_prompt_candidates=hard_prompt_candidates,
-                    hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-                    input_ids=inputs,
-                    target_ids=targets,
-                )
-            ).mean(dim=0)
+        gathered_candidate_losses = test_hard_prompt_candidates(
+            self.model,
+            hard_prompt_candidates=hard_prompt_candidates,
+            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+            input_ids=inputs,
+            target_ids=targets,
+        )
 
-            min_loss_candidate_idx = torch.argmin(gathered_candidate_losses).item()
+        min_loss_candidate_idx = torch.argmin(gathered_candidate_losses).item()
 
-            min_loss = gathered_candidate_losses[min_loss_candidate_idx]
+        min_loss = gathered_candidate_losses[min_loss_candidate_idx]
 
-            # TODO: have rank zero do this? hm can test w/ print
-            self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
+        # TODO: have rank zero do this? hm can test w/ print
+        self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
 
-            self.log("train_loss", min_loss)
+        self.log("train_loss", min_loss)
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
