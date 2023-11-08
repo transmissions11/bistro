@@ -68,7 +68,10 @@ class LitModel(L.LightningModule):
 
         self.register_buffer(
             "current_hard_prompt",
-            tokenizer.encode("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅").to(torch.int64),
+            torch.tensor(
+                [hard_prompt_tkn] * num_hard_prompt_tkns,
+                dtype=torch.int64,
+            ),
         )
 
         assert (
