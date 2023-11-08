@@ -25,9 +25,6 @@ class GPT(nn.Module):
 
         self.rope_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
 
-    def reset_caches(self):
-        self.rope_cache = None
-
     def forward(
         self,
         *,  # Force keyword args to avoid confusion.
@@ -41,7 +38,7 @@ class GPT(nn.Module):
         elif input_embs is not None:
             x = input_embs
         elif input_ids is not None:
-            x = self.transformer.wte(input_ids)  # (b, t, n_embd)
+            x = self.embed(input_ids)  # (b, t, n_embd)
         else:
             raise ValueError("[!] you must specify either input_ids or input_embs")
 
@@ -68,3 +65,17 @@ class GPT(nn.Module):
         x = self.transformer.ln_f(x)  # (b, t, n_embd)
 
         return self.lm_head(x)  # (b, t, vocab_size)
+
+    def reset_caches(self):
+        self.rope_cache = None
+
+    def embed(self, input_ids: torch.Tensor) -> torch.Tensor:
+        return self.transformer.wte(input_ids)
+
+    def unembed(self, input_embs: torch.Tensor, argmax: bool = True) -> torch.Tensor:
+        logits = input_embs @ self.transformer.wte.weight.T
+
+        if argmax:
+            return logits.argmax(dim=-1)  # (.., t)
+        else:
+            return logits  # (.., t, vocab_size)
