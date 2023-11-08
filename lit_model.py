@@ -97,7 +97,7 @@ class LitModel(L.LightningModule):
         )
 
         # If it is time to update the model parameters:
-        if (batch_idx + 1) % self.hparams.grad_accumulation_steps == 0:
+        if (batch_idx + 1) % (self.hparams.grad_accumulation_steps + 1) == 0:
             # Use the accumulated gradients for the update.
             hard_prompt_grads = (
                 self.accumulated_grads / self.hparams.grad_accumulation_steps
