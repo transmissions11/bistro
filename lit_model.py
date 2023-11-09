@@ -118,11 +118,6 @@ class LitModel(L.LightningModule):
                 self.hparams.grad_accumulation_steps + 1
             )
 
-            self.print(
-                "hard_prompt_grads",
-                hard_prompt_grads.mean(),
-            )
-
             self.accumulated_grads.zero_()
 
             # TODO: support grad accum iters essentially (split into multiple batches)
@@ -142,8 +137,6 @@ class LitModel(L.LightningModule):
                 hard_prompt_candidates=hard_prompt_candidates,
             )
 
-            self.print("cleaned_hard_prompt_candidates", hard_prompt_candidates)
-
             # TODO: ensure every proc has the same cands
 
             gathered_candidate_losses = test_hard_prompt_candidates(
@@ -154,19 +147,16 @@ class LitModel(L.LightningModule):
                 target_ids=targets,
             )
 
-            self.print("gathered_candidate_losses", gathered_candidate_losses)
-
             min_loss_candidate_idx = torch.argmin(gathered_candidate_losses).item()
-
-            self.print("min_loss_candidate_idx", min_loss_candidate_idx)
-
             min_loss = gathered_candidate_losses[min_loss_candidate_idx]
 
             # TODO: have rank zero do this? hm can test w/ print
             self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
 
-            self.log("train_loss", min_loss)
-            self.log("hard_prompt_step", self.hard_prompt_step)
+            self.print("MIN LOSS", min_loss)
+
+            # self.log("train_loss", min_loss)
+            # self.log("hard_prompt_step", self.hard_prompt_step)
 
             self.hard_prompt_step += 1.0
 
