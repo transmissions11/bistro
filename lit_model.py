@@ -92,6 +92,15 @@ class LitModel(L.LightningModule):
             persistent=False,
         )
 
+        self.register_buffer(
+            "testing_var",
+            torch.tensor(
+                [1, 2, 3],
+                dtype=torch.float64,
+            ),
+            persistent=False,
+        )
+
         self.hard_prompt_step = 0.0
 
         # TODO: benchmark this
@@ -113,6 +122,8 @@ class LitModel(L.LightningModule):
         ), f"hard prompt size mismatch {self.current_hard_prompt.size(0)} != {num_hard_prompt_tkns}"
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
+        self.print(self.testing_var, self.testing_var.dtype)
+
         inputs, targets = batch["inputs"], batch["targets"]
 
         # TODO: ablate these for performance
