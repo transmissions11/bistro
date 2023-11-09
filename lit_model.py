@@ -117,15 +117,23 @@ class LitModel(L.LightningModule):
             if self.hard_prompt_step == 2.0:
                 flat_current_grads = current_grads.view(-1)
                 flat_hard_prompt_grads = hard_prompt_grads.view(-1)
+                flat_accumulated_grads = self.accumulated_grads.view(-1)
 
                 indices = torch.randperm(flat_current_grads.nelement())[:25]
 
                 self.print(
-                    self.hard_prompt_step,
                     "current_grads",
                     flat_current_grads[indices],
+                )
+                self.print("")
+                self.print(
                     "hard_prompt_grads",
                     flat_hard_prompt_grads[indices],
+                )
+                self.print("")
+                self.print(
+                    "accumulated_grads",
+                    flat_accumulated_grads[indices],
                 )
 
             self.accumulated_grads.zero_()
