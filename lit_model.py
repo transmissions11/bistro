@@ -116,9 +116,11 @@ class LitModel(L.LightningModule):
                 self.print(
                     self.hard_prompt_step,
                     "current_grads",
-                    current_grads,
+                    # randomly sample 100 indices
+                    torch.randperm(current_grads.nelement())[:100]
                     "hard_prompt_grads",
-                    hard_prompt_grads,
+                    # randomly sample 100 indices
+                    torch.randperm(hard_prompt_grads.nelement())[:100],
                 )
 
             self.accumulated_grads.zero_()
