@@ -94,7 +94,7 @@ class LitModel(L.LightningModule):
         torch.set_printoptions(precision=30)
         torch.set_printoptions(profile="full")
 
-        print("RAND 1 -------", torch.randint(torch.randint(1, 100, (1,))))
+        print("RAND 1 -------", (torch.randint(1, 100, (1,))))
 
         current_grads = get_hard_prompt_gradients(
             self.model,
@@ -127,7 +127,7 @@ class LitModel(L.LightningModule):
 
             self.accumulated_grads.zero_()
 
-            print("RAND 2 -------", torch.randint(torch.randint(1, 100, (1,))))
+            print("RAND 2 -------", (torch.randint(1, 100, (1,))))
 
             # TODO: support grad accum iters essentially (split into multiple batches)
             hard_prompt_candidates = create_hard_prompt_candidates(
@@ -138,7 +138,7 @@ class LitModel(L.LightningModule):
                 topk=50,
             )
 
-            print("RAND 3 -------", torch.randint(torch.randint(1, 100, (1,))))
+            print("RAND 3 -------", (torch.randint(1, 100, (1,))))
 
             # TODO: make sure cands are all in the same place
 
@@ -150,7 +150,7 @@ class LitModel(L.LightningModule):
 
             self.print("cleaned_hard_prompt_candidates", hard_prompt_candidates)
 
-            print("RAND 4 -------", torch.randint(torch.randint(1, 100, (1,))))
+            print("RAND 4 -------", (torch.randint(1, 100, (1,))))
 
             # TODO: ensure every proc has the same cands
 
@@ -162,7 +162,7 @@ class LitModel(L.LightningModule):
                 target_ids=targets,
             )
 
-            print("RAND 5 -------", torch.randint(torch.randint(1, 100, (1,))))
+            print("RAND 5 -------", (torch.randint(1, 100, (1,))))
 
             self.print("gathered_candidate_losses", gathered_candidate_losses)
 
