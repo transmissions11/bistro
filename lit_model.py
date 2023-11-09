@@ -91,7 +91,7 @@ class LitModel(L.LightningModule):
 
         # If it is time to update the model parameters:
 
-        torch.set_printoptions(precision=30, profile="full")
+        torch.set_printoptions(precision=50, profile="full")
 
         current_grads = get_hard_prompt_gradients(
             self.model,
