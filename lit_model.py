@@ -112,16 +112,18 @@ class LitModel(L.LightningModule):
                 self.hparams.grad_accumulation_steps + 1
             )
 
-            if self.hard_prompt_step == 2.0:
-                self.print(
-                    self.hard_prompt_step,
-                    "current_grads",
-                    # randomly sample 100 indices
-                    torch.randperm(current_grads.nelement())[:100],
-                    "hard_prompt_grads",
-                    # randomly sample 100 indices
-                    torch.randperm(hard_prompt_grads.nelement())[:100],
-                )
+            self.print(current_grads.shape)
+
+            # if self.hard_prompt_step == 2.0:
+            #     self.print(
+            #         self.hard_prompt_step,
+            #         "current_grads",
+            #         # randomly sample 100 indices
+            #         torch.randperm(current_grads.nelement())[:100],
+            #         "hard_prompt_grads",
+            #         # randomly sample 100 indices
+            #         torch.randperm(hard_prompt_grads.nelement())[:100],
+            #     )
 
             self.accumulated_grads.zero_()
 
