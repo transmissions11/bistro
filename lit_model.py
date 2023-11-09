@@ -107,9 +107,6 @@ class LitModel(L.LightningModule):
                 self.hparams.grad_accumulation_steps + 1
             )
 
-            print("current_grads", current_grads.mean())
-            print("hard_prompt_grads", hard_prompt_grads.mean())
-
             self.accumulated_grads.zero_()
 
             # TODO: support grad accum iters essentially (split into multiple batches)
