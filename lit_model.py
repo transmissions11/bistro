@@ -60,6 +60,12 @@ class LitModel(L.LightningModule):
             persistent=False,
         )
 
+        self.register_buffer(
+            "hard_prompt_step",
+            0,
+            persistent=False,
+        )
+
         # TODO: benchmark this
         self.register_buffer(
             "not_allowed_tokens",
@@ -108,6 +114,8 @@ class LitModel(L.LightningModule):
             # hard_prompt_grads = self.accumulated_grads / (
             #     self.hparams.grad_accumulation_steps + 1
             # )
+
+            self.hardware_prompt_step += 1
 
             hard_prompt_grads = current_grads
 
@@ -158,6 +166,7 @@ class LitModel(L.LightningModule):
             self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
 
             self.log("train_loss", min_loss)
+            self.log("hard_prompt_step", self.hard_prompt_step)
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
