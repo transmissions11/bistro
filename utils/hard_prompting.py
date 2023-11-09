@@ -98,7 +98,6 @@ def create_hard_prompt_candidates(
     topk: int = 256,
     # Can be used to use only ASCII tokens, for example.
     not_allowed_tokens: Optional[torch.Tensor] = None,
-    debug: bool = False,
 ) -> torch.Tensor:
     """
     Creates a batch of hard prompt candidates by sampling randomly from the top-k tokens.
@@ -111,15 +110,10 @@ def create_hard_prompt_candidates(
     # if not_allowed_tokens is not None:
     #     hard_prompt_grads[:, not_allowed_tokens] = float("inf")
 
-    if debug:
-        print("innmer hard prompt grads", hard_prompt_grads.mean())
-
     # Get the ids of the top-k tokens that would most decrease the loss.
     top_indices = (-hard_prompt_grads).topk(topk, dim=1).indices
 
-    if debug:
-        print(top_indices.type(torch.float32).mean())
-
+    # Create a (batch_size, num_hard_prompt_tkns) tensor of the current hard prompt.
     candidates_batch = current_hard_prompt.repeat(batch_size, 1)
 
     # Generate a (batch_size) tensor of an index to replace in each row of the batch.

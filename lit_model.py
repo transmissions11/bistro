@@ -113,8 +113,6 @@ class LitModel(L.LightningModule):
         ), f"hard prompt size mismatch {self.current_hard_prompt.size(0)} != {num_hard_prompt_tkns}"
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
-        self.print(self.accumulated_grads.dtype)
-
         inputs, targets = batch["inputs"], batch["targets"]
 
         # TODO: ablate these for performance
@@ -123,8 +121,6 @@ class LitModel(L.LightningModule):
         # Compute, gather, and accumulate the gradients for the hard prompt.
 
         # If it is time to update the model parameters:
-
-        torch.set_printoptions(precision=50, profile="full")
 
         current_grads = get_hard_prompt_gradients(
             self.model,
@@ -136,11 +132,6 @@ class LitModel(L.LightningModule):
 
         self.accumulated_grads += current_grads
 
-        if self.hard_prompt_step == 2.0:
-            self.print("current_grads", current_grads.view(-1)[indices])
-            self.print("accumulated_grads", self.accumulated_grads.view(-1)[indices])
-            self.print("accumulated_grads_dtype", self.accumulated_grads.dtype)
-
         # If it is time to update the model parameters:
         if (batch_idx + 1) % (self.hparams.grad_accumulation_steps + 1) == 0:
             # Use the accumulated gradients for the update.
@@ -150,21 +141,6 @@ class LitModel(L.LightningModule):
                 self.hparams.grad_accumulation_steps + 1
             )
 
-            if self.hard_prompt_step == 2.0:
-                flat_current_grads = current_grads.view(-1)
-                flat_hard_prompt_grads = hard_prompt_grads.view(-1)
-
-                grabbed_current_grads = flat_current_grads[indices]
-                grabbed_hard_prompt_grads = flat_hard_prompt_grads[indices]
-
-                self.print("current_grads", grabbed_current_grads)
-                self.print("")
-                self.print("hard_prompt_grads", grabbed_hard_prompt_grads)
-                self.print("")
-                self.print("diff", grabbed_current_grads - grabbed_hard_prompt_grads)
-
-            self.accumulated_grads.zero_()
-
             # TODO: support grad accum iters essentially (split into multiple batches)
             hard_prompt_candidates = create_hard_prompt_candidates(
                 current_hard_prompt=self.current_hard_prompt,
@@ -172,7 +148,6 @@ class LitModel(L.LightningModule):
                 batch_size=100,  # TODO: find a good value and make this configurable
                 not_allowed_tokens=self.not_allowed_tokens,
                 topk=50,
-                debug=(self.hard_prompt_step == 2.0),
             )
 
             # TODO: make sure cands are all in the same place
