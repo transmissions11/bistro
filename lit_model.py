@@ -112,7 +112,7 @@ class LitModel(L.LightningModule):
                 self.hparams.grad_accumulation_steps + 1
             )
 
-            torch.set_printoptions(precision=18)
+            torch.set_printoptions(precision=30)
             self.print(
                 "current_grads",
                 current_grads.mean(),
