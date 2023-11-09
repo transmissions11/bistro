@@ -92,18 +92,7 @@ class LitModel(L.LightningModule):
             persistent=False,
         )
 
-        self.register_buffer(
-            "testing_var",
-            torch.tensor(
-                [1, 2, 3],
-                dtype=torch.float64,
-            ),
-            persistent=False,
-        )
-
-        print("testing_var", self.testing_var.dtype)
-
-        self.hard_prompt_step = 0.0
+        self.hard_prompt_step = 0.0  # TODO: will this break with bfloat16?
 
         # TODO: benchmark this
         self.register_buffer(
@@ -134,8 +123,6 @@ class LitModel(L.LightningModule):
         # Compute, gather, and accumulate the gradients for the hard prompt.
 
         # If it is time to update the model parameters:
-
-        self.accumulated_grads = self.accumulated_grads.type(torch.float64)
 
         torch.set_printoptions(precision=50, profile="full")
 
@@ -320,3 +307,7 @@ class LitModel(L.LightningModule):
     def on_train_start(self):
         self.print("\nResetting model caches for training...\n")
         self.model.reset_caches()
+
+        # Pytorch Lightning calls .to() on all registered buffers during setup,
+        # which will set the dtype to the default dtype. We need to reset it here.
+        self.accumulated_grads = self.accumulated_grads.type(torch.float64)
