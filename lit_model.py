@@ -34,7 +34,7 @@ class LitModel(L.LightningModule):
         hard_prompt_tkn: int,
         num_hard_prompt_tkns: int,
         only_ascii_tkns: bool = True,
-        grad_accumulation_steps: int = 2,
+        grad_accumulation_steps: int = 3,
         #######################################
         checkpoint_path: Optional[Path] = None,
     ):
