@@ -60,11 +60,7 @@ class LitModel(L.LightningModule):
             persistent=False,
         )
 
-        self.register_buffer(
-            "hard_prompt_step",
-            0,
-            persistent=False,
-        )
+        self.hard_prompt_step = 0
 
         # TODO: benchmark this
         self.register_buffer(
