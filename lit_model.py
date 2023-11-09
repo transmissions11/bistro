@@ -179,9 +179,6 @@ class LitModel(L.LightningModule):
 
             self.hard_prompt_step += 1.0
 
-            if self.hard_prompt_step > 2:
-                raise RuntimeError("Done")
-
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
 
