@@ -111,6 +111,13 @@ class LitModel(L.LightningModule):
                 self.hparams.grad_accumulation_steps + 1
             )
 
+            self.print(
+                "current_grads",
+                current_grads.mean(),
+                "hard_prompt_grads",
+                hard_prompt_grads.mean(),
+            )
+
             self.accumulated_grads.zero_()
 
             # TODO: support grad accum iters essentially (split into multiple batches)
@@ -151,16 +158,6 @@ class LitModel(L.LightningModule):
             self.log("hard_prompt_step", self.hard_prompt_step)
 
             self.hard_prompt_step += 1
-
-            print("bidx, hstep, loss", batch_idx, self.hard_prompt_step, min_loss)
-            print(
-                batch_idx,
-                "updating... — " "current_grads",
-                current_grads.mean(),
-                "hard_prompt_grads",
-                hard_prompt_grads.mean(),
-            )
-            print(self.hparams.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
