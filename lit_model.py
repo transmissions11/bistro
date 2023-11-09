@@ -113,8 +113,10 @@ class LitModel(L.LightningModule):
             )
 
             self.print(
-                "grad delta",
-                current_grads.mean() - hard_prompt_grads.mean(),
+                "current_grads",
+                current_grads.mean(),
+                "hard_prompt_grads",
+                hard_prompt_grads.mean(),
             )
 
             self.accumulated_grads.zero_()
