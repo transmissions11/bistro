@@ -91,7 +91,7 @@ class LitModel(L.LightningModule):
 
         # If it is time to update the model parameters:
 
-        torch.set_printoptions(precision=30)
+        torch.set_printoptions(precision=30, profile="full")
 
         current_grads = get_hard_prompt_gradients(
             self.model,
@@ -131,6 +131,9 @@ class LitModel(L.LightningModule):
                 not_allowed_tokens=self.not_allowed_tokens,
                 topk=50,
             )
+
+            if self.hard_prompt_step == 2.0:
+                self.print(hard_prompt_candidates)
 
             # TODO: make sure cands are all in the same place
 
