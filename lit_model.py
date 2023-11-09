@@ -111,19 +111,7 @@ class LitModel(L.LightningModule):
             #     self.hparams.grad_accumulation_steps + 1
             # )
 
-            self.hard_prompt_step += 1
-
             hard_prompt_grads = current_grads
-
-            print("bidx, hstep", batch_idx, self.hard_prompt_step)
-
-            print(
-                batch_idx,
-                "updating... — " "current_grads",
-                current_grads.mean(),
-                "hard_prompt_grads",
-                hard_prompt_grads.mean(),
-            )
 
             self.accumulated_grads.zero_()
 
@@ -163,6 +151,18 @@ class LitModel(L.LightningModule):
 
             self.log("train_loss", min_loss)
             self.log("hard_prompt_step", self.hard_prompt_step)
+
+            self.hard_prompt_step += 1
+
+            print("bidx, hstep, loss", batch_idx, self.hard_prompt_step, min_loss)
+            print(
+                batch_idx,
+                "updating... — " "current_grads",
+                current_grads.mean(),
+                "hard_prompt_grads",
+                hard_prompt_grads.mean(),
+            )
+            print(self.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
