@@ -130,7 +130,7 @@ class LitModel(L.LightningModule):
                 batch_size=100,  # TODO: find a good value and make this configurable
                 not_allowed_tokens=self.not_allowed_tokens,
                 topk=50,
-                debug=(self.hard_prompt_step is 2.0),
+                debug=(self.hard_prompt_step == 2.0),
             )
 
             # TODO: make sure cands are all in the same place
