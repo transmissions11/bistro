@@ -141,6 +141,8 @@ class LitModel(L.LightningModule):
                 hard_prompt_candidates=hard_prompt_candidates,
             )
 
+            self.print("cleaned_hard_prompt_candidates", hard_prompt_candidates)
+
             # TODO: ensure every proc has the same cands
 
             gathered_candidate_losses = test_hard_prompt_candidates(
@@ -151,7 +153,11 @@ class LitModel(L.LightningModule):
                 target_ids=targets,
             )
 
+            self.print("gathered_candidate_losses", gathered_candidate_losses)
+
             min_loss_candidate_idx = torch.argmin(gathered_candidate_losses).item()
+
+            self.print("min_loss_candidate_idx", min_loss_candidate_idx)
 
             min_loss = gathered_candidate_losses[min_loss_candidate_idx]
 
