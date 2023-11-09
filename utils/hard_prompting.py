@@ -123,15 +123,11 @@ def create_hard_prompt_candidates(
         device=hard_prompt_grads.device,
     ).type(torch.int64)
 
-    rand_ints = torch.randint(0, topk, (batch_size, 1), device=hard_prompt_grads.device)
-
-    print("RAND INTS", rand_ints.type(torch.float32).mean())
-
     # Generate a (batch_size, 1) tensor of token ids to replace each new_token_pos index with.
     new_token_val = torch.gather(
         top_indices[new_token_pos],
         1,
-        rand_ints,
+        torch.randint(0, topk, (batch_size, 1), device=hard_prompt_grads.device),
     )
 
     # Replace the new_token_pos index in each row of the batch with the new_token_val.
