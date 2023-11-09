@@ -137,6 +137,7 @@ class LitModel(L.LightningModule):
         if self.hard_prompt_step == 2.0:
             self.print("current_grads", current_grads.view(-1)[indices])
             self.print("accumulated_grads", self.accumulated_grads.view(-1)[indices])
+            self.print("accumulated_grads_dtype", self.accumulated_grads.dtype)
 
         # If it is time to update the model parameters:
         if (batch_idx + 1) % (self.hparams.grad_accumulation_steps + 1) == 0:
