@@ -111,7 +111,7 @@ class LitModel(L.LightningModule):
 
             hard_prompt_grads = current_grads
 
-            print("bidx, tstep", batch_idx, self.global_step)
+            print("bidx, tstep", batch_idx, self.trainer.global_step)
 
             print(
                 batch_idx,
