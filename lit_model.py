@@ -61,7 +61,7 @@ class LitModel(L.LightningModule):
             persistent=False,
         )
 
-        self.hard_prompt_step = 0
+        self.hard_prompt_step = 0.0
 
         # TODO: benchmark this
         self.register_buffer(
@@ -161,7 +161,7 @@ class LitModel(L.LightningModule):
             self.log("train_loss", min_loss)
             self.log("hard_prompt_step", self.hard_prompt_step)
 
-            self.hard_prompt_step += 1
+            self.hard_prompt_step += 1.0
 
             if self.hard_prompt_step > 3:
                 raise RuntimeError("Done")
