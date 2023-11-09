@@ -94,7 +94,7 @@ class LitModel(L.LightningModule):
         torch.set_printoptions(precision=30)
         torch.set_printoptions(profile="full")
 
-        print("RAND 1 -------", (torch.randint(1, 100, (1,))))
+        # print("RAND 1 -------", (torch.randint(1, 100, (1,))))
 
         current_grads = get_hard_prompt_gradients(
             self.model,
