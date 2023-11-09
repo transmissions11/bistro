@@ -162,7 +162,7 @@ class LitModel(L.LightningModule):
                 "hard_prompt_grads",
                 hard_prompt_grads.mean(),
             )
-            print(self.tokenizer.decode(self.current_hard_prompt))
+            print(self.hparams.tokenizer.decode(self.current_hard_prompt))
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
