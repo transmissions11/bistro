@@ -112,8 +112,6 @@ class LitModel(L.LightningModule):
                 self.hparams.grad_accumulation_steps + 1
             )
 
-            self.print(current_grads.shape)
-
             if self.hard_prompt_step == 2.0:
                 flat_current_grads = current_grads.view(-1)
                 flat_hard_prompt_grads = hard_prompt_grads.view(-1)
