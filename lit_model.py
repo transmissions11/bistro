@@ -130,11 +130,6 @@ class LitModel(L.LightningModule):
                     "hard_prompt_grads",
                     flat_hard_prompt_grads[indices],
                 )
-                self.print("")
-                self.print(
-                    "accumulated_grads",
-                    flat_accumulated_grads[indices],
-                )
 
             self.accumulated_grads.zero_()
 
