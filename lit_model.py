@@ -118,15 +118,13 @@ class LitModel(L.LightningModule):
                 flat_current_grads = current_grads.view(-1)
                 flat_hard_prompt_grads = hard_prompt_grads.view(-1)
 
-                indices = torch.randperm(flat_current_grads.nelement())[:100]
+                indices = torch.randperm(flat_current_grads.nelement())[:25]
 
                 self.print(
                     self.hard_prompt_step,
                     "current_grads",
-                    # randomly sample 100 indices
                     flat_current_grads[indices],
                     "hard_prompt_grads",
-                    # randomly sample 100 indices
                     flat_hard_prompt_grads[indices],
                 )
 
