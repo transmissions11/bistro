@@ -98,6 +98,7 @@ def create_hard_prompt_candidates(
     topk: int = 256,
     # Can be used to use only ASCII tokens, for example.
     not_allowed_tokens: Optional[torch.Tensor] = None,
+    debug: bool = False,
 ) -> torch.Tensor:
     """
     Creates a batch of hard prompt candidates by sampling randomly from the top-k tokens.
@@ -112,6 +113,8 @@ def create_hard_prompt_candidates(
 
     # Get the ids of the top-k tokens that would most decrease the loss.
     top_indices = (-hard_prompt_grads).topk(topk, dim=1).indices
+
+    print(top_indices)
 
     candidates_batch = current_hard_prompt.repeat(batch_size, 1)
 
