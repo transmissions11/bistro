@@ -122,6 +122,8 @@ class LitModel(L.LightningModule):
 
         # If it is time to update the model parameters:
 
+        self.accumulated_grads = self.accumulated_grads.type(torch.float64)
+
         torch.set_printoptions(precision=50, profile="full")
 
         current_grads = get_hard_prompt_gradients(
