@@ -91,6 +91,8 @@ class LitModel(L.LightningModule):
 
         # If it is time to update the model parameters:
 
+        torch.set_printoptions(precision=30)
+
         current_grads = get_hard_prompt_gradients(
             self.model,
             current_hard_prompt=self.current_hard_prompt,
@@ -101,7 +103,10 @@ class LitModel(L.LightningModule):
 
         self.accumulated_grads += current_grads
 
-        # print(batch_idx, "accumulating")
+        self.print(
+            "current_grads",
+            current_grads.mean(),
+        )
 
         # If it is time to update the model parameters:
         if (batch_idx + 1) % (self.hparams.grad_accumulation_steps + 1) == 0:
@@ -112,10 +117,7 @@ class LitModel(L.LightningModule):
                 self.hparams.grad_accumulation_steps + 1
             )
 
-            torch.set_printoptions(precision=30)
             self.print(
-                "current_grads",
-                current_grads.mean(),
                 "hard_prompt_grads",
                 hard_prompt_grads.mean(),
             )
