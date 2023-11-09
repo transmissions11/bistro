@@ -112,13 +112,14 @@ class LitModel(L.LightningModule):
                 self.hparams.grad_accumulation_steps + 1
             )
 
-            self.print(
-                self.hard_prompt_step,
-                "current_grads",
-                current_grads.mean(),
-                "hard_prompt_grads",
-                hard_prompt_grads.mean(),
-            )
+            if self.hard_prompt_step == 2.0:
+                self.print(
+                    self.hard_prompt_step,
+                    "current_grads",
+                    current_grads.mean(),
+                    "hard_prompt_grads",
+                    hard_prompt_grads.mean(),
+                )
 
             self.accumulated_grads.zero_()
 
