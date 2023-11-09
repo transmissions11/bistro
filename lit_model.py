@@ -99,7 +99,7 @@ class LitModel(L.LightningModule):
             hard_prompt_tkn=self.hparams.hard_prompt_tkn,
             input_ids=inputs,
             target_ids=targets,
-        ).type(torch.float64)
+        )
 
         self.accumulated_grads += current_grads
 
