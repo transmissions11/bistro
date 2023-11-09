@@ -174,8 +174,8 @@ class LitModel(L.LightningModule):
             # TODO: have rank zero do this? hm can test w/ print
             self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
 
-            # self.log("train_loss", min_loss)
-            # self.log("hard_prompt_step", self.hard_prompt_step)
+            self.log("train_loss", min_loss)
+            self.log("hard_prompt_step", self.hard_prompt_step)
 
             self.hard_prompt_step += 1.0
 
