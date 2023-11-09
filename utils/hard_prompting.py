@@ -118,7 +118,7 @@ def create_hard_prompt_candidates(
     top_indices = (-hard_prompt_grads).topk(topk, dim=1).indices
 
     if debug:
-        print(top_indices)
+        print(top_indices.mean())
 
     candidates_batch = current_hard_prompt.repeat(batch_size, 1)
 
