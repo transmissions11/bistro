@@ -24,6 +24,36 @@ from utils.hard_prompting import (
 
 from model import GPT
 
+indices = torch.tensor(
+    [
+        362118,
+        383687,
+        584029,
+        388941,
+        437266,
+        19222,
+        465701,
+        264092,
+        618156,
+        396458,
+        296922,
+        386221,
+        553930,
+        605735,
+        171931,
+        85324,
+        501452,
+        327611,
+        232568,
+        319176,
+        411242,
+        528339,
+        154090,
+        221868,
+        61679,
+    ]
+)
+
 
 class LitModel(L.LightningModule):
     def __init__(
@@ -103,6 +133,8 @@ class LitModel(L.LightningModule):
 
         self.accumulated_grads += current_grads
 
+        self.print("accumulated_grads", self.accumulated_grads[indices])
+
         # If it is time to update the model parameters:
         if (batch_idx + 1) % (self.hparams.grad_accumulation_steps + 1) == 0:
             # Use the accumulated gradients for the update.
@@ -115,8 +147,6 @@ class LitModel(L.LightningModule):
             if self.hard_prompt_step == 2.0:
                 flat_current_grads = current_grads.view(-1)
                 flat_hard_prompt_grads = hard_prompt_grads.view(-1)
-
-                indices = torch.randperm(flat_current_grads.nelement())[:10]
 
                 grabbed_current_grads = flat_current_grads[indices]
                 grabbed_hard_prompt_grads = flat_hard_prompt_grads[indices]
