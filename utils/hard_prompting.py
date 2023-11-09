@@ -111,11 +111,11 @@ def create_hard_prompt_candidates(
     if not_allowed_tokens is not None:
         hard_prompt_grads[:, not_allowed_tokens] = float("inf")
 
+    if debug:
+        print(not_allowed_tokens)
+
     # Get the ids of the top-k tokens that would most decrease the loss.
     top_indices = (-hard_prompt_grads).topk(topk, dim=1).indices
-
-    if debug:
-        print(top_indices)
 
     candidates_batch = current_hard_prompt.repeat(batch_size, 1)
 
