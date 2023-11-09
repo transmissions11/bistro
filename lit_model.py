@@ -116,10 +116,10 @@ class LitModel(L.LightningModule):
                 flat_current_grads = current_grads.view(-1)
                 flat_hard_prompt_grads = hard_prompt_grads.view(-1)
 
+                indices = torch.randperm(flat_current_grads.nelement())[:10]
+
                 grabbed_current_grads = flat_current_grads[indices]
                 grabbed_hard_prompt_grads = flat_hard_prompt_grads[indices]
-
-                indices = torch.randperm(flat_current_grads.nelement())[:10]
 
                 self.print("current_grads", grabbed_current_grads)
                 self.print("")
