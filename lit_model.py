@@ -88,13 +88,15 @@ class LitModel(L.LightningModule):
 
         # If it is time to update the model parameters:
 
-        self.accumulated_grads += get_hard_prompt_gradients(
+        current_grads = get_hard_prompt_gradients(
             self.model,
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_tkn=self.hparams.hard_prompt_tkn,
             input_ids=inputs,
             target_ids=targets,
         )
+
+        self.accumulated_grads += current_grads
 
         # If it is time to update the model parameters:
         if (batch_idx + 1) % (self.hparams.grad_accumulation_steps + 1) == 0:
@@ -103,7 +105,9 @@ class LitModel(L.LightningModule):
                 self.accumulated_grads / self.hparams.grad_accumulation_steps
             )
 
-            print("hard_prompt_grads", hard_prompt_grads.shape, hard_prompt_grads)
+            print("current_grads", current_grads)
+            print("accumulated_grads", accumulated_grads)
+            print("hard_prompt_grads", hard_prompt_grads)
 
             self.accumulated_grads.zero_()
 
