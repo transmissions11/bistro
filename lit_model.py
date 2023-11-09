@@ -113,6 +113,7 @@ class LitModel(L.LightningModule):
             )
 
             self.print(
+                self.hard_prompt_step,
                 "current_grads",
                 current_grads.mean(),
                 "hard_prompt_grads",
