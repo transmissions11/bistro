@@ -108,7 +108,7 @@ class LitModel(L.LightningModule):
             # Use the accumulated gradients for the update.
             # + 1 because grad accumulation steps are on top of the normal step.
             # e.g. if grad_accumulation_steps=1, two batches are needed to update.
-            hard_prompt_grads = self.accumulated_grads / (
+            hard_prompt_grads = self.accumulated_grads.type(torch.float64) / (
                 self.hparams.grad_accumulation_steps + 1
             )
 
