@@ -111,6 +111,8 @@ class LitModel(L.LightningModule):
 
             hard_prompt_grads = current_grads
 
+            print("bidx, tstep", batch_idx, self.training_step)
+
             print(
                 batch_idx,
                 "updating... — " "current_grads",
