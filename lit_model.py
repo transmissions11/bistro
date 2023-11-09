@@ -101,7 +101,7 @@ class LitModel(L.LightningModule):
             persistent=False,
         )
 
-        self.print("testing_var", self.testing_var.dtype)
+        print("testing_var", self.testing_var.dtype)
 
         self.hard_prompt_step = 0.0
 
