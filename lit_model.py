@@ -183,7 +183,8 @@ class LitModel(L.LightningModule):
 
             self.log(
                 "hard_prompt_step",
-                # Must specify float32 or we'll get precision issues.
+                # We need to specify float32 or we'll get annoying precision issues.
+                # Bug report: https://github.com/Lightning-AI/lightning/issues/18984
                 torch.tensor(self.hard_prompt_step, dtype=torch.float32),
             )
             self.hard_prompt_step += 1.0
