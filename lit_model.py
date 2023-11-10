@@ -146,6 +146,8 @@ class LitModel(L.LightningModule):
             # e.g. if grad_accumulation_steps=1, two batches are needed to update.
             grads = self.accumulated_grads / self.hparams.accumulate_grad_batches
 
+            self.accumulated_grads.zero_()  # Reset the accumulated gradients.
+
             # TODO: support grad accumulation iters essentially (split into multiple batches)
             hard_prompt_candidates = create_hard_prompt_candidates(
                 current_hard_prompt=self.current_hard_prompt,
