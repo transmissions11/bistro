@@ -64,8 +64,8 @@ class LitModel(L.LightningModule):
         hard_prompt_tkn: int,
         num_hard_prompt_tkns: int,
         only_ascii_tkns: bool = True,
-        # TODO: make this work where 1 = no grad accum
-        grad_accumulation_steps: int = 4,
+        # Where 1 means no accumulation.
+        accumulate_grad_batches: int = 1,
         #######################################
         checkpoint_path: Optional[Path] = None,
     ):
@@ -82,23 +82,7 @@ class LitModel(L.LightningModule):
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(ignore=["checkpoint_path"], logger=False)
 
-        self.register_buffer(
-            "accumulated_grads",
-            torch.zeros(
-                self.hparams.num_hard_prompt_tkns,
-                self.hparams.tokenizer.vocab_size,
-                dtype=torch.float64,
-            ),
-            persistent=False,
-        )
-
-        # TODO: will this break with bfloat16?
-        # TODO: will this break with bfloat16?
-        # TODO: will this break with bfloat16?
-        # TODO: will this break with bfloat16?
-        # TODO: will this break with bfloat16? # TODO: will this break with bfloat16?
-        # TODO: TEST THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        self.hard_prompt_step = 0.0
+        #####################################################################
 
         # TODO: benchmark this
         self.register_buffer(
@@ -118,39 +102,50 @@ class LitModel(L.LightningModule):
             self.current_hard_prompt.size(0) == num_hard_prompt_tkns
         ), f"hard prompt size mismatch {self.current_hard_prompt.size(0)} != {num_hard_prompt_tkns}"
 
+        #####################################################################
+
+        self.hard_prompt_step = 0.0
+
+        self.register_buffer(
+            "accumulated_grads",
+            torch.zeros(
+                self.hparams.num_hard_prompt_tkns,
+                self.hparams.tokenizer.vocab_size,
+                dtype=torch.float64,
+            ),
+            persistent=False,
+        )
+
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
         # TODO: ablate these for performance
 
         # TODO; we could support input ids with batches here, just mean properly
-        # Compute, gather, and accumulate the gradients for the hard prompt.
 
-        # If it is time to update the model parameters:
-
-        current_grads = get_hard_prompt_gradients(
+        # Compute and accumulate the gradients for the hard prompt.
+        # .type_as() is needed to upcast the gradients to the
+        # higher precision type used by self.accumulated_grads.
+        self.accumulated_grads += get_hard_prompt_gradients(
             self.model,
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_tkn=self.hparams.hard_prompt_tkn,
             input_ids=inputs,
             target_ids=targets,
-        ).type(torch.float64)
+        ).type_as(self.accumulated_grads)
 
-        self.accumulated_grads += current_grads
-
-        # If it is time to update the model parameters:
-        if (batch_idx + 1) % (self.hparams.grad_accumulation_steps + 1) == 0:
+        # We need to use batch_idx + 1 here since batch_idx starts at 0, which
+        # would cause the first batch to trigger an update before accumulating.
+        if (batch_idx + 1) % self.hparams.accumulate_grad_batches == 0:
             # Use the accumulated gradients for the update.
             # + 1 because grad accumulation steps are on top of the normal step.
             # e.g. if grad_accumulation_steps=1, two batches are needed to update.
-            hard_prompt_grads = self.accumulated_grads / (
-                self.hparams.grad_accumulation_steps + 1
-            )
+            grads = self.accumulated_grads / self.hparams.accumulate_grad_batches
 
-            # TODO: support grad accum iters essentially (split into multiple batches)
+            # TODO: support grad accumulation iters essentially (split into multiple batches)
             hard_prompt_candidates = create_hard_prompt_candidates(
                 current_hard_prompt=self.current_hard_prompt,
-                hard_prompt_grads=hard_prompt_grads,
+                hard_prompt_grads=grads,
                 batch_size=100,  # TODO: find a good value and make this configurable
                 not_allowed_tokens=self.not_allowed_tokens,
                 topk=50,
@@ -166,7 +161,7 @@ class LitModel(L.LightningModule):
 
             # TODO: ensure every proc has the same cands
 
-            gathered_candidate_losses = test_hard_prompt_candidates(
+            candidate_losses = test_hard_prompt_candidates(
                 self.model,
                 hard_prompt_candidates=hard_prompt_candidates,
                 hard_prompt_tkn=self.hparams.hard_prompt_tkn,
@@ -174,15 +169,15 @@ class LitModel(L.LightningModule):
                 target_ids=targets,
             )
 
-            min_loss_candidate_idx = torch.argmin(gathered_candidate_losses).item()
-            min_loss = gathered_candidate_losses[min_loss_candidate_idx]
+            min_loss_candidate_idx = torch.argmin(candidate_losses).item()
+            min_loss = candidate_losses[min_loss_candidate_idx]
 
             # TODO: have rank zero do this? hm can test w/ print
             self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
 
             self.log("train_loss", min_loss)
-            self.log("hard_prompt_step", self.hard_prompt_step)
 
+            self.log("hard_prompt_step", self.hard_prompt_step)
             self.hard_prompt_step += 1
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:

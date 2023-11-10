@@ -46,7 +46,7 @@ def main(
     disable_wandb: bool = False,  # Also useful for debugging.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
     #################################################################
-    grad_accumulation_steps: int = 4,
+    accumulate_grad_batches: int = 1,  # Where 1 means no accumulation.
     #################################################################
     run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
 ):
@@ -101,7 +101,7 @@ def main(
         hard_prompt_tkn=tokenizer.token_to_id(hard_prompt_tkn),
         num_hard_prompt_tkns=num_hard_prompt_tkns,
         checkpoint_path=base_model_dir / "lit_model.pth",
-        grad_accumulation_steps=grad_accumulation_steps,
+        accumulate_grad_batches=accumulate_grad_batches,
     )
 
     datamodule = LitDataModule(
