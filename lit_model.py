@@ -276,6 +276,7 @@ class LitModel(L.LightningModule):
         self.print("\nResetting model caches for training...\n")
         self.model.reset_caches()
 
-        # Pytorch Lightning calls .to() on all registered buffers during setup,
-        # which will set the dtype to the default dtype. We need to reset it here.
+        # Lightning calls .to() on all registered buffers during setup which
+        # will set the dtype to the default dtype. We need to reset it here.
+        # Bug report: https://github.com/Lightning-AI/lightning/issues/18982
         self.accumulated_grads = self.accumulated_grads.type(torch.float64)
