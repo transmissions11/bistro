@@ -104,7 +104,7 @@ class LitModel(L.LightningModule):
 
         #####################################################################
 
-        self.hard_prompt_step = 0.0
+        self.hard_prompt_step = 0
 
         self.register_buffer(
             "accumulated_grads",
@@ -177,7 +177,7 @@ class LitModel(L.LightningModule):
 
             self.log("train_loss", min_loss)
 
-            self.log("hard_prompt_step", self.hard_prompt_step)
+            self.logger.log_metrics({"hard_prompt_step": self.hard_prompt_step})
             self.hard_prompt_step += 1
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
