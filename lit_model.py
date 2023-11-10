@@ -104,7 +104,7 @@ class LitModel(L.LightningModule):
 
         #####################################################################
 
-        self.hard_prompt_step = 0
+        self.hard_prompt_step = 0.0
 
         self.register_buffer(
             "accumulated_grads",
@@ -117,6 +117,10 @@ class LitModel(L.LightningModule):
         )
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
+        # TODO: make sure i didnt mess anything up in the big commit (30e3365)
+
+        ####################
+
         inputs, targets = batch["inputs"], batch["targets"]
 
         # TODO: ablate these for performance
@@ -177,8 +181,12 @@ class LitModel(L.LightningModule):
 
             self.log("train_loss", min_loss)
 
-            self.logger.log_metrics({"hard_prompt_step": self.hard_prompt_step})
-            self.hard_prompt_step += 1
+            self.log(
+                "hard_prompt_step",
+                # Must specify float32 or we'll get precision issues.
+                torch.tensor(self.hard_prompt_step, dtype=torch.float32),
+            )
+            self.hard_prompt_step += 1.0
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
