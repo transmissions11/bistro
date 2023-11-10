@@ -111,7 +111,7 @@ class LitModel(L.LightningModule):
             torch.zeros(
                 self.hparams.num_hard_prompt_tkns,
                 self.hparams.tokenizer.vocab_size,
-                # dtype=torch.float64,
+                dtype=torch.float64,
             ),
             persistent=False,
         )
@@ -282,7 +282,7 @@ class LitModel(L.LightningModule):
         self.print("\nResetting model caches for training...\n")
         self.model.reset_caches()
 
-        # # Lightning calls .to() on all registered buffers during setup which
-        # # will set the dtype to the default dtype. We need to reset it here.
-        # # Bug report: https://github.com/Lightning-AI/lightning/issues/18982
-        # self.accumulated_grads = self.accumulated_grads.type(torch.float64)
+        # Lightning calls .to() on all registered buffers during setup which
+        # will set the dtype to the default dtype. We need to reset it here.
+        # Bug report: https://github.com/Lightning-AI/lightning/issues/18982
+        self.accumulated_grads = self.accumulated_grads.type(torch.float64)
