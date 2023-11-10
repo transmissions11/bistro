@@ -94,7 +94,7 @@ def create_hard_prompt_candidates(
     current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
     hard_prompt_grads: torch.Tensor,  # (num_hard_prompt_tkns, vocab_size)
     *,  # Force keyword arguments.
-    batch_size: int,
+    num_candidates: int,
     topk: int = 256,
     # Can be used to use only ASCII tokens, for example.
     not_allowed_tokens: Optional[torch.Tensor] = None,
@@ -113,33 +113,33 @@ def create_hard_prompt_candidates(
     # Get the ids of the top-k tokens that would most decrease the loss.
     top_indices = (-hard_prompt_grads).topk(topk, dim=1).indices
 
-    # Create a (batch_size, num_hard_prompt_tkns) tensor of the current hard prompt.
-    candidates_batch = current_hard_prompt.repeat(batch_size, 1)
+    # Create a (num_candidates, num_hard_prompt_tkns) tensor of the current hard prompt.
+    candidates = current_hard_prompt.repeat(num_candidates, 1)
 
-    # Generate a (batch_size) tensor of an index to replace in each row of the batch.
+    # Generate a (num_candidates) tensor of an index to replace in each row.
     new_token_pos = torch.arange(
         0,
         len(current_hard_prompt),
-        len(current_hard_prompt) / batch_size,
+        len(current_hard_prompt) / num_candidates,
         device=hard_prompt_grads.device,
     ).type(torch.int64)
 
-    # Generate a (batch_size, 1) tensor of token ids to replace each new_token_pos index with.
+    # Generate a (num_candidates, 1) tensor of token ids to replace each new_token_pos index with.
     new_token_val = torch.gather(
         top_indices[new_token_pos],
         1,
-        torch.randint(0, topk, (batch_size, 1), device=hard_prompt_grads.device),
+        torch.randint(0, topk, (num_candidates, 1), device=hard_prompt_grads.device),
     )
 
-    # Replace the new_token_pos index in each row of the batch with the new_token_val.
-    return candidates_batch.scatter_(1, new_token_pos.unsqueeze(-1), new_token_val)
+    # Replace the new_token_pos index in each row with the new_token_val.
+    return candidates.scatter_(1, new_token_pos.unsqueeze(-1), new_token_val)
 
 
 def clean_hard_prompt_candidates(
     tokenizer: Tokenizer,
     *,  # Force keyword arguments.
     current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
-    hard_prompt_candidates: torch.Tensor,  # (batch_size, num_hard_prompt_tkns)
+    hard_prompt_candidates: torch.Tensor,  # (num_candidates, num_hard_prompt_tkns)
 ) -> torch.Tensor:
     """
     Filters candidates that don't match the current hard prompt's length and cleans others
@@ -175,7 +175,7 @@ def clean_hard_prompt_candidates(
 def test_hard_prompt_candidates(
     model: GPT,
     *,  # Force keyword arguments.
-    hard_prompt_candidates: torch.Tensor,  # (batch_size, num_hard_prompt_tkns)
+    hard_prompt_candidates: torch.Tensor,  # (num_candidates, num_hard_prompt_tkns)
     hard_prompt_tkn: int,
     input_ids: torch.Tensor,  # (b = 1, t)
     target_ids: torch.Tensor,  # (b = 1, t)
@@ -201,6 +201,12 @@ def test_hard_prompt_candidates(
         # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
         new_input_ids_list.append({"inputs": new_input_ids, "targets": target_ids})
 
+    # TODO: DON'T SAY BATCH IF NOT RLY A BATCH!!!!!
+    # TODO: DON'T SAY BATCH IF NOT RLY A BATCH!!!!!
+    # TODO: DON'T SAY BATCH IF NOT RLY A BATCH!!!!!
+    # TODO: DON'T SAY BATCH IF NOT RLY A BATCH!!!!!
+    # TODO: DON'T SAY BATCH IF NOT RLY A BATCH!!!!!
+
     # Pad the sequences and convert them to a tensor
     batch = pad_collate_fn(new_input_ids_list)
 
@@ -214,4 +220,4 @@ def test_hard_prompt_candidates(
     ).view(hard_prompt_candidates.size(0), -1)
 
     # Ignore losses of 0, as they are due to padding, return take the mean of the rest.
-    return loss[loss != 0].view(loss.size(0), -1).mean(dim=-1)  # (batch_size)
+    return loss[loss != 0].view(loss.size(0), -1).mean(dim=-1)  # (num_candidates)
