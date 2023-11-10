@@ -198,17 +198,7 @@ class LitModel(L.LightningModule):
 
         loss = torch.min(candidate_losses)
 
-        self.log(
-            "val_loss",
-            # Need to upcast precision as types like bfloat16
-            # have very low precision with larger values (~256+)
-            # that results in inaccurate accumulation w/ on_epoch.
-            # https://github.com/Lightning-AI/lightning/issues/18620
-            loss.to(torch.float32),
-            on_epoch=True,
-            prog_bar=True,
-            sync_dist=True,
-        )
+        self.log("val_loss", loss, on_epoch=True, prog_bar=True, sync_dist=True)
 
         # # Log a few sample inferences from the validation set to W&B.
         # if batch_idx == 0:
