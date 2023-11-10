@@ -98,7 +98,7 @@ class LitModel(L.LightningModule):
         # TODO: will this break with bfloat16?
         # TODO: will this break with bfloat16? # TODO: will this break with bfloat16?
         # TODO: TEST THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        self.hard_prompt_step = 0
+        self.hard_prompt_step = 0.0
 
         # TODO: benchmark this
         self.register_buffer(
@@ -182,8 +182,9 @@ class LitModel(L.LightningModule):
 
             self.log("train_loss", min_loss)
             self.log("hard_prompt_step", self.hard_prompt_step)
+            print(f"hard prompt step: {self.hard_prompt_step:.3f}")
 
-            self.hard_prompt_step += 1
+            self.hard_prompt_step += 1.0
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
