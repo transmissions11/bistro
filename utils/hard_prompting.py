@@ -216,19 +216,26 @@ def test_hard_prompt_candidates(
         collated_mega_batch["targets"].split(candidate_batch_size, dim=0),
     )
 
-    # Compute the loss for each batch using a list comprehension
-    losses = torch.stack(
-        [
-            # TODO: verify view is correct, and add a comment
-            compute_loss(
-                model,
-                input_ids=inputs,
-                target_ids=targets,
-                reduction="none",
-            ).view(targets.size(0), -1)
-            for inputs, targets in zip(input_batches, target_batches)
-        ]
-    )
+    # TODO: may have GC problems and need to look at llm-attacks collab or
+    # https://stackoverflow.com/questions/57496285/why-is-the-memory-in-gpu-still-in-use-after-clearing-the-object
+
+    losses = []
+    for inputs, targets in zip(input_batches, target_batches):
+        raw_loss = compute_loss(
+            model,
+            input_ids=inputs,
+            target_ids=targets,
+            reduction="none",
+        )
+
+        print("raw", raw_loss.shape)
+
+        loss = raw_loss.view(targets.size(0), -1)
+        print("viewed", loss.shape)
+
+        losses.append(loss)
+
+    losses = torch.stack(losses)
 
     # Ignore losses of 0, as they are due to padding, return take the mean of the rest.
     return losses[losses != 0].view(losses.size(0), -1).mean(dim=-1)  # (num_candidates)
