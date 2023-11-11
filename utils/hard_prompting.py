@@ -222,6 +222,9 @@ def test_hard_prompt_candidates(
     losses = []
     i = 0
     for inputs, targets in zip(input_batches, target_batches):
+        print(f"micro batch {i}")
+        i += 1
+
         # compute_loss -> (candidate_batch_size * t)
         # .view(...) -> (candidate_batch_size, t)
         loss = compute_loss(
@@ -231,8 +234,7 @@ def test_hard_prompt_candidates(
             reduction="none",
         ).view(targets.size(0), -1)
 
-        print(f"micro batch {i}")
-        i += 1
+        # TODO: just try sleeping?
 
         losses.append(loss)
 
