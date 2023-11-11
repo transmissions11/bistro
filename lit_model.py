@@ -151,7 +151,7 @@ class LitModel(L.LightningModule):
 
             self.print("CAND LOSSES", candidate_losses)
 
-            if self.hard_prompt_step > 2.0:
+            if self.hard_prompt_step > 1.0:
                 raise ValueError("DONE")
 
             min_loss_candidate_idx = torch.argmin(candidate_losses).item()
