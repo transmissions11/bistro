@@ -177,7 +177,6 @@ class LitModel(L.LightningModule):
             )
             self.hard_prompt_step += 1.0
 
-            torch.set_printoptions(precision=20)
             self.print("CAND LOSSES", candidate_losses)
             if self.hard_prompt_step == 3.0:
                 raise ValueError("DONE")
