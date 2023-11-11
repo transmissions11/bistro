@@ -177,8 +177,8 @@ class LitModel(L.LightningModule):
                     self.hparams.tokenizer.decode(hard_prompt_candidates[i]),
                 )
             self.print("CAND LOSSES", candidate_losses)
-            # if self.hard_prompt_step == 3.0:
-            #     raise ValueError("DONE")
+            if self.hard_prompt_step == 3.0:
+                raise ValueError("DONE")
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
