@@ -226,9 +226,9 @@ def test_hard_prompt_candidates(
     for inputs, targets in zip(input_batches, target_batches):
         # TODO: profile why mem usage is 50% before even running compute_loss?
         # -> ah hmm prolly just loading weights in and shit during configure_model???
-        import time
+        # import time
 
-        time.sleep(25)
+        # time.sleep(25)
 
         print(f"micro batch {i}")
         i += 1
