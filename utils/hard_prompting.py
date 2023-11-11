@@ -216,28 +216,17 @@ def test_hard_prompt_candidates(
         collated_mega_batch["targets"].split(candidate_batch_size, dim=0),
     )
 
-    # TODO: may have GC problems and need to look at llm-attacks collab or
-    # https://stackoverflow.com/questions/57496285/why-is-the-memory-in-gpu-still-in-use-after-clearing-the-object
+    losses = []  # Create a list to store the loss for each candidate.
 
-    # TODO: OHHHH TORCH.NO_GRAD / INFERENCE MODE???
-
-    losses = []
-    i = 0
     # TODO List comp instead of loop?
     for inputs, targets in zip(input_batches, target_batches):
         # TODO: profile why mem usage is 50% before even running compute_loss?
-        # -> ah hmm prolly just loading weights in and shit during configure_model???
-        # import time
+        # -> ah hmm probably just loading weights in and shit during configure_model???
 
-        # time.sleep(25)
-
-        print(f"micro batch {i}")
-        i += 1
-
-        # compute_loss -> (candidate_batch_size * t)
-        # .view(...) -> (candidate_batch_size, t)
-        # TODO: use inference mode decorator or something insted?
+        # TODO: use inference mode decorator or something instead?
         with torch.no_grad():
+            # compute_loss -> (candidate_batch_size * t)
+            # .view(...) -> (candidate_batch_size, t)
             loss = compute_loss(
                 model,
                 input_ids=inputs,
@@ -245,13 +234,6 @@ def test_hard_prompt_candidates(
                 reduction="none",
             ).view(targets.size(0), -1)
             losses.append(loss)
-
-        # TODO: just try sleeping?
-        # import time
-        # import gc
-
-        # gc.collect()
-        # torch.cuda.empty_cache()
 
     losses = torch.cat(losses, dim=0)  # (num_candidates, t)
 
