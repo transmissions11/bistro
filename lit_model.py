@@ -120,11 +120,16 @@ class LitModel(L.LightningModule):
 
             self.accumulated_grads.zero_()  # Reset the accumulated gradients.
 
+            candidate_batch_size = 50
+            num_candidate_batches_to_test = 2
+
+            num_candidates = candidate_batch_size * num_candidate_batches_to_test
+
             # TODO: support grad accumulation iters essentially (split into multiple batches)
             hard_prompt_candidates = create_hard_prompt_candidates(
                 current_hard_prompt=self.current_hard_prompt,
                 hard_prompt_grads=grads,
-                num_candidates=100,  # TODO: find a good value and make this configurable
+                num_candidates=num_candidates,  # TODO: find a good value and make this configurable
                 not_allowed_tokens=self.not_allowed_tokens,
                 topk=50,
             )
@@ -142,6 +147,7 @@ class LitModel(L.LightningModule):
             candidate_losses = self.all_gather(
                 test_hard_prompt_candidates(
                     self.model,
+                    candidate_batch_size=candidate_batch_size,
                     hard_prompt_candidates=hard_prompt_candidates,
                     hard_prompt_tkn=self.hparams.hard_prompt_tkn,
                     input_ids=inputs,
