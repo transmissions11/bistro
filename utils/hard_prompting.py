@@ -219,6 +219,8 @@ def test_hard_prompt_candidates(
     # TODO: may have GC problems and need to look at llm-attacks collab or
     # https://stackoverflow.com/questions/57496285/why-is-the-memory-in-gpu-still-in-use-after-clearing-the-object
 
+    # TODO: OHHHH TORCH.NO_GRAD / INFERENCE MODE???
+
     losses = []
     i = 0
     for inputs, targets in zip(input_batches, target_batches):
@@ -229,12 +231,14 @@ def test_hard_prompt_candidates(
 
         # compute_loss -> (candidate_batch_size * t)
         # .view(...) -> (candidate_batch_size, t)
-        loss = compute_loss(
-            model,
-            input_ids=inputs,
-            target_ids=targets,
-            reduction="none",
-        ).view(targets.size(0), -1)
+        with torch.no_grad():
+            loss = compute_loss(
+                model,
+                input_ids=inputs,
+                target_ids=targets,
+                reduction="none",
+            ).view(targets.size(0), -1)
+            losses.append(loss)
 
         # TODO: just try sleeping?
         # import time
@@ -242,8 +246,6 @@ def test_hard_prompt_candidates(
 
         # gc.collect()
         # torch.cuda.empty_cache()
-
-        losses.append(loss)
 
     losses = torch.cat(losses, dim=0)  # (num_candidates, t)
 
