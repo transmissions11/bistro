@@ -241,7 +241,7 @@ def test_hard_prompt_candidates(
 
         gc.collect()
         torch.cuda.empty_cache()
-        time.sleep(1)
+        time.sleep(25)
 
         losses.append(loss)
 
