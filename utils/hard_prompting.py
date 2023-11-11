@@ -210,11 +210,15 @@ def test_hard_prompt_candidates(
     # multiple input_ids, so leaving this in here for future compatibility.
     collated_mega_batch = pad_collate_fn(mega_batch)
 
+    print("collated_mega_batch:", collated_mega_batch["inputs"].shape)
+
     # Split the mega batch into smaller batches of size candidate_batch_size.
     input_batches, target_batches = (
         collated_mega_batch["inputs"].split(candidate_batch_size, dim=0),
         collated_mega_batch["targets"].split(candidate_batch_size, dim=0),
     )
+
+    print("input_batches split:", input_batches[0].shape)
 
     losses = []  # Create a list to store the loss for each candidate.
 
@@ -235,7 +239,11 @@ def test_hard_prompt_candidates(
             ).view(targets.size(0), -1)
             losses.append(loss)
 
+    print("losses", losses)
+
     losses = torch.cat(losses, dim=0)  # (num_candidates, t)
+
+    print("catted", losses.shape)
 
     # Ignore losses of 0, as they are due to padding, return the mean of the rest.
     return losses[losses != 0].view(losses.size(0), -1).mean(dim=-1)  # (num_candidates)
