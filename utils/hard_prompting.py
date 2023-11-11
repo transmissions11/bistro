@@ -214,11 +214,11 @@ def test_hard_prompt_candidates(
 
     # Split the mega batch into smaller batches of size candidate_batch_size.
     input_batches, target_batches = (
-        collated_mega_batch["inputs"].split(candidate_batch_size, dim=0),
-        collated_mega_batch["targets"].split(candidate_batch_size, dim=0),
+        torch.stack(collated_mega_batch["inputs"].split(candidate_batch_size, dim=0)),
+        torch.stack(collated_mega_batch["targets"].split(candidate_batch_size, dim=0)),
     )
 
-    print("input_batches split:", input_batches)
+    print("input_batches split:", input_batches.shape)
 
     losses = []  # Create a list to store the loss for each candidate.
 
