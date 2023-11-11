@@ -134,9 +134,6 @@ class LitModel(L.LightningModule):
                 topk=50,
             )
 
-            for cand in hard_prompt_candidates:
-                self.print("Raw", self.hparams.tokenizer.decode(cand))
-
             # TODO: make sure cands are all in the same place
 
             hard_prompt_candidates = clean_hard_prompt_candidates(
@@ -144,9 +141,6 @@ class LitModel(L.LightningModule):
                 current_hard_prompt=self.current_hard_prompt,
                 hard_prompt_candidates=hard_prompt_candidates,
             )
-
-            for cand in hard_prompt_candidates:
-                self.print(self.hparams.tokenizer.decode(cand))
 
             # TODO: ensure every proc has the same cands
 
