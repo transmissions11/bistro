@@ -171,6 +171,11 @@ class LitModel(L.LightningModule):
             )
             self.hard_prompt_step += 1.0
 
+            for i in range(5):
+                self.print(
+                    f"CAND {i}",
+                    self.hparams.tokenizer.decode(hard_prompt_candidates[i]),
+                )
             self.print("CAND LOSSES", candidate_losses)
             if self.hard_prompt_step == 3.0:
                 raise ValueError("DONE")
