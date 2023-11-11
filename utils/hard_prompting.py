@@ -106,6 +106,9 @@ def create_hard_prompt_candidates(
     filter_hard_prompt_candidates to ensure the length of the candidates doesn't explode.
     """
 
+    # TODO: Build clean_hard_prompt_candidates into this function, and don't just
+    # repeat the last candidate if after cleaning there are less than num_candidates.
+
     # Set the gradients of not allowed tokens to infinity.
     if not_allowed_tokens is not None:
         hard_prompt_grads[:, not_allowed_tokens] = float("inf")
