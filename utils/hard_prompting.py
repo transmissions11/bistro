@@ -204,6 +204,9 @@ def test_hard_prompt_candidates(
     # Pad the sequences and convert them to a tensor
     batch = pad_collate_fn(new_input_ids_list)
 
+    if torch.distributed.get_rank() == 0:
+        print("batch:", batch)
+
     with torch.no_grad():
         # Compute the loss for the entire batch (batch_size, t)
         loss = compute_loss(
