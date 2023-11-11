@@ -222,6 +222,8 @@ def test_hard_prompt_candidates(
     losses = []
     i = 0
     for inputs, targets in zip(input_batches, target_batches):
+        time.sleep(25)
+
         print(f"micro batch {i}")
         i += 1
 
@@ -235,13 +237,11 @@ def test_hard_prompt_candidates(
         ).view(targets.size(0), -1)
 
         # TODO: just try sleeping?
+        # import time
+        # import gc
 
-        import time
-        import gc
-
-        gc.collect()
-        torch.cuda.empty_cache()
-        time.sleep(25)
+        # gc.collect()
+        # torch.cuda.empty_cache()
 
         losses.append(loss)
 
