@@ -151,9 +151,6 @@ class LitModel(L.LightningModule):
 
             self.print("CAND LOSSES", candidate_losses)
 
-            if self.hard_prompt_step > 1.0:
-                raise ValueError("DONE")
-
             min_loss_candidate_idx = torch.argmin(candidate_losses).item()
             min_loss = candidate_losses[min_loss_candidate_idx]
 
@@ -169,6 +166,9 @@ class LitModel(L.LightningModule):
                 torch.tensor(self.hard_prompt_step, dtype=torch.float32),
             )
             self.hard_prompt_step += 1.0
+
+            if self.hard_prompt_step == 3.0:
+                raise ValueError("DONE")
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
