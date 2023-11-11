@@ -243,7 +243,7 @@ def test_hard_prompt_candidates(
 
             losses.append(loss)
 
-    losses = torch.stack(losses, dim=0)  # (num_candidates, t)
+    losses = torch.cat(losses, dim=0)  # (num_candidates, t)
 
     if torch.distributed.get_rank() == 0:
         print("loss values:", loss.shape, loss)
