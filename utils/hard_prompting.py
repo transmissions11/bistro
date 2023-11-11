@@ -223,6 +223,7 @@ def test_hard_prompt_candidates(
 
     losses = []
     i = 0
+    # TODO List comp instead of loop?
     for inputs, targets in zip(input_batches, target_batches):
         # TODO: profile why mem usage is 50% before even running compute_loss?
         # -> ah hmm prolly just loading weights in and shit during configure_model???
