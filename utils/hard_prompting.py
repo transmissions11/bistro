@@ -218,7 +218,7 @@ def test_hard_prompt_candidates(
         collated_mega_batch["targets"].split(candidate_batch_size, dim=0),
     )
 
-    print("input_batches split:", input_batches[0].shape)
+    print("input_batches split:", input_batches.shape)
 
     losses = []  # Create a list to store the loss for each candidate.
 
