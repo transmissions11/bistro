@@ -249,7 +249,7 @@ def test_hard_prompt_candidates(
     losses = torch.cat(losses, dim=0)  # (num_candidates, t)
 
     if torch.distributed.get_rank() == 0:
-        print("loss values:", loss.shape, loss)
+        print("loss values:", losses.shape, losses)
 
     # Ignore losses of 0, as they are due to padding, return the mean of the rest.
     return losses[losses != 0].view(losses.size(0), -1).mean(dim=-1)  # (num_candidates)
