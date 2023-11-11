@@ -235,6 +235,7 @@ def test_hard_prompt_candidates(
         ).view(targets.size(0), -1)
 
         # TODO: just try sleeping?
+        torch.cuda.empty_cache()
 
         losses.append(loss)
 
