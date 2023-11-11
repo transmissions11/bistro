@@ -142,6 +142,9 @@ class LitModel(L.LightningModule):
                 hard_prompt_candidates=hard_prompt_candidates,
             )
 
+            for cand in hard_prompt_candidates:
+                self.print(self.hparams.tokenizer.decode(cand))
+
             # TODO: ensure every proc has the same cands
 
             candidate_losses = self.all_gather(
