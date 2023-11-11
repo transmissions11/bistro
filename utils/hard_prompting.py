@@ -224,6 +224,9 @@ def test_hard_prompt_candidates(
     losses = []
     i = 0
     for inputs, targets in zip(input_batches, target_batches):
+        # TODO: profile why mem usage is so high throughout 9even before compute loss)
+        import time
+
         time.sleep(25)
 
         print(f"micro batch {i}")
