@@ -149,7 +149,10 @@ class LitModel(L.LightningModule):
                 )
             ).mean(dim=0)
 
-            print("CAND LOSSES", candidate_losses)
+            self.print("CAND LOSSES", candidate_losses)
+
+            if self.hard_prompt_step > 2.0:
+                raise ValueError("DONE")
 
             min_loss_candidate_idx = torch.argmin(candidate_losses).item()
             min_loss = candidate_losses[min_loss_candidate_idx]
