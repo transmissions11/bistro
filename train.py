@@ -28,7 +28,7 @@ def main(
     data_dir: Path = Path("data"),
     base_model_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
     #################################################################
-    devices: int = 4,
+    devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
     precision: str = "bf16-true",
     #################################################################
