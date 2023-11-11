@@ -175,6 +175,7 @@ def clean_hard_prompt_candidates(
 def test_hard_prompt_candidates(
     model: GPT,
     *,  # Force keyword arguments.
+    candidate_batch_size: int,
     hard_prompt_candidates: torch.Tensor,  # (num_candidates, num_hard_prompt_tkns)
     hard_prompt_tkn: int,
     input_ids: torch.Tensor,  # (b = 1, t)
@@ -190,34 +191,44 @@ def test_hard_prompt_candidates(
     hard_prompt_start_pos = hard_prompt_positions[0].item()
     hard_prompt_end_pos = hard_prompt_positions[-1].item()
 
-    # Create a list to store the new input sequences
-    new_input_ids_list = []
+    # Create a list to store input_id/target_id pairs for each candidate.
+    # This is called a "mega batch" as we'll be splitting this into smaller
+    # batches of size candidate_batch_size when actually testing them later on.
+    mega_batch = []
 
-    for idx, candidate in enumerate(hard_prompt_candidates):
+    for candidate in hard_prompt_candidates:
         # Replace the hard prompt in the input sequence with the candidate.
         new_input_ids = input_ids.clone()
         new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
 
-        # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
-        new_input_ids_list.append({"inputs": new_input_ids, "targets": target_ids})
+        # Add the new input/target pair to the mega batch.
+        mega_batch.append({"inputs": new_input_ids, "targets": target_ids})
 
-    # TODO: DON'T SAY BATCH IF NOT RLY A BATCH!!!!!
-    # TODO: DON'T SAY BATCH IF NOT RLY A BATCH!!!!!
-    # TODO: DON'T SAY BATCH IF NOT RLY A BATCH!!!!!
-    # TODO: DON'T SAY BATCH IF NOT RLY A BATCH!!!!!
-    # TODO: DON'T SAY BATCH IF NOT RLY A BATCH!!!!!
+    # Pad the sequences and group everything into 2 tensors: inputs and targets.
+    # TODO: We don't actually need to pad since we're using the same input_ids
+    # for each candidate, but we may need to in the future to support using
+    # multiple input_ids, so leaving this in here for future compatibility.
+    collated_mega_batch = pad_collate_fn(mega_batch)
 
-    # Pad the sequences and convert them to a tensor
-    batch = pad_collate_fn(new_input_ids_list)
+    # Split the mega batch into smaller batches of size candidate_batch_size.
+    input_batches, target_batches = (
+        collated_mega_batch["inputs"].split(candidate_batch_size, dim=0),
+        collated_mega_batch["targets"].split(candidate_batch_size, dim=0),
+    )
 
-    # Compute the loss for the entire batch (batch_size, t)
-    loss = compute_loss(
-        # reduce=False to get the loss for each sequence in the batch.
-        model,
-        input_ids=batch["inputs"],
-        target_ids=batch["targets"],
-        reduction="none",
-    ).view(hard_prompt_candidates.size(0), -1)
+    # Compute the loss for each batch using a list comprehension
+    losses = torch.stack(
+        [
+            # TODO: verify view is correct, and add a comment
+            compute_loss(
+                model,
+                input_ids=inputs,
+                target_ids=targets,
+                reduction="none",
+            ).view(targets.size(0), -1)
+            for inputs, targets in zip(input_batches, target_batches)
+        ]
+    )
 
     # Ignore losses of 0, as they are due to padding, return take the mean of the rest.
-    return loss[loss != 0].view(loss.size(0), -1).mean(dim=-1)  # (num_candidates)
+    return losses[losses != 0].view(losses.size(0), -1).mean(dim=-1)  # (num_candidates)
