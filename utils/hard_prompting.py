@@ -214,7 +214,7 @@ def test_hard_prompt_candidates(
     collated_mega_batch = pad_collate_fn(mega_batch)
 
     if torch.distributed.get_rank() == 0:
-        for i in range(5):
+        for i in range(2):
             print(f"input_ids {i}:", collated_mega_batch["inputs"][i])
 
     # Split the mega batch into smaller batches of size candidate_batch_size.
