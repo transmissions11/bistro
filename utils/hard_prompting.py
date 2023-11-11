@@ -220,22 +220,23 @@ def test_hard_prompt_candidates(
     # https://stackoverflow.com/questions/57496285/why-is-the-memory-in-gpu-still-in-use-after-clearing-the-object
 
     losses = []
+    i = 0
     for inputs, targets in zip(input_batches, target_batches):
-        raw_loss = compute_loss(
+        # compute_loss -> (candidate_batch_size * t)
+        # .view(...) -> (candidate_batch_size, t)
+        loss = compute_loss(
             model,
             input_ids=inputs,
             target_ids=targets,
             reduction="none",
-        )
+        ).view(targets.size(0), -1)
 
-        print("raw", raw_loss.shape)
-
-        loss = raw_loss.view(targets.size(0), -1)
-        print("viewed", loss.shape)
+        print(f"micro batch {i}")
+        i += 1
 
         losses.append(loss)
 
-    losses = torch.stack(losses)
+    losses = torch.cat(losses, dim=0)  # (num_candidates, t)
 
-    # Ignore losses of 0, as they are due to padding, return take the mean of the rest.
+    # Ignore losses of 0, as they are due to padding, return the mean of the rest.
     return losses[losses != 0].view(losses.size(0), -1).mean(dim=-1)  # (num_candidates)
