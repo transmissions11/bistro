@@ -149,6 +149,8 @@ class LitModel(L.LightningModule):
                 )
             ).mean(dim=0)
 
+            print("CAND LOSSES", candidate_losses)
+
             min_loss_candidate_idx = torch.argmin(candidate_losses).item()
             min_loss = candidate_losses[min_loss_candidate_idx]
 
