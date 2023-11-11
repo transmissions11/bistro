@@ -224,7 +224,8 @@ def test_hard_prompt_candidates(
     losses = []
     i = 0
     for inputs, targets in zip(input_batches, target_batches):
-        # TODO: profile why mem usage is so high throughout 9even before compute loss)
+        # TODO: profile why mem usage is 50% before even running compute_loss?
+        # -> ah hmm prolly just loading weights in and shit during configure_model???
         import time
 
         time.sleep(25)
@@ -234,6 +235,7 @@ def test_hard_prompt_candidates(
 
         # compute_loss -> (candidate_batch_size * t)
         # .view(...) -> (candidate_batch_size, t)
+        # TODO: use inference mode decorator or something insted?
         with torch.no_grad():
             loss = compute_loss(
                 model,
