@@ -204,14 +204,15 @@ def test_hard_prompt_candidates(
     # Pad the sequences and convert them to a tensor
     batch = pad_collate_fn(new_input_ids_list)
 
-    # Compute the loss for the entire batch (batch_size, t)
-    loss = compute_loss(
-        # reduce=False to get the loss for each sequence in the batch.
-        model,
-        input_ids=batch["inputs"],
-        target_ids=batch["targets"],
-        reduction="none",
-    ).view(hard_prompt_candidates.size(0), -1)
+    with torch.no_grad():
+        # Compute the loss for the entire batch (batch_size, t)
+        loss = compute_loss(
+            # reduce=False to get the loss for each sequence in the batch.
+            model,
+            input_ids=batch["inputs"],
+            target_ids=batch["targets"],
+            reduction="none",
+        ).view(hard_prompt_candidates.size(0), -1)
 
     # Ignore losses of 0, as they are due to padding, return take the mean of the rest.
     return loss[loss != 0].view(loss.size(0), -1).mean(dim=-1)  # (batch_size)
