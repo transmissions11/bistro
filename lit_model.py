@@ -124,7 +124,7 @@ class LitModel(L.LightningModule):
             hard_prompt_candidates = create_hard_prompt_candidates(
                 current_hard_prompt=self.current_hard_prompt,
                 hard_prompt_grads=grads,
-                batch_size=8,  # TODO: find a good value and make this configurable
+                batch_size=2,  # TODO: find a good value and make this configurable
                 not_allowed_tokens=self.not_allowed_tokens,
                 topk=50,
             )
@@ -165,14 +165,14 @@ class LitModel(L.LightningModule):
             )
             self.hard_prompt_step += 1.0
 
-            # for i in range(5):
-            #     self.print(
-            #         f"CAND {i}",
-            #         self.hparams.tokenizer.decode(hard_prompt_candidates[i]),
-            #     )
-            # self.print("CAND LOSSES", candidate_losses)
-            # if self.hard_prompt_step == 3.0:
-            #     raise ValueError("DONE")
+            for i in range(len(hard_prompt_candidates)):
+                self.print(
+                    f"CAND {i}",
+                    self.hparams.tokenizer.decode(hard_prompt_candidates[i]),
+                )
+            self.print("CAND LOSSES", candidate_losses)
+            if self.hard_prompt_step == 3.0:
+                raise ValueError("DONE")
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
