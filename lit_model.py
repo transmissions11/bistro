@@ -134,6 +134,9 @@ class LitModel(L.LightningModule):
                 topk=50,
             )
 
+            for cand in hard_prompt_candidates:
+                self.print("Raw", self.hparams.tokenizer.decode(cand))
+
             # TODO: make sure cands are all in the same place
 
             hard_prompt_candidates = clean_hard_prompt_candidates(
