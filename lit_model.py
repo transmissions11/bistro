@@ -124,7 +124,7 @@ class LitModel(L.LightningModule):
             hard_prompt_candidates = create_hard_prompt_candidates(
                 current_hard_prompt=self.current_hard_prompt,
                 hard_prompt_grads=grads,
-                batch_size=4,  # TODO: find a good value and make this configurable
+                batch_size=6,  # TODO: find a good value and make this configurable
                 not_allowed_tokens=self.not_allowed_tokens,
                 topk=50,
             )
