@@ -218,7 +218,7 @@ def test_hard_prompt_candidates(
             reduction="none",
         ).view(hard_prompt_candidates.size(0), -1)
         if torch.distributed.get_rank() == 0:
-            print("loss values:", loss)
+            print("loss values:", loss.shape, loss)
 
     # Ignore losses of 0, as they are due to padding, return take the mean of the rest.
     return loss[loss != 0].view(loss.size(0), -1).mean(dim=-1)  # (batch_size)
