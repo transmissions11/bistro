@@ -198,6 +198,8 @@ class LitModel(L.LightningModule):
 
         self.log("val_loss", loss, on_epoch=True, prog_bar=True, sync_dist=True)
 
+        # TODO: log samples
+
     def configure_optimizers(self):
         ...  # We don't need an optimizer.
 
