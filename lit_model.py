@@ -198,45 +198,6 @@ class LitModel(L.LightningModule):
 
         self.log("val_loss", loss, on_epoch=True, prog_bar=True, sync_dist=True)
 
-        # # Log a few sample inferences from the validation set to W&B.
-        # if batch_idx == 0:
-        #     tokenizer = self.hparams.tokenizer
-
-        #     prompt_end_tkns = tokenizer.encode(
-        #         VICUNA_END_OF_USER_PROMPT_SEQUENCE, device=self.device
-        #     )
-
-        #     def process_val_sample(sample, target):
-        #         sample = strip_right_pad(sample)
-        #         target = strip_right_pad(target)
-
-        #         input_ids = sample[: find_subtensor_end(sample, prompt_end_tkns) + 1]
-
-        #         return (
-        #             tokenizer.decode(input_ids),
-        #             tokenizer.decode(
-        #                 inference_model(
-        #                     self.model,
-        #                     input_ids,
-        #                     temperature=0.00,  # Sample 100% greedily.
-        #                     max_new_tokens=100,  # Should hit an eos token first.
-        #                     eos_id=tokenizer.eos_id,
-        #                 )
-        #             ),
-        #             # Note: target != ignored_tkn strips away ignored_tkn tokens entirely,
-        #             # which may lead to confusion if ignored_tkn is used between real tokens.
-        #             tokenizer.decode(target[target != ignored_tkn]),
-        #         )
-
-        #     self.logger.log_text(
-        #         key="val_samples",
-        #         columns=["input", "output", "target"],
-        #         data=[
-        #             process_val_sample(inputs[i], targets[i])
-        #             for i in range(len(inputs))  # Full batch.
-        #         ],
-        #     )
-
     def configure_optimizers(self):
         ...  # We don't need an optimizer.
 
