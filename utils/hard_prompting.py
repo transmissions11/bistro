@@ -225,6 +225,9 @@ def test_hard_prompt_candidates(
 
     losses = []  # Create a list to store the loss for each candidate.
 
+    # TODO: isolate by just runnning the same batch of two identical sequences, one in sequence and one in parallel with batch
+    # if they're different we know wby this is brokey
+
     # TODO List comp instead of loop?
     for inputs, targets in zip(input_batches, target_batches):
         # TODO: profile why mem usage is 50% before even running compute_loss?
