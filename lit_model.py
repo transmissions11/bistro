@@ -125,6 +125,8 @@ class LitModel(L.LightningModule):
             f"target_ids: {target_ids.size()}",
         )
 
+        self.print("--------------------------BOTH-------------------------")
+
         loss = compute_loss(
             # reduce=False to get the loss for each sequence in the batch.
             self.model,
@@ -132,6 +134,30 @@ class LitModel(L.LightningModule):
             target_ids=target_ids,
             reduction="none",
         ).view(2, -1)
+
+        self.print(loss)
+
+        self.print("--------------------------FIRST-------------------------")
+
+        loss = compute_loss(
+            # reduce=False to get the loss for each sequence in the batch.
+            self.model,
+            input_ids=input_ids[0].unsqueeze(0),
+            target_ids=target_ids[0].unsqueeze(0),
+            reduction="none",
+        ).view(1, -1)
+
+        self.print(loss)
+
+        self.print("--------------------------SECOND-------------------------")
+
+        loss = compute_loss(
+            # reduce=False to get the loss for each sequence in the batch.
+            self.model,
+            input_ids=input_ids[1].unsqueeze(0),
+            target_ids=target_ids[1].unsqueeze(0),
+            reduction="none",
+        ).view(1, -1)
 
         self.print(loss)
 
