@@ -206,6 +206,7 @@ def test_hard_prompt_candidates(
 
     for i in range(len(batch["inputs"])):
         print(f"input_ids {i}:", batch["inputs"][i])
+        print(f"target_ids {i}:", batch["targets"][i])
 
     with torch.no_grad():
         # Compute the loss for the entire batch (batch_size, t)
