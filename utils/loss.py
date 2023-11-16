@@ -17,7 +17,6 @@ def compute_loss(
     reduction: str = "mean",
 ) -> torch.Tensor:
     logits = model(input_ids=input_ids, input_embs=input_embs)
-    print("LOGITS", logits)
     return F.cross_entropy(
         logits.view(-1, logits.size(-1)),
         target_ids.view(-1),

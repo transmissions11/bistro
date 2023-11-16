@@ -59,6 +59,8 @@ class GPT(nn.Module):
         cos = cos[:T]
         sin = sin[:T]
 
+        print(x)
+
         for block in self.transformer.h:
             x, *_ = block(x, (cos, sin), block_size)  # (b, t, n_embd)
 
