@@ -63,8 +63,7 @@ class GPT(nn.Module):
 
         for block in self.transformer.h:
             x, *_ = block(x, (cos, sin), block_size)  # (b, t, n_embd)
-
-        print("POST BLOCKS", x)
+            print("POST BLOCK", x)
 
         x = self.transformer.ln_f(x)  # (b, t, n_embd)
 
