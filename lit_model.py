@@ -117,6 +117,7 @@ class LitModel(L.LightningModule):
                 f"CAND {i}",
                 self.hparams.tokenizer.decode(hard_prompt_candidates[i]),
             )
+
         self.print("CAND LOSSES", candidate_losses)
 
         candidate_losses = test_hard_prompt_candidates(
