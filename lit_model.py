@@ -145,7 +145,7 @@ class LitModel(L.LightningModule):
             input_ids=input_ids[0].unsqueeze(0),
             target_ids=target_ids[0].unsqueeze(0),
             reduction="none",
-        ).view(1, -1)
+        )
 
         self.print(loss)
 
@@ -157,7 +157,7 @@ class LitModel(L.LightningModule):
             input_ids=input_ids[1].unsqueeze(0),
             target_ids=target_ids[1].unsqueeze(0),
             reduction="none",
-        ).view(1, -1)
+        )
 
         self.print(loss)
 
