@@ -61,8 +61,8 @@ class GPT(nn.Module):
 
         torch.set_printoptions(precision=15)
 
-        self = self.to(torch.get_default_dtype())
-        x = x.to(torch.get_default_dtype())
+        # self = self.to(torch.get_default_dtype())
+        # x = x.to(torch.get_default_dtype())
 
         print("PRE BLOCKS", x[0][0][0])
 
