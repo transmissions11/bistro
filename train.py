@@ -30,7 +30,7 @@ def main(
     #################################################################
     devices: int = 1,
     strategy: str = "auto",
-    precision: str = "32-true",
+    precision: str = "64-true",
     #################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
     epochs: int = -1,  # Make this -1 to train forever / until max_time.
