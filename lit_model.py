@@ -77,74 +77,65 @@ class LitModel(L.LightningModule):
         self.hard_prompt_step = 0.0
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
-        ####################
-
-        inputs, targets = batch["inputs"], batch["targets"]
-
-        # TODO: ablate these for performance
-        # TODO; we could support input ids with batches here, just mean properly
-
-        # Compute and accumulate the gradients for the hard prompt.
-        grads = get_hard_prompt_gradients(
-            self.model,
-            current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-            input_ids=inputs,
-            target_ids=targets,
-        )
-
         self.print(f"-------- START HARD PROMPT STEP {self.hard_prompt_step} --------")
 
-        candidate_batch_size = 1
-        num_candidate_batches_to_test = 2
+        # fmt: off
+        input_ids = torch.tensor([
+                    torch.tensor([ 319, 13563,  1546,   263, 12758,  1404,   322,   385, 23116, 21082,
+        20255, 29889,   450, 20255,  4076,  8444, 29892, 13173, 29892,   322,
+         1248,   568,  6089,   304,   278,  1404, 29915, 29879,  5155, 29889,
+         3148,  1001, 29901,  1128, 31681, 31681, 31681, 31681, 31681, 31681,
+        31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681,
+        31681, 31681, 31681, 29871, 29946, 29953, 29906,   334, 29871, 29945,
+        29955, 29929,   353,   319,  1799,  9047, 13566, 29901, 29871, 29906,
+        29953, 29955, 29892, 29946, 29929, 29947]),
+                    torch.tensor([  319, 13563,  1546,   263, 12758,  1404,   322,   385, 23116, 21082,
+        20255, 29889,   450, 20255,  4076,  8444, 29892, 13173, 29892,   322,
+         1248,   568,  6089,   304,   278,  1404, 29915, 29879,  5155, 29889,
+         3148,  1001, 29901,  1128, 31681, 31681, 31681, 31681, 31681, 31681,
+        31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681,
+        31681, 31681, 31681, 29871, 29946, 29953, 29906,   334, 29871, 29945,
+        29955, 29929,   353,   319,  1799,  9047, 13566, 29901, 29871, 29906,
+        29953, 29955, 29892, 29946, 29929, 29947])
+        ])
 
-        num_candidates = candidate_batch_size * num_candidate_batches_to_test
+        target_ids = torch.tensor([
+                    torch.tensor([   -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1, 29871, 29906, 29953,
+        29955, 29892, 29946, 29929, 29947,     2]),
+                    torch.tensor([   -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+           -1,    -1,    -1,    -1,    -1,    -1,    -1, 29871, 29906, 29953,
+        29955, 29892, 29946, 29929, 29947,     2])
+        ])
+        # fmt: on
 
-        # TODO: support grad accumulation iters essentially (split into multiple batches)
-        hard_prompt_candidates = create_hard_prompt_candidates(
-            current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_grads=grads,
-            num_candidates=num_candidates,  # TODO: find a good value and make this configurable
-            not_allowed_tokens=self.not_allowed_tokens,
-            topk=50,
+        self.print(
+            "SHAPES",
+            f"input_ids: {input_ids.size()}",
+            f"target_ids: {target_ids.size()}",
         )
 
-        # TODO: make sure cands are all in the same place
-
-        hard_prompt_candidates = clean_hard_prompt_candidates(
-            self.hparams.tokenizer,
-            current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_candidates=hard_prompt_candidates,
-        )
-
-        # TODO: ensure every proc has the same cands
-
-        for i in range(len(hard_prompt_candidates)):
-            self.print(
-                f"CAND {i}",
-                self.hparams.tokenizer.decode(hard_prompt_candidates[i]),
-            )
-
-        candidate_losses = test_hard_prompt_candidates(
+        loss = compute_loss(
+            # reduce=False to get the loss for each sequence in the batch.
             self.model,
-            candidate_batch_size=candidate_batch_size,
-            hard_prompt_candidates=hard_prompt_candidates,
-            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-            input_ids=inputs,
-            target_ids=targets,
-        )
+            input_ids=input_ids,
+            target_ids=target_ids,
+            reduction="none",
+        ).view(2, -1)
 
-        self.print("CAND LOSSES", candidate_losses)
+        self.print(loss)
 
-        min_loss_candidate_idx = torch.argmin(candidate_losses).item()
-        min_loss = candidate_losses[min_loss_candidate_idx]
-
-        # TODO: have rank zero do this? hm can test w/ print
-        self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
-
-        ################################################################################
-
-        self.log("train_loss", min_loss)
+        ####################################################################
 
         self.log(
             "hard_prompt_step",
@@ -152,10 +143,9 @@ class LitModel(L.LightningModule):
             # Bug report: https://github.com/Lightning-AI/lightning/issues/18984
             torch.tensor(self.hard_prompt_step, dtype=torch.float32),
         )
-
         self.hard_prompt_step += 1.0
 
-        ################################################################################
+        ####################################################################
 
         if self.hard_prompt_step == 1.0:
             raise ValueError("DONE")
