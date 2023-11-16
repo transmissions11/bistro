@@ -157,7 +157,7 @@ class LitModel(L.LightningModule):
 
         self.print("CAND LOSSES", candidate_losses)
 
-        if self.hard_prompt_step == 20.0:
+        if self.hard_prompt_step == 1.0:
             raise ValueError("DONE")
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
