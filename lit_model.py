@@ -118,8 +118,6 @@ class LitModel(L.LightningModule):
                 self.hparams.tokenizer.decode(hard_prompt_candidates[i]),
             )
 
-        self.print("CAND LOSSES", candidate_losses)
-
         candidate_losses = test_hard_prompt_candidates(
             self.model,
             hard_prompt_candidates=hard_prompt_candidates,
@@ -127,6 +125,8 @@ class LitModel(L.LightningModule):
             input_ids=inputs,
             target_ids=targets,
         )
+
+        self.print("CAND LOSSES", candidate_losses)
 
         min_loss_candidate_idx = torch.argmin(candidate_losses).item()
         min_loss = candidate_losses[min_loss_candidate_idx]
