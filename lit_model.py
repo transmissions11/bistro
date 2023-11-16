@@ -149,18 +149,6 @@ class LitModel(L.LightningModule):
 
         self.print(loss)
 
-        self.print("--------------------------SECOND-------------------------")
-
-        loss = compute_loss(
-            # reduce=False to get the loss for each sequence in the batch.
-            self.model,
-            input_ids=input_ids[1].unsqueeze(0),
-            target_ids=target_ids[1].unsqueeze(0),
-            reduction="none",
-        )
-
-        self.print(loss)
-
         ####################################################################
 
         self.log(
