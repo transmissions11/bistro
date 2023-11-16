@@ -135,7 +135,7 @@ class LitModel(L.LightningModule):
             reduction="none",
         ).view(2, -1)
 
-        self.print(loss)
+        self.print(loss[0])
 
         self.print("--------------------------FIRST-------------------------")
 
