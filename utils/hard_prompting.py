@@ -215,6 +215,7 @@ def test_hard_prompt_candidates(
 
     for i in range(len(collated_mega_batch["inputs"])):
         print(f"input_ids {i}:", collated_mega_batch["inputs"][i])
+        print(f"target_ids {i}:", collated_mega_batch["targets"][i])
 
     # Split the mega batch into smaller batches of size candidate_batch_size.
     input_batches, target_batches = (
