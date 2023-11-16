@@ -59,8 +59,8 @@ class GPT(nn.Module):
         cos = cos[:T]
         sin = sin[:T]
 
-        self = self.to(torch.float64)
-        x = x.to(torch.float64)
+        self = self.to(torch.get_default_dtype())
+        x = x.to(torch.get_default_dtype())
 
         print("PRE BLOCKS", x[0][0][0])
 
