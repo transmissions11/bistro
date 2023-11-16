@@ -149,7 +149,7 @@ class LitModel(L.LightningModule):
 
         self.print(loss2)
 
-        self.print(torch.abs(loss1 - loss2), torch.abs(loss1 - loss2).sum())
+        self.print("DELTAS", torch.abs(loss1 - loss2), torch.abs(loss1 - loss2).sum())
 
         ####################################################################
 
