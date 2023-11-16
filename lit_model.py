@@ -119,6 +119,14 @@ class LitModel(L.LightningModule):
 
         # TODO: ensure every proc has the same cands
 
+        for i in range(len(hard_prompt_candidates)):
+            self.print(
+                f"CAND {i}",
+                self.hparams.tokenizer.decode(hard_prompt_candidates[i]),
+            )
+
+        self.print("CAND LOSSES", candidate_losses)
+
         candidate_losses = test_hard_prompt_candidates(
             self.model,
             candidate_batch_size=candidate_batch_size,
@@ -148,14 +156,6 @@ class LitModel(L.LightningModule):
         self.hard_prompt_step += 1.0
 
         ################################################################################
-
-        for i in range(len(hard_prompt_candidates)):
-            self.print(
-                f"CAND {i}",
-                self.hparams.tokenizer.decode(hard_prompt_candidates[i]),
-            )
-
-        self.print("CAND LOSSES", candidate_losses)
 
         if self.hard_prompt_step == 1.0:
             raise ValueError("DONE")
