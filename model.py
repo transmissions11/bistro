@@ -4,7 +4,7 @@ import torch.nn as nn
 from typing import Optional, Tuple
 
 from lit_gpt.config import Config
-from lit_gpt.model import Block, build_rope_cache
+from lit_gpt.model import Block
 
 
 class GPT(nn.Module):
@@ -22,8 +22,6 @@ class GPT(nn.Module):
                 ln_f=config.norm_class(config.n_embd, eps=config.norm_eps),
             )
         )
-
-        self.rope_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
 
     def forward(
         self,
@@ -46,12 +44,16 @@ class GPT(nn.Module):
 
         assert block_size >= T, f"[!] seq of len {T} exceeds block_size of {block_size}"
 
-        cos, sin = self.rope_cache
-        cos = cos[:T]
-        sin = sin[:T]
+        if not hasattr(self, "cos"):
+            cos, sin = self.rope_cache()  # Build the cache.
+            self.register_buffer("cos", cos, persistent=False)
+            self.register_buffer("sin", sin, persistent=False)
 
+        cos = self.cos[:T]
+        sin = self.sin[:T]
+
+        # TODO: del
         torch.set_printoptions(precision=15)
-
         # self = self.to(torch.get_default_dtype())
         # x = x.to(torch.get_default_dtype())
 
@@ -66,7 +68,10 @@ class GPT(nn.Module):
         return self.lm_head(x)  # (b, t, vocab_size)
 
     def reset_caches(self):
-        self.rope_cache = None
+        # TODO: WE NEED TO RESET THE ROPE CACHE?
+        # also should we rename this to reset_parameters?
+        # https://github.com/Lightning-AI/lit-gpt/blob/9cec81c38fc4df9ecb9250a0b64b1d8301cde259/lit_gpt/model.py#L57
+        ...
 
     def embed(self, input_ids: torch.Tensor) -> torch.Tensor:
         return self.transformer.wte(input_ids)
