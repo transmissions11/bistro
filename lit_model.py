@@ -111,7 +111,7 @@ class LitModel(L.LightningModule):
             self.accumulated_grads.zero_()  # Reset the accumulated gradients.
 
             candidate_batch_size = 100
-            num_candidate_batches_to_test = 10
+            num_candidate_batches_to_test = 8
 
             num_candidates = candidate_batch_size * num_candidate_batches_to_test
 
