@@ -46,15 +46,6 @@ class GPT(nn.Module):
 
         assert block_size >= T, f"[!] seq of len {T} exceeds block_size of {block_size}"
 
-        if self.rope_cache is None:
-            self.rope_cache = build_rope_cache(
-                seq_len=block_size,
-                n_elem=int(self.config.rotary_percentage * self.config.head_size),
-                dtype=torch.get_default_dtype(),
-                device=x.device,
-                condense_ratio=self.config.rope_condense_ratio,
-            )
-
         cos, sin = self.rope_cache
         cos = cos[:T]
         sin = sin[:T]
