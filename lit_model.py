@@ -200,3 +200,7 @@ class LitModel(L.LightningModule):
             g0_print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
 
         g0_print("Done loading & configuring model.")
+
+    def on_train_start(self):
+        self.print("\nResetting model caches for training...\n")
+        self.model.reset_caches()

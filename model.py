@@ -66,6 +66,9 @@ class GPT(nn.Module):
 
         return self.lm_head(x)  # (b, t, vocab_size)
 
+    def reset_caches(self):
+        self.rope_cache = None
+
     def embed(self, input_ids: torch.Tensor) -> torch.Tensor:
         return self.transformer.wte(input_ids)
 
