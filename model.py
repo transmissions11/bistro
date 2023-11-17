@@ -66,7 +66,7 @@ class GPT(nn.Module):
         print("PRE BLOCKS", x[0][0][0])
 
         for block in self.transformer.h:
-            x, *_ = block(x, cos, sin)  # (b, t, n_embd)
+            x = block(x, cos, sin)  # (b, t, n_embd)
             print("POST BLOCK", x[0][0][0])
 
         x = self.transformer.ln_f(x)  # (b, t, n_embd)
