@@ -76,97 +76,92 @@ class LitModel(L.LightningModule):
 
         self.hard_prompt_step = 0.0
 
+        self.register_buffer(
+            "accumulated_grads",
+            torch.zeros(
+                self.hparams.num_hard_prompt_tkns,
+                self.hparams.tokenizer.vocab_size,
+                dtype=torch.float64,
+            ),
+            persistent=False,
+        )
+
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
-        self.print(f"-------- START HARD PROMPT STEP {self.hard_prompt_step} --------")
+        inputs, targets = batch["inputs"], batch["targets"]
 
-        # fmt: off
-        input_ids = torch.tensor([
-                    [ 319, 13563,  1546,   263, 12758,  1404,   322,   385, 23116, 21082,
-        20255, 29889,   450, 20255,  4076,  8444, 29892, 13173, 29892,   322,
-         1248,   568,  6089,   304,   278,  1404, 29915, 29879,  5155, 29889,
-         3148,  1001, 29901,  1128, 31681, 31681, 31681, 31681, 31681, 31681,
-        31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681,
-        31681, 31681, 31681, 29871, 29946, 29953, 29906,   334, 29871, 29945,
-        29955, 29929,   353,   319,  1799,  9047, 13566, 29901, 29871, 29906,
-        29953, 29955, 29892, 29946, 29929, 29947],
-                    [  319, 13563,  1546,   263, 12758,  1404,   322,   385, 23116, 21082,
-        20255, 29889,   450, 20255,  4076,  8444, 29892, 13173, 29892,   322,
-         1248,   568,  6089,   304,   278,  1404, 29915, 29879,  5155, 29889,
-         3148,  1001, 29901,  1128, 31681, 31681, 31681, 31681, 31681, 31681,
-        31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681, 31681,
-        31681, 31681, 31681, 29871, 29946, 29953, 29906,   334, 29871, 29945,
-        29955, 29929,   353,   319,  1799,  9047, 13566, 29901, 29871, 29906,
-        29953, 29955, 29892, 29946, 29929, 29947]
-        ]).to(self.device)
+        # Compute and accumulate the gradients for the hard prompt.
+        # .type_as() is needed to upcast the gradients to the
+        # higher precision type used by self.accumulated_grads.
+        self.accumulated_grads += self.all_gather(
+            get_hard_prompt_gradients(
+                self.model,
+                current_hard_prompt=self.current_hard_prompt,
+                hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                input_ids=inputs,
+                target_ids=targets,
+            ).type_as(self.accumulated_grads)
+        ).mean(dim=0)
 
-        target_ids = torch.tensor([
-                    [   -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1, 29871, 29906, 29953,
-        29955, 29892, 29946, 29929, 29947,     2],
-                    [   -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-           -1,    -1,    -1,    -1,    -1,    -1,    -1, 29871, 29906, 29953,
-        29955, 29892, 29946, 29929, 29947,     2]
-        ]).to(self.device)
-        # fmt: on
+        # We need to use batch_idx + 1 here since batch_idx starts at 0, which
+        # would cause the first batch to trigger an update before accumulating.
+        if (batch_idx + 1) % self.hparams.accumulate_grad_batches == 0:
+            # Use the accumulated gradients for the update.
+            # + 1 because grad accumulation steps are on top of the normal step.
+            # e.g. if grad_accumulation_steps=1, two batches are needed to update.
+            grads = self.accumulated_grads / self.hparams.accumulate_grad_batches
 
-        self.print(
-            "SHAPES",
-            f"input_ids: {input_ids.size()}",
-            f"target_ids: {target_ids.size()}",
-        )
+            self.accumulated_grads.zero_()  # Reset the accumulated gradients.
 
-        self.print("--------------------------BOTH-------------------------")
+            candidate_batch_size = 100
+            num_candidate_batches_to_test = 1
 
-        loss1 = compute_loss(
-            # reduce=False to get the loss for each sequence in the batch.
-            self.model,
-            input_ids=input_ids,
-            target_ids=target_ids,
-            reduction="none",
-        ).view(2, -1)[0]
+            num_candidates = candidate_batch_size * num_candidate_batches_to_test
 
-        self.print(loss1)
+            # TODO: support grad accumulation iters essentially (split into multiple batches)
+            hard_prompt_candidates = create_hard_prompt_candidates(
+                current_hard_prompt=self.current_hard_prompt,
+                hard_prompt_grads=grads,
+                num_candidates=num_candidates,
+                not_allowed_tokens=self.not_allowed_tokens,
+                topk=50,  # TODO: make configurable
+            )
 
-        self.print("--------------------------FIRST-------------------------")
+            # TODO: make sure cands are all in the same place
 
-        loss2 = compute_loss(
-            # reduce=False to get the loss for each sequence in the batch.
-            self.model,
-            input_ids=input_ids[0].unsqueeze(0),
-            target_ids=target_ids[0].unsqueeze(0),
-            reduction="none",
-        )
+            hard_prompt_candidates = clean_hard_prompt_candidates(
+                self.hparams.tokenizer,
+                current_hard_prompt=self.current_hard_prompt,
+                hard_prompt_candidates=hard_prompt_candidates,
+            )
 
-        self.print(loss2)
+            # TODO: ensure every proc has the same cands
 
-        self.print("--------------------------DELTAs-------------------------")
+            candidate_losses = self.all_gather(
+                test_hard_prompt_candidates(
+                    self.model,
+                    candidate_batch_size=candidate_batch_size,
+                    hard_prompt_candidates=hard_prompt_candidates,
+                    hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                    input_ids=inputs,
+                    target_ids=targets,
+                )
+            ).mean(dim=0)
 
-        self.print("ERROR", torch.abs(loss1 - loss2).sum())
+            min_loss_candidate_idx = torch.argmin(candidate_losses).item()
+            min_loss = candidate_losses[min_loss_candidate_idx]
 
-        ####################################################################
+            # TODO: have rank zero do this? hm can test w/ print
+            self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
 
-        self.log(
-            "hard_prompt_step",
-            # We need to specify float32 or we'll get annoying precision issues.
-            # Bug report: https://github.com/Lightning-AI/lightning/issues/18984
-            torch.tensor(self.hard_prompt_step, dtype=torch.float32),
-        )
-        self.hard_prompt_step += 1.0
+            self.log("train_loss", min_loss)
 
-        ####################################################################
-
-        if self.hard_prompt_step == 1.0:
-            raise ValueError("DONE")
+            self.log(
+                "hard_prompt_step",
+                # We need to specify float32 or we'll get annoying precision issues.
+                # Bug report: https://github.com/Lightning-AI/lightning/issues/18984
+                torch.tensor(self.hard_prompt_step, dtype=torch.float32),
+            )
+            self.hard_prompt_step += 1.0
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
@@ -182,6 +177,8 @@ class LitModel(L.LightningModule):
         loss = torch.min(candidate_losses)
 
         self.log("val_loss", loss, on_epoch=True, prog_bar=True, sync_dist=True)
+
+        # TODO: log samples
 
     def configure_optimizers(self):
         ...  # We don't need an optimizer.
@@ -215,3 +212,9 @@ class LitModel(L.LightningModule):
             g0_print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
 
         g0_print("Done loading & configuring model.")
+
+    def on_train_start(self):
+        # Lightning calls .to() on all registered buffers during setup which
+        # will set the dtype to the default dtype. We need to reset it here.
+        # Bug report: https://github.com/Lightning-AI/lightning/issues/18982
+        self.accumulated_grads = self.accumulated_grads.type(torch.float64)
