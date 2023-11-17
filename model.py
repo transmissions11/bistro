@@ -58,6 +58,8 @@ class GPT(nn.Module):
         cos = self.cos[:T]
         sin = self.sin[:T]
 
+        print(cos.shape, sin.shape)
+
         # TODO: del
         torch.set_printoptions(precision=15)
         # self = self.to(torch.get_default_dtype())
