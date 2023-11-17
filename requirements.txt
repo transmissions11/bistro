@@ -1,5 +1,5 @@
 torch>=2.1.0
-lightning @ git+https://github.com/Lightning-AI/lightning@master
+lightning>=2.1.2
 tokenizers
 requests
 jsonargparse[signatures]==4.20.0  # CLI
