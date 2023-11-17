@@ -4,7 +4,7 @@ import torch.nn as nn
 from typing import Optional, Tuple
 
 from lit_gpt.config import Config
-from lit_gpt.model import Block
+from lit_gpt.model import Block, build_rope_cache
 
 
 class GPT(nn.Module):
@@ -45,7 +45,13 @@ class GPT(nn.Module):
         assert block_size >= T, f"[!] seq of len {T} exceeds block_size of {block_size}"
 
         if not hasattr(self, "cos"):
-            cos, sin = self.rope_cache()  # Build the cache.
+            cos, sin = build_rope_cache(
+                seq_len=block_size,
+                n_elem=self.config.rope_n_elem,
+                device=x.device,
+                condense_ratio=self.config.rope_condense_ratio,
+                base=self.config.rope_base,
+            )
             self.register_buffer("cos", cos, persistent=False)
             self.register_buffer("sin", sin, persistent=False)
 
