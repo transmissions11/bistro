@@ -41,6 +41,7 @@ class LitDataModule(L.LightningDataModule):
                     x["targets"],
                     space_before_prompt=False,  # We don't want a space before the hard prompt tokens.
                 ),
+                bos=False,  # TODO: Just use default, just trying this for now.
                 eos=True,  # Don't see why you wouldn't want to train with an eos_token.
             )
 
