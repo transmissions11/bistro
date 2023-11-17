@@ -213,9 +213,9 @@ def test_hard_prompt_candidates(
     # multiple input_ids, so leaving this in here for future compatibility.
     collated_mega_batch = pad_collate_fn(mega_batch)
 
-    # for i in range(len(collated_mega_batch["inputs"])):
-    #     print(f"input_ids {i}:", collated_mega_batch["inputs"][i])
-    #     print(f"target_ids {i}:", collated_mega_batch["targets"][i])
+    if torch.distributed.get_rank() == 0:
+        for i in range(len(collated_mega_batch["inputs"])):
+            print(f"input_ids {i}:", collated_mega_batch["inputs"][i])
 
     # Split the mega batch into smaller batches of size candidate_batch_size.
     input_batches, target_batches = (
@@ -225,15 +225,9 @@ def test_hard_prompt_candidates(
 
     losses = []  # Create a list to store the loss for each candidate.
 
-    # TODO: isolate by just runnning the same batch of two identical sequences, one in sequence and one in parallel with batch
-    # if they're different we know wby this is brokey
-
-    # TODO List comp instead of loop?
+    # TODO Use a list comprehension instead of a loop?
     for inputs, targets in zip(input_batches, target_batches):
-        # TODO: profile why mem usage is 50% before even running compute_loss?
-        # -> ah hmm probably just loading weights in and shit during configure_model???
-
-        # TODO: use inference mode decorator or something instead?
+        # TODO: Use inference mode decorator or something instead?
         with torch.no_grad():
             # compute_loss -> (candidate_batch_size * t)
             # .view(...) -> (candidate_batch_size, t)
@@ -246,11 +240,7 @@ def test_hard_prompt_candidates(
 
             losses.append(loss)
 
-    # print("losses arr", len(losses), losses[0].shape, losses[1].shape)
-
     losses = torch.cat(losses, dim=0)  # (num_candidates, t)
-
-    # print("loss values:", losses.shape, losses)
 
     # Ignore losses of 0, as they are due to padding, return the mean of the rest.
     return losses[losses != 0].view(losses.size(0), -1).mean(dim=-1)  # (num_candidates)
