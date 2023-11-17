@@ -160,7 +160,9 @@ def clean_hard_prompt_candidates(
 
         # Decode and encode it again, to ensure we can use the
         # hard prompt on a model that only accepts text inputs.
-        reencoded_candidate = tokenizer.encode(tokenizer.decode(candidate)).to(
+        reencoded_candidate = tokenizer.encode(
+            tokenizer.decode(candidate), bos=False
+        ).to(
             hard_prompt_candidates  # Move to same device and dtype as candidates.
         )
 
