@@ -94,7 +94,7 @@ def create_hard_prompt_candidates(
     current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
     hard_prompt_grads: torch.Tensor,  # (num_hard_prompt_tkns, vocab_size)
     *,  # Force keyword arguments.
-    batch_size: int,
+    num_candidates: int,
     topk: int = 256,
     # Can be used to use only ASCII tokens, for example.
     not_allowed_tokens: Optional[torch.Tensor] = None,
@@ -106,6 +106,9 @@ def create_hard_prompt_candidates(
     filter_hard_prompt_candidates to ensure the length of the candidates doesn't explode.
     """
 
+    # TODO: Build clean_hard_prompt_candidates into this function, and don't just
+    # repeat the last candidate if after cleaning there are less than num_candidates.
+
     # Set the gradients of not allowed tokens to infinity.
     if not_allowed_tokens is not None:
         hard_prompt_grads[:, not_allowed_tokens] = float("inf")
@@ -113,33 +116,33 @@ def create_hard_prompt_candidates(
     # Get the ids of the top-k tokens that would most decrease the loss.
     top_indices = (-hard_prompt_grads).topk(topk, dim=1).indices
 
-    # Create a (batch_size, num_hard_prompt_tkns) tensor of the current hard prompt.
-    candidates_batch = current_hard_prompt.repeat(batch_size, 1)
+    # Create a (num_candidates, num_hard_prompt_tkns) tensor of the current hard prompt.
+    candidates = current_hard_prompt.repeat(num_candidates, 1)
 
-    # Generate a (batch_size) tensor of an index to replace in each row of the batch.
+    # Generate a (num_candidates) tensor of an index to replace in each row.
     new_token_pos = torch.arange(
         0,
         len(current_hard_prompt),
-        len(current_hard_prompt) / batch_size,
+        len(current_hard_prompt) / num_candidates,
         device=hard_prompt_grads.device,
     ).type(torch.int64)
 
-    # Generate a (batch_size, 1) tensor of token ids to replace each new_token_pos index with.
+    # Generate a (num_candidates, 1) tensor of token ids to replace each new_token_pos index with.
     new_token_val = torch.gather(
         top_indices[new_token_pos],
         1,
-        torch.randint(0, topk, (batch_size, 1), device=hard_prompt_grads.device),
+        torch.randint(0, topk, (num_candidates, 1), device=hard_prompt_grads.device),
     )
 
-    # Replace the new_token_pos index in each row of the batch with the new_token_val.
-    return candidates_batch.scatter_(1, new_token_pos.unsqueeze(-1), new_token_val)
+    # Replace the new_token_pos index in each row with the new_token_val.
+    return candidates.scatter_(1, new_token_pos.unsqueeze(-1), new_token_val)
 
 
 def clean_hard_prompt_candidates(
     tokenizer: Tokenizer,
     *,  # Force keyword arguments.
     current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
-    hard_prompt_candidates: torch.Tensor,  # (batch_size, num_hard_prompt_tkns)
+    hard_prompt_candidates: torch.Tensor,  # (num_candidates, num_hard_prompt_tkns)
 ) -> torch.Tensor:
     """
     Filters candidates that don't match the current hard prompt's length and cleans others
@@ -175,7 +178,8 @@ def clean_hard_prompt_candidates(
 def test_hard_prompt_candidates(
     model: GPT,
     *,  # Force keyword arguments.
-    hard_prompt_candidates: torch.Tensor,  # (batch_size, num_hard_prompt_tkns)
+    candidate_batch_size: int,
+    hard_prompt_candidates: torch.Tensor,  # (num_candidates, num_hard_prompt_tkns)
     hard_prompt_tkn: int,
     input_ids: torch.Tensor,  # (b = 1, t)
     target_ids: torch.Tensor,  # (b = 1, t)
@@ -190,35 +194,49 @@ def test_hard_prompt_candidates(
     hard_prompt_start_pos = hard_prompt_positions[0].item()
     hard_prompt_end_pos = hard_prompt_positions[-1].item()
 
-    # Create a list to store the new input sequences
-    new_input_ids_list = []
+    # Create a list to store input_id/target_id pairs for each candidate.
+    # This is called a "mega batch" as we'll be splitting this into smaller
+    # batches of size candidate_batch_size when actually testing them later on.
+    mega_batch = []
 
-    for idx, candidate in enumerate(hard_prompt_candidates):
+    for candidate in hard_prompt_candidates:
         # Replace the hard prompt in the input sequence with the candidate.
         new_input_ids = input_ids.clone()
         new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
 
-        # TODO: wait i dont think we need to pad lol, we're using the same SEQ!
-        new_input_ids_list.append({"inputs": new_input_ids, "targets": target_ids})
+        # Add the new input/target pair to the mega batch.
+        mega_batch.append({"inputs": new_input_ids, "targets": target_ids})
 
-    # Pad the sequences and convert them to a tensor
-    batch = pad_collate_fn(new_input_ids_list)
+    # Pad the sequences and group everything into 2 tensors: inputs and targets.
+    # TODO: We don't actually need to pad since we're using the same input_ids
+    # for each candidate, but we may need to in the future to support using
+    # multiple input_ids, so leaving this in here for future compatibility.
+    collated_mega_batch = pad_collate_fn(mega_batch)
 
-    # for i in range(len(batch["inputs"])):
-    #     print(f"input_ids {i}:", batch["inputs"][i])
-    #     print(f"target_ids {i}:", batch["targets"][i])
+    # Split the mega batch into smaller batches of size candidate_batch_size.
+    input_batches, target_batches = (
+        torch.stack(collated_mega_batch["inputs"].split(candidate_batch_size, dim=0)),
+        torch.stack(collated_mega_batch["targets"].split(candidate_batch_size, dim=0)),
+    )
 
-    with torch.no_grad():
-        # Compute the loss for the entire batch (batch_size, t)
-        loss = compute_loss(
-            # reduce=False to get the loss for each sequence in the batch.
-            model,
-            input_ids=batch["inputs"],
-            target_ids=batch["targets"],
-            reduction="none",
-        ).view(hard_prompt_candidates.size(0), -1)
+    losses = []  # Create a list to store the loss for each candidate.
 
-        # print("loss values:", loss.shape, loss)
+    # TODO Use a list comprehension instead of a loop?
+    for inputs, targets in zip(input_batches, target_batches):
+        # TODO: Use inference mode decorator or something instead?
+        with torch.no_grad():
+            # compute_loss -> (candidate_batch_size * t)
+            # .view(...) -> (candidate_batch_size, t)
+            loss = compute_loss(
+                model,
+                input_ids=inputs,
+                target_ids=targets,
+                reduction="none",
+            ).view(targets.size(0), -1)
 
-    # Ignore losses of 0, as they are due to padding, return take the mean of the rest.
-    return loss[loss != 0].view(loss.size(0), -1).mean(dim=-1)  # (batch_size)
+            losses.append(loss)
+
+    losses = torch.cat(losses, dim=0)  # (num_candidates, t)
+
+    # Ignore losses of 0, as they are due to padding, return the mean of the rest.
+    return losses[losses != 0].view(losses.size(0), -1).mean(dim=-1)  # (num_candidates)
