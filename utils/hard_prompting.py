@@ -163,7 +163,10 @@ def clean_hard_prompt_candidates(
         # bos=False because we don't want to force all candidates to
         # start with bos, as they will be in the middle of the sequence.
         reencoded_candidate = tokenizer.encode(
-            tokenizer.decode(candidate), bos=False
+            # bos/eos=False because the candidates
+            # will be in the middle of the sequence.
+            bos=False,
+            eos=False,
         ).to(
             hard_prompt_candidates  # Move to same device and dtype as candidates.
         )
