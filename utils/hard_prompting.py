@@ -233,6 +233,7 @@ def test_hard_prompt_candidates(
     for inputs, targets in zip(input_batches, target_batches):
         # TODO: Use inference mode decorator or something instead?
         with torch.no_grad():
+            print("INPUTS", inputs[0])
             # compute_loss -> (candidate_batch_size * t)
             # .view(...) -> (candidate_batch_size, t)
             loss = compute_loss(
