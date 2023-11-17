@@ -105,9 +105,6 @@ class LitModel(L.LightningModule):
         # We need to use batch_idx + 1 here since batch_idx starts at 0, which
         # would cause the first batch to trigger an update before accumulating.
         if (batch_idx + 1) % self.hparams.accumulate_grad_batches == 0:
-            self.print(
-                f"-------- START HARD PROMPT STEP {self.hard_prompt_step} --------"
-            )
             # Use the accumulated gradients for the update.
             # + 1 because grad accumulation steps are on top of the normal step.
             # e.g. if grad_accumulation_steps=1, two batches are needed to update.
