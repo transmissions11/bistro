@@ -115,8 +115,6 @@ class LitModel(L.LightningModule):
             candidate_batch_size = 100
             num_candidate_batches_to_test = 1
 
-            print(self.hparams.tokenizer.decode(inputs[0]))
-
             num_candidates = candidate_batch_size * num_candidate_batches_to_test
 
             # TODO: support grad accumulation iters essentially (split into multiple batches)
