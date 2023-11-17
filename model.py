@@ -73,12 +73,6 @@ class GPT(nn.Module):
 
         return self.lm_head(x)  # (b, t, vocab_size)
 
-    def reset_caches(self):
-        # TODO: WE NEED TO RESET THE ROPE CACHE?
-        # also should we rename this to reset_parameters?
-        # https://github.com/Lightning-AI/lit-gpt/blob/9cec81c38fc4df9ecb9250a0b64b1d8301cde259/lit_gpt/model.py#L57
-        ...
-
     def embed(self, input_ids: torch.Tensor) -> torch.Tensor:
         return self.transformer.wte(input_ids)
 
