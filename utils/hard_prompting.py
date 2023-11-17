@@ -168,11 +168,6 @@ def clean_hard_prompt_candidates(
         if candidate.size(0) == reencoded_candidate.size(0):
             filtered.append(reencoded_candidate)
 
-    # Log what percent of the candidates were filtered.
-    print(
-        f"Filtered {100 * (1 - len(filtered) / len(hard_prompt_candidates)):.2f}% of candidates"
-    )
-
     # If the number of filtered candidates is less than the number of hard
     # prompt candidates, pad the list with the last candidate and return.
     return torch.stack(
