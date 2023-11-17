@@ -58,8 +58,6 @@ class GPT(nn.Module):
         cos = self.cos[:T]
         sin = self.sin[:T]
 
-        print(cos.shape, sin.shape)
-
         # TODO: del
         torch.set_printoptions(precision=15)
         # self = self.to(torch.get_default_dtype())
@@ -68,7 +66,7 @@ class GPT(nn.Module):
         print("PRE BLOCKS", x[0][0][0])
 
         for block in self.transformer.h:
-            x, *_ = block(x, (cos, sin), block_size)  # (b, t, n_embd)
+            x, *_ = block(x, cos, sin)  # (b, t, n_embd)
             print("POST BLOCK", x[0][0][0])
 
         x = self.transformer.ln_f(x)  # (b, t, n_embd)
