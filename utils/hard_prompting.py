@@ -160,6 +160,8 @@ def clean_hard_prompt_candidates(
 
         # Decode and encode it again, to ensure we can use the
         # hard prompt on a model that only accepts text inputs.
+        # bos=False because we don't want to force all candidates to
+        # start with bos, as they will be in the middle of the sequence.
         reencoded_candidate = tokenizer.encode(
             tokenizer.decode(candidate), bos=False
         ).to(
