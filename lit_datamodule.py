@@ -41,26 +41,6 @@ class LitDataModule(L.LightningDataModule):
                     x["targets"],
                     space_before_prompt=False,  # We don't want a space before the hard prompt tokens.
                 ),
-                ##############################################################
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                bos=False,  # THSI SHOULD BE EQUIV ON THIS BRANCH!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                # TODO: TRY TRAINING WITH NO BOS TOKEN!!!!!!!!!!!!!!!!!!!!!!!!
-                ##############################################################
                 eos=True,  # Don't see why you wouldn't want to train with an eos_token.
             )
 
