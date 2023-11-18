@@ -135,8 +135,10 @@ def create_hard_prompt_candidates(
         0, topk, (num_candidates, 1), device=hard_prompt_grads.device
     )
 
+    top_indices_TEMP = top_indices[new_token_pos]
+
     # Generate a (num_candidates, 1) tensor of token ids to replace each new_token_pos index with.
-    new_token_val = torch.gather(top_indices[new_token_pos], 1, extracted_vals_TEMP)
+    new_token_val = torch.gather(top_indices_TEMP, 1, extracted_vals_TEMP)
 
     # Replace the new_token_pos index in each row with the new_token_val.
     return candidates.scatter_(1, new_token_pos.unsqueeze(-1), new_token_val)
