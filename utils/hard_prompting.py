@@ -125,6 +125,9 @@ def create_hard_prompt_candidates(
         len(current_hard_prompt),
         len(current_hard_prompt) / num_candidates,
         device=hard_prompt_grads.device,
+        # Need to run arange in a higher precision dtype before casting to int to
+        # avoid rounding issues which result in indices >= len(current_hard_prompt).
+        dtype=torch.float32,
     ).type(torch.int64)
 
     import ipdb
