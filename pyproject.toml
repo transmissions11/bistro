@@ -1,0 +1,2 @@
+[tool.ipdb]
+context=6
