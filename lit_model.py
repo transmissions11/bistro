@@ -74,7 +74,7 @@ class LitModel(L.LightningModule):
 
         #####################################################################
 
-        self.hard_prompt_step = 0.0
+        self.hard_prompt_step = 0
 
         self.register_buffer(
             "accumulated_grads",
@@ -169,7 +169,7 @@ class LitModel(L.LightningModule):
                 # Bug report: https://github.com/Lightning-AI/lightning/issues/18984
                 torch.tensor(self.hard_prompt_step, dtype=torch.float32),
             )
-            self.hard_prompt_step += 1.0
+            self.hard_prompt_step += 1
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
