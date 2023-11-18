@@ -99,6 +99,9 @@ def create_hard_prompt_candidates(
     # Can be used to use only ASCII tokens, for example.
     not_allowed_tokens: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
+    # TODO: Build clean_hard_prompt_candidates into this function, and don't just
+    # repeat the last candidate if after cleaning there are less than num_candidates.
+
     """
     Creates a batch of hard prompt candidates by sampling randomly from the top-k tokens.
 
@@ -106,8 +109,11 @@ def create_hard_prompt_candidates(
     filter_hard_prompt_candidates to ensure the length of the candidates doesn't explode.
     """
 
-    # TODO: Build clean_hard_prompt_candidates into this function, and don't just
-    # repeat the last candidate if after cleaning there are less than num_candidates.
+    # Ensure that (num_hard_prompt_tkns * topk) > num_candidates, as
+    # otherwise we'd start repeating candidates and be wasting compute.
+    assert (
+        current_hard_prompt.size(0) * topk > num_candidates
+    ), f"num_candidates ({num_candidates}) should be < (num_hard_prompt_tkns ({current_hard_prompt.size(0)}) * topk ({topk}))"
 
     # Set the gradients of not allowed tokens to infinity.
     if not_allowed_tokens is not None:
