@@ -86,6 +86,15 @@ class LitModel(L.LightningModule):
             persistent=False,
         )
 
+    def on_train_start(self):
+        self.print("\nResetting model caches for training...\n")
+        self.model.reset_caches()
+
+        # Lightning calls .to() on all registered buffers during setup which
+        # will set the dtype to the default dtype. We need to reset it here.
+        # Bug report: https://github.com/Lightning-AI/lightning/issues/18982
+        self.accumulated_grads = self.accumulated_grads.type(torch.float64)
+
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
@@ -213,12 +222,3 @@ class LitModel(L.LightningModule):
             g0_print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
 
         g0_print("Done loading & configuring model.")
-
-    def on_train_start(self):
-        self.print("\nResetting model caches for training...\n")
-        self.model.reset_caches()
-
-        # Lightning calls .to() on all registered buffers during setup which
-        # will set the dtype to the default dtype. We need to reset it here.
-        # Bug report: https://github.com/Lightning-AI/lightning/issues/18982
-        self.accumulated_grads = self.accumulated_grads.type(torch.float64)
