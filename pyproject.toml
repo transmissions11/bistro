@@ -1,2 +1,2 @@
 [tool.ipdb]
-context=100
+context=12
