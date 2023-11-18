@@ -95,10 +95,13 @@ def create_hard_prompt_candidates(
     hard_prompt_grads: torch.Tensor,  # (num_hard_prompt_tkns, vocab_size)
     *,  # Force keyword arguments.
     num_candidates: int,
-    topk: int = 256,
+    topk: int,
     # Can be used to use only ASCII tokens, for example.
     not_allowed_tokens: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
+    # TODO: Build clean_hard_prompt_candidates into this function, and don't just
+    # repeat the last candidate if after cleaning there are less than num_candidates.
+
     """
     Creates a batch of hard prompt candidates by sampling randomly from the top-k tokens.
 
@@ -106,15 +109,18 @@ def create_hard_prompt_candidates(
     filter_hard_prompt_candidates to ensure the length of the candidates doesn't explode.
     """
 
-    # TODO: Build clean_hard_prompt_candidates into this function, and don't just
-    # repeat the last candidate if after cleaning there are less than num_candidates.
+    # Ensure that (num_hard_prompt_tkns * topk) > num_candidates, as
+    # otherwise we'd start repeating candidates and be wasting compute.
+    assert (
+        current_hard_prompt.size(0) * topk > num_candidates
+    ), f"num_candidates ({num_candidates}) should be < (num_hard_prompt_tkns ({current_hard_prompt.size(0)}) * topk ({topk}))"
 
     # Set the gradients of not allowed tokens to infinity.
     if not_allowed_tokens is not None:
         hard_prompt_grads[:, not_allowed_tokens] = float("inf")
 
-    # Get the ids of the top-k tokens that would most decrease the loss.
-    top_indices = (-hard_prompt_grads).topk(topk, dim=1).indices
+    # Create a (num_hard_prompt_tkns, topk) tensor of the top-k token ids that would decrease loss for each hard prompt token.
+    top_tkns = (-hard_prompt_grads).topk(topk, dim=1).indices
 
     # Create a (num_candidates, num_hard_prompt_tkns) tensor of the current hard prompt.
     candidates = current_hard_prompt.repeat(num_candidates, 1)
@@ -130,16 +136,16 @@ def create_hard_prompt_candidates(
         dtype=torch.float32,
     ).type(torch.int64)
 
-    extracted_vals_TEMP = torch.randint(
-        0, topk, (num_candidates, 1), device=hard_prompt_grads.device
+    # Generate a (num_candidates, 1) tensor of token ids to replace each new_token_pos index with.
+    new_token_val = torch.gather(
+        top_tkns[new_token_pos],  # (num_candidates, topk)
+        1,
+        # (num_candidates, 1) — Random index from 0 to topk for each candidate.
+        torch.randint(0, topk, (num_candidates, 1), device=hard_prompt_grads.device),
     )
 
-    top_indices_TEMP = top_indices[new_token_pos]
-
-    # Generate a (num_candidates, 1) tensor of token ids to replace each new_token_pos index with.
-    new_token_val = torch.gather(top_indices_TEMP, 1, extracted_vals_TEMP)
-
-    # Replace the new_token_pos index in each row with the new_token_val.
+    # (num_candidates, num_hard_prompt_tkns) — replace the new_token_pos
+    # index for each candidate with the corresponding new_token_val token.
     return candidates.scatter_(1, new_token_pos.unsqueeze(-1), new_token_val)
 
 
