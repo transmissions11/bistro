@@ -122,6 +122,8 @@ def main(
     trainer.fit(model, datamodule=datamodule)
 
 
+__spec__ = None  # For pdb support.
+
 if __name__ == "__main__":
     from jsonargparse import CLI
 
