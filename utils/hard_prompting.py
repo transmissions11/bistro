@@ -119,8 +119,8 @@ def create_hard_prompt_candidates(
     if not_allowed_tokens is not None:
         hard_prompt_grads[:, not_allowed_tokens] = float("inf")
 
-    # Get the ids of the top-k tokens that would most decrease the loss.
-    top_indices = (-hard_prompt_grads).topk(topk, dim=1).indices
+    # Create a (num_hard_prompt_tkns, topk) tensor of the top-k token ids that would decrease loss for each hard prompt token.
+    top_tkns = (-hard_prompt_grads).topk(topk, dim=1).indices
 
     # Create a (num_candidates, num_hard_prompt_tkns) tensor of the current hard prompt.
     candidates = current_hard_prompt.repeat(num_candidates, 1)
@@ -138,12 +138,14 @@ def create_hard_prompt_candidates(
 
     # Generate a (num_candidates, 1) tensor of token ids to replace each new_token_pos index with.
     new_token_val = torch.gather(
-        top_indices[new_token_pos],
+        top_tkns[new_token_pos],  # (num_candidates, topk)
         1,
+        # (num_candidates, 1) — Random index from 0 to topk for each candidate.
         torch.randint(0, topk, (num_candidates, 1), device=hard_prompt_grads.device),
     )
 
-    # Replace the new_token_pos index in each row with the new_token_val.
+    # (num_candidates, num_hard_prompt_tkns) — replace the new_token_pos
+    # index for each candidate with the corresponding new_token_val token.
     return candidates.scatter_(1, new_token_pos.unsqueeze(-1), new_token_val)
 
 
