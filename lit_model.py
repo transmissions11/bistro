@@ -97,14 +97,6 @@ class LitModel(L.LightningModule):
             else True
         )
 
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(torch.distributed.get_rank() == 0)
-            if torch.distributed.is_initialized()
-            else True
-        )
-
         # Compute and accumulate the gradients for the hard prompt.
         # .type_as() is needed to upcast the gradients to the
         # higher precision type used by self.accumulated_grads.
