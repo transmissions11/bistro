@@ -130,10 +130,6 @@ def create_hard_prompt_candidates(
         dtype=torch.float32,
     ).type(torch.int64)
 
-    import ipdb
-
-    ipdb.set_trace()
-
     extracted_vals_TEMP = torch.randint(
         0, topk, (num_candidates, 1), device=hard_prompt_grads.device
     )
