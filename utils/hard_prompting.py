@@ -95,7 +95,7 @@ def create_hard_prompt_candidates(
     hard_prompt_grads: torch.Tensor,  # (num_hard_prompt_tkns, vocab_size)
     *,  # Force keyword arguments.
     num_candidates: int,
-    topk: int = 256,
+    topk: int,
     # Can be used to use only ASCII tokens, for example.
     not_allowed_tokens: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
