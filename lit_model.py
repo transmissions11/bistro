@@ -127,7 +127,7 @@ class LitModel(L.LightningModule):
                 hard_prompt_grads=grads,
                 num_candidates=num_candidates,
                 not_allowed_tokens=self.not_allowed_tokens,
-                topk=50,  # TODO: make configurable
+                topk=256,  # TODO: make configurable
             )
 
             # TODO: make sure cands are all in the same place
