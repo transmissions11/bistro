@@ -164,6 +164,7 @@ class LitModel(L.LightningModule):
 
         candidate_losses = test_hard_prompt_candidates(
             self.model,
+            candidate_batch_size=1,  # TODO: read from hparams
             hard_prompt_candidates=self.current_hard_prompt.unsqueeze(0),
             hard_prompt_tkn=self.hparams.hard_prompt_tkn,
             input_ids=inputs,
