@@ -42,7 +42,7 @@ def main(
     val_check_interval: float = 0.01,  # After every 1% of training steps.
     skip_starting_validation: bool = False,  # Useful for debugging.
     #################################################################
-    log_every_n_steps: int = 10,
+    log_every_n_steps: int = 1,
     disable_wandb: bool = False,  # Also useful for debugging.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
     #################################################################
