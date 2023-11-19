@@ -14,6 +14,7 @@ def launch_ipdb_on_exception_distributed():
         print("!!!!!!!!!!!!!!!!!!!! HELLO !!!!!!!!!!!!!!!!!!!!")
         sys.exit()  # Exit the program if we quit ipdb.
     except Exception:
+        print("HELLO WORLD ---------------------------")
         # Only the rank zero proc should drop into ipdb.
         # Still need to catch the exception on other ranks,
         # though, or the program will crash while debugging.
