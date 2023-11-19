@@ -26,7 +26,8 @@ def launch_ipdb_on_exception_distributed():
             print(m.__repr__(), file=sys.stderr)
             ipdb.post_mortem(tb)
     finally:
-        pass
+        # Re-raise the exception so the program crashes.
+        raise
 
 
 iexd = launch_ipdb_on_exception_distributed()
