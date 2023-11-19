@@ -12,7 +12,6 @@ from lit_gpt.tokenizer import Tokenizer
 
 from lightning.pytorch.loggers import WandbLogger
 
-from utils.debugging import iexd
 from utils.warnings import suppress_uncontrollable_warnings, elevate_important_warnings
 
 from datetime import datetime
@@ -23,7 +22,6 @@ from lit_model import LitModel
 from model import Config
 
 
-@iexd  # Will drop into ipdb if an exception is raised on rank zero.
 def main(
     project: str = "hard-prompting",
     ####################################################################
