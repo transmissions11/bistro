@@ -23,7 +23,8 @@ def attach():
             print(e.__repr__(), file=sys.stderr)
             _, _, tb = sys.exc_info()
             ipdb.post_mortem(tb)
-        # TODO: wait do we need pass?
+        finally:
+            pass
     else:
         yield
 
