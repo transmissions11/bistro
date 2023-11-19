@@ -8,7 +8,7 @@ from decorator import contextmanager
 
 
 @contextmanager
-def iexd():
+def attach():
     """Drop into ipdb if an exception is raised in rank zero of a distributed context."""
 
     if (
@@ -26,3 +26,6 @@ def iexd():
         # TODO: wait do we need pass?
     else:
         yield
+
+
+iexd = attach()
