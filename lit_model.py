@@ -109,9 +109,13 @@ class LitModel(L.LightningModule):
             target_ids=targets,
         ).type_as(self.accumulated_grads)
 
-        from utils.debugging import debug_distributed
+        import ipdb
 
-        debug_distributed()
+        ipdb.set_trace(
+            cond=(0 == torch.distributed.get_rank())
+            if torch.distributed.is_initialized()
+            else True
+        )
 
         # We need to use batch_idx + 1 here since batch_idx starts at 0, which
         # would cause the first batch to trigger an update before accumulating.

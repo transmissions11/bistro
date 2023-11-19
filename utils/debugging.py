@@ -4,25 +4,6 @@ import torch
 from decorator import contextmanager
 
 
-def is_rank_zero():
-    return (
-        (0 == torch.distributed.get_rank())
-        if torch.distributed.is_initialized()
-        else True
-    )
-
-
-def barrier():
-    if torch.distributed.is_initialized():
-        torch.distributed.barrier()
-
-
-def debug_distributed():
-    ipdb.set_trace(cond=is_rank_zero())
-
-    barrier()  # Make sure all procs are synced up before continuing.
-
-
 @contextmanager
 def launch_ipdb_on_exception_distributed():
     """Drop into ipdb if an exception is raised in rank zero of a distributed context."""
@@ -41,7 +22,9 @@ def launch_ipdb_on_exception_distributed():
             print(message.__repr__(), file=sys.stderr)
             ipdb.post_mortem(traceback)
     finally:
-        barrier()  # Make sure all procs are synced up before continuing.
+        # Make sure all procs are synced up before exiting.
+        if torch.distributed.is_initialized():
+            torch.distributed.barrier()
 
 
 iexd = launch_ipdb_on_exception_distributed()
