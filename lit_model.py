@@ -30,13 +30,13 @@ class LitModel(L.LightningModule):
         self,
         model_config: Config,
         tokenizer: Tokenizer,
-        #######################################
+        ########################################
         hard_prompt_tkn: int,
         num_hard_prompt_tkns: int,
         only_ascii_tkns: bool = True,
         # Where 1 means no accumulation.
         accumulate_grad_batches: int = 1,
-        #######################################
+        ########################################
         checkpoint_path: Optional[Path] = None,
     ):
         super().__init__()

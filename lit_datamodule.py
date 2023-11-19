@@ -1,7 +1,6 @@
 import lightning.pytorch as L
 
 from functools import partial
-import torch
 
 from torch.utils.data import DataLoader
 
@@ -41,6 +40,7 @@ class LitDataModule(L.LightningDataModule):
                     x["targets"],
                     space_before_prompt=False,  # We don't want a space before the hard prompt tokens.
                 ),
+                bos=True,  # TODO: Don't manually set this, just use the default.
                 eos=True,  # Don't see why you wouldn't want to train with an eos_token.
             )
 
