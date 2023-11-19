@@ -21,10 +21,9 @@ from lit_model import LitModel
 
 from model import Config
 
-from utils.debugging import iexd
+from utils.debugging import launch_ipdb_on_exception_distributed
 
 
-@iexd
 def main(
     project: str = "hard-prompting",
     ################################################################
@@ -128,4 +127,5 @@ def main(
 if __name__ == "__main__":
     from jsonargparse import CLI
 
-    CLI(main)
+    with launch_ipdb_on_exception_distributed():
+        CLI(main)
