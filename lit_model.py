@@ -1,8 +1,6 @@
 import time
 import torch
 
-from ipdb import iex
-
 import lightning as L
 
 from pathlib import Path
@@ -94,7 +92,6 @@ class LitModel(L.LightningModule):
         # Bug report: https://github.com/Lightning-AI/lightning/issues/18982
         self.accumulated_grads = self.accumulated_grads.type(torch.float64)
 
-    @iex
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
@@ -168,7 +165,6 @@ class LitModel(L.LightningModule):
             )
             self.hard_prompt_step += 1
 
-    @iex
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
 
