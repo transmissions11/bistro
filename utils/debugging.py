@@ -1,8 +1,10 @@
 import sys
 
+import ipdb
+
 import torch
 
-from ipdb import post_mortem, contextmanager
+from decorator import contextmanager
 
 
 @contextmanager
@@ -20,7 +22,7 @@ def iexd():
         except Exception as e:
             print(e.__repr__(), file=sys.stderr)
             _, _, tb = sys.exc_info()
-            post_mortem(tb)
+            ipdb.post_mortem(tb)
         # TODO: wait do we need pass?
     else:
         yield
