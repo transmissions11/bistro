@@ -117,7 +117,7 @@ class LitModel(L.LightningModule):
         if batch_idx == 2:
             raise NotImplementedError("TODO: remove this")
 
-        self.print("WE're PAST THE ERROR")
+        print(batch_idx, "WE're PAST THE ERROR")
 
         # We need to use batch_idx + 1 here since batch_idx starts at 0, which
         # would cause the first batch to trigger an update before accumulating.
