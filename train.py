@@ -12,6 +12,7 @@ from lit_gpt.tokenizer import Tokenizer
 
 from lightning.pytorch.loggers import WandbLogger
 
+from utils.debugging import iexd
 from utils.warnings import suppress_uncontrollable_warnings, elevate_important_warnings
 
 from datetime import datetime
@@ -21,9 +22,8 @@ from lit_model import LitModel
 
 from model import Config
 
-from utils.debugging import launch_ipdb_on_exception_distributed
 
-
+@iexd  # Will drop into ipdb if an exception is raised on rank zero.
 def main(
     project: str = "hard-prompting",
     ################################################################
@@ -127,5 +127,4 @@ def main(
 if __name__ == "__main__":
     from jsonargparse import CLI
 
-    with launch_ipdb_on_exception_distributed():
-        CLI(main)
+    CLI(main)
