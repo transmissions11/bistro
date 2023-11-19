@@ -121,6 +121,14 @@ def main(
     if not skip_starting_validation:
         trainer.validate(model, datamodule=datamodule)
 
+    import ipdb
+
+    ipdb.set_trace(
+        cond=(0 == torch.distributed.get_rank())
+        if torch.distributed.is_initialized()
+        else True
+    )
+
     trainer.fit(model, datamodule=datamodule)
 
 
