@@ -218,8 +218,4 @@ class LitModel(L.LightningModule):
             )
             g0_print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
 
-        t0 = g0_print("Compiling model...")
-        self.model = torch.compile(self.model, dynamic=True, fullgraph=True)
-        g0_print(f"Compiled model in {time.time() - t0:.3f}s.")
-
         g0_print("Done loading & configuring model.")

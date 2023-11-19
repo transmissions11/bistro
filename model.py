@@ -23,15 +23,6 @@ class GPT(nn.Module):
             )
         )
 
-        cos, sin = build_rope_cache(
-            seq_len=config.block_size,
-            n_elem=self.config.rope_n_elem,
-            condense_ratio=self.config.rope_condense_ratio,
-            base=self.config.rope_base,
-        )
-        self.register_buffer("cos", cos, persistent=False)
-        self.register_buffer("sin", sin, persistent=False)
-
     def forward(
         self,
         *,  # Force keyword args to avoid confusion.
@@ -52,6 +43,17 @@ class GPT(nn.Module):
         (B, T), block_size = x.shape[:2], self.config.block_size
 
         assert block_size >= T, f"[!] seq of len {T} exceeds block_size of {block_size}"
+
+        if not hasattr(self, "cos"):
+            cos, sin = build_rope_cache(
+                seq_len=block_size,
+                n_elem=self.config.rope_n_elem,
+                device=x.device,
+                condense_ratio=self.config.rope_condense_ratio,
+                base=self.config.rope_base,
+            )
+            self.register_buffer("cos", cos, persistent=False)
+            self.register_buffer("sin", sin, persistent=False)
 
         cos = self.cos[:T]
         sin = self.sin[:T]
