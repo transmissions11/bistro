@@ -80,6 +80,10 @@ class LitDataModule(L.LightningDataModule):
         # Load the dataset on each process, from cache.
         self.hf_datasets = self.load_mapped_datasets()
 
+        raise NotImplementedError("TODO: remove this")
+
+        print(stage, "WE're PAST THE ERROR")
+
     def train_dataloader(self):
         return DataLoader(
             self.hf_datasets["train"],
