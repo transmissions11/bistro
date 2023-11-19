@@ -3,7 +3,6 @@ import ipdb
 import torch
 from decorator import contextmanager
 
-
 @contextmanager
 def launch_ipdb_on_exception_distributed():
     """Drop into ipdb if an exception is raised in rank zero of a distributed context."""
