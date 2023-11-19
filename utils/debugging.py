@@ -22,9 +22,9 @@ def launch_ipdb_on_exception_distributed():
             if torch.distributed.is_initialized()
             else True
         ):
-            _, m, tb = sys.exc_info()
-            print(m.__repr__(), file=sys.stderr)
-            ipdb.post_mortem(tb)
+            _, message, traceback = sys.exc_info()
+            print(message.__repr__(), file=sys.stderr)
+            ipdb.post_mortem(traceback)
     finally:
         # Make sure all procs are synced up before exiting.
         if torch.distributed.is_initialized():
