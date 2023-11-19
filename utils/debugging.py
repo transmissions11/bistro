@@ -10,8 +10,8 @@ def launch_ipdb_on_exception_distributed():
     """Drop into ipdb if an exception is raised in rank zero of a distributed context."""
     try:
         yield
-    except BdbQuit:
-        sys.exit()  # Exit the program if we quit ipdb.
+    # except BdbQuit:
+    #     sys.exit()  # Exit the program if we quit ipdb.
     except Exception:
         # Only the rank zero proc should drop into ipdb.
         # Still need to catch the exception on other ranks,
