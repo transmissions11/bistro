@@ -25,7 +25,10 @@ def launch_ipdb_on_exception_distributed():
             _, m, tb = sys.exc_info()
             print(m.__repr__(), file=sys.stderr)
             ipdb.post_mortem(tb)
-            raise Exception("ipdb session ended")
+    finally:
+        # Make sure all procs are synced up before exiting.
+        if torch.distributed.is_initialized():
+            torch.distributed.barrier()
 
 
 iexd = launch_ipdb_on_exception_distributed()
