@@ -2,7 +2,29 @@
 
 Opinionated GPT implementation and finetuning harness.
 
-Tip: Pass `--dtype bfloat16` when using `convert_hf_checkpoint`, will speed up loading the model 2-3x.
+## Installation
+
+Cloning the repo:
+
+```sh
+git clone https://github.com/transmisisons11/bistro
+cd bistro
+```
+
+Installing dependencies:
+
+```sh
+pip install -r requirements.txt
+```
+
+Downloading and setting up a base model:
+
+```sh
+python lit_script.py download --repo_id lmsys/vicuna-7b-v1.5
+python lit_script.py download convert_hf_checkpoint --checkpoint_dir checkpoints/lmsys/vicuna-7b-v1.5 --dtype bfloat16
+```
+
+See [lit-gpt's setup guide](https://github.com/Lightning-AI/lit-gpt#setup) for additional info.
 
 ## Acknowledgements
 
