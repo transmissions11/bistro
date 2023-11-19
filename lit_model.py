@@ -109,7 +109,8 @@ class LitModel(L.LightningModule):
             target_ids=targets,
         ).type_as(self.accumulated_grads)
 
-        raise NotImplementedError("TODO: remove this")
+        if batch_idx == 2:
+            raise NotImplementedError("TODO: remove this")
 
         # We need to use batch_idx + 1 here since batch_idx starts at 0, which
         # would cause the first batch to trigger an update before accumulating.
