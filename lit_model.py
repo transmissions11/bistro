@@ -30,13 +30,13 @@ class LitModel(L.LightningModule):
         self,
         model_config: Config,
         tokenizer: Tokenizer,
-        #######################################
+        ########################################
         hard_prompt_tkn: int,
         num_hard_prompt_tkns: int,
         only_ascii_tkns: bool = True,
         # Where 1 means no accumulation.
         accumulate_grad_batches: int = 1,
-        #######################################
+        ########################################
         checkpoint_path: Optional[Path] = None,
     ):
         super().__init__()
@@ -52,7 +52,7 @@ class LitModel(L.LightningModule):
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(ignore=["checkpoint_path"], logger=False)
 
-        #####################################################################
+        ####################################################################
 
         # TODO: benchmark this
         self.register_buffer(
@@ -72,7 +72,7 @@ class LitModel(L.LightningModule):
             self.current_hard_prompt.size(0) == num_hard_prompt_tkns
         ), f"hard prompt size mismatch {self.current_hard_prompt.size(0)} != {num_hard_prompt_tkns}"
 
-        #####################################################################
+        ####################################################################
 
         self.hard_prompt_step = 0
 

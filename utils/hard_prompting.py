@@ -1,6 +1,6 @@
 import torch
 
-from typing import Optional, Tuple
+from typing import Optional
 
 from lit_gpt import Tokenizer
 
