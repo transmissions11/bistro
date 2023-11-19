@@ -21,7 +21,10 @@ from lit_model import LitModel
 
 from model import Config
 
+from utils.debugging import iexd
 
+
+@iexd
 def main(
     project: str = "hard-prompting",
     ################################################################

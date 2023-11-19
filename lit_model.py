@@ -10,7 +10,6 @@ from typing import Optional
 
 from lit_gpt import Config, Tokenizer
 
-from utils.debugging import iexd
 from utils.loss import compute_loss
 from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
@@ -97,7 +96,6 @@ class LitModel(L.LightningModule):
         # Bug report: https://github.com/Lightning-AI/lightning/issues/18982
         self.accumulated_grads = self.accumulated_grads.type(torch.float64)
 
-    @iexd
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
