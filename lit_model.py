@@ -170,7 +170,3 @@ class LitModel(L.LightningModule):
             cast(WandbLogger, self.trainer.logger).watch(self.model)
 
         g0_print("Done loading & configuring model.")
-
-    def on_train_start(self):
-        self.print("\nResetting model caches for training...\n")
-        self.model.reset_caches()
