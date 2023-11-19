@@ -26,30 +26,30 @@ from model import Config
 @iexd  # Will drop into ipdb if an exception is raised on rank zero.
 def main(
     project: str = "hard-prompting",
-    ################################################################
+    ####################################################################
     data_dir: Path = Path("data"),
     base_model_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
-    #################################################################
+    ####################################################################
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
     precision: str = "bf16-true",
-    ################################################################
+    ####################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
     epochs: int = -1,  # Make this -1 to train forever / until max_time.
-    #################################################################
+    ####################################################################
     num_hard_prompt_tkns: int = 20,
     hard_prompt_tkn: str = "✅",
-    ################################################################
+    ####################################################################
     val_split_ratio: float = 0.01,  # 1% of training dataset.
-    val_check_interval: float = 0.01,  # After every 1% of training steps.
-    skip_starting_validation: bool = False,  # Useful for debugging.
-    ################################################################
+    val_check_interval: float = 0.01,  # After every 1% of train steps.
+    skip_starting_validation: bool = False,  # To speed up debugging.
+    ####################################################################
     log_every_n_steps: int = 1,
     disable_wandb: bool = False,  # Also useful for debugging.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
-    #################################################################
+    ####################################################################
     accumulate_grad_batches: int = 1,  # Where 1 means no accumulation.
-    ################################################################
+    ####################################################################
     run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
 ):
     """
