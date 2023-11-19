@@ -78,7 +78,7 @@ def main(
         max_epochs=epochs,
         max_time=max_time,
         profiler=profiler,
-        deterministic="warn",
+        deterministic=True,
         precision=precision,
         val_check_interval=val_check_interval,
         log_every_n_steps=log_every_n_steps,
