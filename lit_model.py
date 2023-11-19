@@ -222,7 +222,7 @@ class LitModel(L.LightningModule):
         # torch._dynamo.config.automatic_dynamic_shapes = True
         # torch._inductor.config.triton.unique_kernel_names = True
         # torch._inductor.config.coordinate_descent_tuning = True
-        model = torch.compile(model, mode="reduce-overhead", fullgraph=True)
+        self.model = torch.compile(self.model, mode="reduce-overhead", fullgraph=True)
         g0_print(f"Compiled model in {time.time() - t0:.3f}s.")
 
         g0_print("Done loading & configuring model.")
