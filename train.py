@@ -13,6 +13,7 @@ from lit_gpt.tokenizer import Tokenizer
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 
+from utils.debugging import iexd
 from utils.warnings import suppress_uncontrollable_warnings, elevate_important_warnings
 
 from datetime import datetime
@@ -23,43 +24,44 @@ from lit_model import LitModel
 from model import Config
 
 
+@iexd  # Will drop into ipdb if an exception is raised on rank zero.
 def main(
     project: str = "bistro",
-    #################################################################
+    ####################################################################
     data_dir: Path = Path("data"),
     base_model_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
-    #################################################################
+    ####################################################################
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
     micro_batch_size: int = 2,
     gradient_accumulation_iters: int = 16,
     precision: str = "bf16-true",
-    #################################################################
+    ####################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
     epochs: int = 1,  # Make this -1 to train forever / until max_time.
-    #################################################################
+    ####################################################################
     learning_rate: float = 2e-5,
     warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
     weight_decay: float = 0.00,  # Generally not used for finetuning.
-    #################################################################
+    ####################################################################
     val_split_ratio: float = 0.05,  # 5% of training dataset.
     val_check_interval: float = 0.05,  # After every 5% of training.
     skip_starting_validation: bool = False,  # Useful for debugging.
-    #################################################################
+    ####################################################################
     # Set params_to_freeze to freeze specific parameters, set params_to_train
     # to freeze everything except specific parameters, or set both to None to
     # train everything. They are mutually exclusive, at least one must be None.
     params_to_freeze: Optional[List[str]] = None,
     params_to_train: Optional[List[str]] = None,
-    #################################################################
+    ####################################################################
     log_every_n_steps: int = 50,
     disable_wandb: bool = False,  # Also useful for debugging.
     watch_gradients: bool = False,  # Very slow if training many params.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
-    #################################################################
+    ####################################################################
     save_checkpoints: bool = True,
     save_top_k_checkpoints: int = 5,
-    #################################################################
+    ####################################################################
     run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
 ):
     """

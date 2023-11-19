@@ -25,12 +25,12 @@ class LitModel(L.LightningModule):
         self,
         model_config: Config,
         tokenizer: Tokenizer,
-        ###############################
+        ################################
         learning_rate: float,
         warmup_ratio: float,
-        ###############################
+        ################################
         weight_decay: float,
-        ###############################
+        ################################
         # If None, will use random weights.
         checkpoint_path: Optional[Path] = None,
         # If None, all parameters will be trained.
