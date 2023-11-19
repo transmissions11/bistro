@@ -23,59 +23,55 @@ class GPT(nn.Module):
             )
         )
 
-        self.rope_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
-
     def forward(
         self,
         *,  # Force keyword args to avoid confusion.
-        input_ids: Optional[torch.Tensor] = None,
-        input_embs: Optional[torch.Tensor] = None,
+        input_ids: Optional[torch.Tensor] = None,  # (b, t)
+        input_embs: Optional[torch.Tensor] = None,  # (b, t, n_embd)
     ) -> torch.Tensor:
         if input_ids is not None and input_embs is not None:
             raise ValueError(
                 "[!] you cannot specify both input_ids and input_embs at the same time"
             )
         elif input_embs is not None:
-            x = input_embs
+            x = input_embs  # (b, t, n_embd)
         elif input_ids is not None:
             x = self.embed(input_ids)  # (b, t, n_embd)
         else:
             raise ValueError("[!] you must specify either input_ids or input_embs")
 
-        (B, T), block_size = x.shape[:2], self.config.block_size
+        (_, T, _), block_size = x.shape, self.config.block_size
 
         assert block_size >= T, f"[!] seq of len {T} exceeds block_size of {block_size}"
 
-        if self.rope_cache is None:
-            self.rope_cache = build_rope_cache(
+        if not hasattr(self, "cos"):
+            cos, sin = build_rope_cache(
                 seq_len=block_size,
-                n_elem=int(self.config.rotary_percentage * self.config.head_size),
-                dtype=torch.get_default_dtype(),
+                n_elem=self.config.rope_n_elem,
                 device=x.device,
                 condense_ratio=self.config.rope_condense_ratio,
+                base=self.config.rope_base,
             )
+            self.register_buffer("cos", cos, persistent=False)
+            self.register_buffer("sin", sin, persistent=False)
 
-        cos, sin = self.rope_cache
-        cos = cos[:T]
-        sin = sin[:T]
+        cos = self.cos[:T]
+        sin = self.sin[:T]
 
         for block in self.transformer.h:
-            x, *_ = block(x, (cos, sin), block_size)  # (b, t, n_embd)
+            x = block(x, cos, sin)  # (b, t, n_embd)
 
         x = self.transformer.ln_f(x)  # (b, t, n_embd)
 
         return self.lm_head(x)  # (b, t, vocab_size)
 
-    def reset_caches(self):
-        self.rope_cache = None
-
     def embed(self, input_ids: torch.Tensor) -> torch.Tensor:
-        return self.transformer.wte(input_ids)
+        return self.transformer.wte(input_ids)  # (..., t, n_embd)
 
     def unembed(self, input_embs: torch.Tensor, argmax: bool = True) -> torch.Tensor:
         logits = input_embs @ self.transformer.wte.weight.T
 
         if argmax:
-            return logits.argmax(dim=-1)  # (.., t)
+            return logits.argmax(dim=-1)  # (..., t)
         else:
-            return logits  # (.., t, vocab_size)
+            return logits  # (..., t, vocab_size)

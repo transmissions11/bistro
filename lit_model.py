@@ -87,9 +87,6 @@ class LitModel(L.LightningModule):
         )
 
     def on_train_start(self):
-        self.print("\nResetting model caches for training...\n")
-        self.model.reset_caches()
-
         # Lightning calls .to() on all registered buffers during setup which
         # will set the dtype to the default dtype. We need to reset it here.
         # Bug report: https://github.com/Lightning-AI/lightning/issues/18982
@@ -101,15 +98,13 @@ class LitModel(L.LightningModule):
         # Compute and accumulate the gradients for the hard prompt.
         # .type_as() is needed to upcast the gradients to the
         # higher precision type used by self.accumulated_grads.
-        self.accumulated_grads += self.all_gather(
-            get_hard_prompt_gradients(
-                self.model,
-                current_hard_prompt=self.current_hard_prompt,
-                hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-                input_ids=inputs,
-                target_ids=targets,
-            ).type_as(self.accumulated_grads)
-        ).mean(dim=0)
+        self.accumulated_grads += get_hard_prompt_gradients(
+            self.model,
+            current_hard_prompt=self.current_hard_prompt,
+            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+            input_ids=inputs,
+            target_ids=targets,
+        ).type_as(self.accumulated_grads)
 
         # We need to use batch_idx + 1 here since batch_idx starts at 0, which
         # would cause the first batch to trigger an update before accumulating.
@@ -145,16 +140,14 @@ class LitModel(L.LightningModule):
 
             # TODO: ensure every proc has the same cands
 
-            candidate_losses = self.all_gather(
-                test_hard_prompt_candidates(
-                    self.model,
-                    candidate_batch_size=candidate_batch_size,
-                    hard_prompt_candidates=hard_prompt_candidates,
-                    hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-                    input_ids=inputs,
-                    target_ids=targets,
-                )
-            ).mean(dim=0)
+            candidate_losses = test_hard_prompt_candidates(
+                self.model,
+                candidate_batch_size=candidate_batch_size,
+                hard_prompt_candidates=hard_prompt_candidates,
+                hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                input_ids=inputs,
+                target_ids=targets,
+            )
 
             min_loss_candidate_idx = torch.argmin(candidate_losses).item()
             min_loss = candidate_losses[min_loss_candidate_idx]
