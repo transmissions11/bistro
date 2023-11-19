@@ -11,6 +11,7 @@ def launch_ipdb_on_exception_distributed():
     try:
         yield
     except BdbQuit:
+        print("!!!!!!!!!!!!!!!!!!!! HELLO !!!!!!!!!!!!!!!!!!!!")
         sys.exit()  # Exit the program if we quit ipdb.
     except Exception:
         # Only the rank zero proc should drop into ipdb.
