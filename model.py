@@ -40,7 +40,7 @@ class GPT(nn.Module):
         else:
             raise ValueError("[!] you must specify either input_ids or input_embs")
 
-        (B, T), block_size = x.shape[:2], self.config.block_size
+        (_, T, _), block_size = x.shape, self.config.block_size
 
         assert block_size >= T, f"[!] seq of len {T} exceeds block_size of {block_size}"
 
@@ -58,16 +58,8 @@ class GPT(nn.Module):
         cos = self.cos[:T]
         sin = self.sin[:T]
 
-        # TODO: del
-        # torch.set_printoptions(precision=15)
-        # self = self.to(torch.get_default_dtype())
-        # x = x.to(torch.get_default_dtype())
-
-        # print("PRE BLOCKS", x[0][0][0])
-
         for block in self.transformer.h:
             x = block(x, cos, sin)  # (b, t, n_embd)
-            # print("POST BLOCK", x[0][0][0])
 
         x = self.transformer.ln_f(x)  # (b, t, n_embd)
 
