@@ -116,7 +116,7 @@ class LitModel(L.LightningModule):
 
             self.accumulated_grads.zero_()  # Reset the accumulated gradients.
 
-            candidate_batch_size = 128
+            candidate_batch_size = 512
             num_candidate_batches_to_test = 1
 
             num_candidates = candidate_batch_size * num_candidate_batches_to_test
@@ -127,7 +127,7 @@ class LitModel(L.LightningModule):
                 hard_prompt_grads=grads,
                 num_candidates=num_candidates,
                 not_allowed_tokens=self.not_allowed_tokens,
-                topk=64,  # TODO: make configurable
+                topk=256,  # TODO: make configurable
             )
 
             # TODO: make sure cands are all in the same place
