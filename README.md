@@ -21,7 +21,7 @@ Downloading and setting up a base model:
 
 ```sh
 python lit_script.py download --repo_id lmsys/vicuna-7b-v1.5
-python lit_script.py download convert_hf_checkpoint --checkpoint_dir checkpoints/lmsys/vicuna-7b-v1.5 --dtype bfloat16
+python lit_script.py convert_hf_checkpoint --checkpoint_dir checkpoints/lmsys/vicuna-7b-v1.5 --dtype bfloat16
 ```
 
 _(Optional)_ Use Flash Attention 2 (only available in PyTorch 2.2)
