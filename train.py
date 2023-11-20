@@ -23,7 +23,7 @@ from lit_model import LitModel
 from model import Config
 
 
-@iexd  # Will drop into ipdb if an exception is raised on rank zero.
+# @iexd  # Will drop into ipdb if an exception is raised on rank zero.
 def main(
     project: str = "hard-prompting",
     ####################################################################
@@ -120,6 +120,14 @@ def main(
 
     if not skip_starting_validation:
         trainer.validate(model, datamodule=datamodule)
+
+    import ipdb
+
+    ipdb.set_trace(
+        cond=(0 == torch.distributed.get_rank())
+        if torch.distributed.is_initialized()
+        else True
+    )
 
     trainer.fit(model, datamodule=datamodule)
 
