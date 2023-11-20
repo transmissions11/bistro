@@ -95,6 +95,14 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
+        import ipdb
+
+        ipdb.set_trace(
+            cond=(0 == torch.distributed.get_rank())
+            if torch.distributed.is_initialized()
+            else True
+        )
+
         # Compute and accumulate the gradients for the hard prompt.
         # .type_as() is needed to upcast the gradients to the
         # higher precision type used by self.accumulated_grads.
@@ -151,14 +159,6 @@ class LitModel(L.LightningModule):
 
             min_loss_candidate_idx = torch.argmin(candidate_losses).item()
             min_loss = candidate_losses[min_loss_candidate_idx]
-
-            import ipdb
-
-            ipdb.set_trace(
-                cond=(0 == torch.distributed.get_rank())
-                if torch.distributed.is_initialized()
-                else True
-            )
 
             # TODO: have rank zero do this? hm can test w/ print
             self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
