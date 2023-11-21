@@ -250,7 +250,7 @@ def test_hard_prompt_candidates(
             ).view(targets.size(0), -1)
             for inputs, targets in zip(input_batches, target_batches)
         ],
-    )  # (num_candidates, t)
+    )  # [(candidate_batch_size, t), ...] -> (num_candidates, t)
 
     # Ignore losses of 0, as they are due to padding, return the mean of the rest.
     return losses[losses != 0].view(losses.size(0), -1).mean(dim=-1)  # (num_candidates)
