@@ -126,8 +126,6 @@ def main(
     if not skip_starting_validation:
         trainer.validate(model, datamodule=datamodule)
 
-    L.seed_everything(1337, workers=True)
-
     trainer.fit(model, datamodule=datamodule)
 
 
