@@ -99,8 +99,8 @@ def create_hard_prompt_candidates(
     # Can be used to use only ASCII tokens, for example.
     not_allowed_tokens: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
-    # TODO: Build clean_hard_prompt_candidates into this function, and don't just
-    # repeat the last candidate if after cleaning there are less than num_candidates.
+    # TODO: Ideally we'd Build clean_hard_prompt_candidates into this function, and not
+    # just repeat the last candidate if after cleaning there are less than num_candidates.
 
     """
     Creates a batch of hard prompt candidates by sampling randomly from the top-k tokens.
@@ -233,6 +233,7 @@ def test_hard_prompt_candidates(
 
     # Split the mega batch into smaller batches of size candidate_batch_size.
     input_batches, target_batches = (
+        # (num_candidates, t) -> (num_candidates / candidate_batch_size, candidate_batch_size, t)
         torch.stack(collated_mega_batch["inputs"].split(candidate_batch_size, dim=0)),
         torch.stack(collated_mega_batch["targets"].split(candidate_batch_size, dim=0)),
     )
