@@ -101,7 +101,9 @@ class LitModel(L.LightningModule):
 
         self.current_hard_prompt = candidates[min_idx]  # Update the hard prompt.
 
-        # TODO: Log hard prompt somewhere? Via wandb? In val step?
+        if batch_idx % self.trainer.log_every_n_steps:
+            # If this is a log step, log the current hard prompt.
+            self.log("hard_prompt", self.current_hard_prompt)
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
