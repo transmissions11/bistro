@@ -73,7 +73,12 @@ class LitModel(L.LightningModule):
             tokenizer = self.hparams.tokenizer
 
             prompt_end_tkns = tokenizer.encode(
-                VICUNA_END_OF_USER_PROMPT_SEQUENCE, device=self.device
+                VICUNA_END_OF_USER_PROMPT_SEQUENCE,
+                device=self.device,
+                # bos/eos=False because the "end tokens"
+                # will be in the middle of the sequence.
+                bos=False,
+                eos=False,
             )
 
             def process_val_sample(sample, target):
