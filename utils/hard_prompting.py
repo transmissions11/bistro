@@ -25,7 +25,6 @@ def get_non_ascii_tkns(tokenizer: Tokenizer):
     )
 
 
-@torch.inference_mode()
 def get_hard_prompt_gradients(
     model: GPT,
     *,  # Force keyword arguments.
