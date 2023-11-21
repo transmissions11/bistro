@@ -9,7 +9,6 @@ from typing import Optional
 
 from lit_gpt import Config, Tokenizer
 
-from utils.loss import compute_loss
 from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
 from utils.padding import strip_right_pad, ignored_tkn
@@ -19,6 +18,7 @@ from utils.hard_prompting import (
     get_hard_prompt_gradients,
     create_hard_prompt_candidates,
     test_hard_prompt_candidates,
+    insert_hard_prompt_into_template,
 )
 
 from model import GPT
@@ -102,6 +102,8 @@ class LitModel(L.LightningModule):
 
         self.current_hard_prompt = candidates[min_idx]  # Update the hard prompt.
 
+        # TODO: Log hard prompt somewhere? Via wandb? In val step?
+
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
 
@@ -136,7 +138,11 @@ class LitModel(L.LightningModule):
                 sample = strip_right_pad(sample)
                 target = strip_right_pad(target)
 
-                input_ids = sample[: find_subtensor_end(sample, prompt_end_tkns) + 1]
+                input_ids = insert_hard_prompt_into_template(
+                    input_ids=sample[: find_subtensor_end(sample, prompt_end_tkns) + 1],
+                    hard_prompt=self.current_hard_prompt,
+                    hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                )
 
                 return (
                     tokenizer.decode(input_ids),
