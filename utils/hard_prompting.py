@@ -99,7 +99,7 @@ def create_hard_prompt_candidates(
     # Can be used to use only ASCII tokens, for example.
     not_allowed_tokens: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
-    # TODO: Ideally we'd Build clean_hard_prompt_candidates into this function, and not
+    # NOTE: Ideally we'd Build clean_hard_prompt_candidates into this function, and not
     # just repeat the last candidate if after cleaning there are less than num_candidates.
 
     """
@@ -226,7 +226,7 @@ def test_hard_prompt_candidates(
         mega_batch.append({"inputs": new_input_ids, "targets": target_ids})
 
     # Pad the sequences and group everything into 2 tensors: inputs and targets.
-    # TODO: We don't actually need to pad since we're using the same input_ids
+    # NOTE: We don't actually need to pad since we're using the same input_ids
     # for each candidate, but we may need to in the future to support using
     # multiple input_ids, so leaving this in here for future compatibility.
     collated_mega_batch = pad_collate_fn(mega_batch)
