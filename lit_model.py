@@ -67,14 +67,6 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(0 == torch.distributed.get_rank())
-            if torch.distributed.is_initialized()
-            else True
-        )
-
         # Compute gradients for each token of the hard prompt.
         grads = get_hard_prompt_gradients(
             self.model,
@@ -104,15 +96,11 @@ class LitModel(L.LightningModule):
             target_ids=targets,
         )  # (num_candidates)
 
-        # TODO: confirm shapes
-
-        min_loss, min_idx = torch.min(
-            candidate_losses, dim=0
-        )  # TODO: confirm we need dim=0
+        min_loss, min_idx = torch.min(candidate_losses, dim=0)
 
         self.log("train_loss", min_loss)
 
-        self.current_hard_prompt = candidates[min_idx]
+        self.current_hard_prompt = candidates[min_idx]  # Update the hard prompt.
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
