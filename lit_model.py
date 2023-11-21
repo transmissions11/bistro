@@ -54,11 +54,19 @@ class LitModel(L.LightningModule):
 
         ####################################################################
 
-        # TODO: benchmark this
+        # Benchmarking the memory and time for not_allowed_tokens buffer registration
+        start_time = time.time()
+        start_mem = torch.cuda.memory_allocated()
         self.register_buffer(
             "not_allowed_tokens",
             get_non_ascii_tkns(tokenizer) if only_ascii_tkns else None,
         )
+        end_time = time.time()
+        end_mem = torch.cuda.memory_allocated()
+        print(
+            f"Time to register not_allowed_tokens buffer: {end_time - start_time} seconds"
+        )
+        print(f"GPU memory increase: {end_mem - start_mem} bytes")
 
         self.register_buffer(
             "current_hard_prompt",
