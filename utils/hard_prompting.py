@@ -91,6 +91,7 @@ def get_hard_prompt_gradients(
     return grad / grad.norm(dim=-1, keepdim=True)  # (num_hard_prompt_tkns, vocab_size)
 
 
+@torch.inference_mode()
 def create_hard_prompt_candidates(
     *,  # Force keyword arguments.
     current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
