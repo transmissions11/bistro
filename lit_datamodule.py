@@ -84,7 +84,7 @@ class LitDataModule(L.LightningDataModule):
         return DataLoader(
             self.hf_datasets["train"],
             collate_fn=pad_collate_fn,
-            batch_size=1,  # Can only compute hard prompt grads on 1 batch at a time.
+            batch_size=1,  # Can only compute hard prompt grads on 1 seq at a time at the moment.
             num_workers=8,
             pin_memory=True,
             shuffle=True,
@@ -94,7 +94,7 @@ class LitDataModule(L.LightningDataModule):
         return DataLoader(
             self.hf_datasets["test"],
             collate_fn=pad_collate_fn,
-            batch_size=1,
+            batch_size=1,  # Can only compute hard prompt grads on 1 seq at a time at the moment.
             num_workers=8,
             pin_memory=True,
         )
