@@ -44,8 +44,8 @@ def main(
     num_candidate_batches: int = 1,
     only_ascii_tkns: bool = True,
     ####################################################################
-    val_split_ratio: float = 0.001,  # 0.1% of training dataset.
-    val_check_interval: float = 0.01,  # After every 1% of train steps.
+    val_split_ratio: float = 0.001,  # 1% of training dataset.
+    val_check_interval: float = 0.0001,  # After every 0.01% of training steps.
     skip_starting_validation: bool = False,  # To speed up debugging.
     ####################################################################
     log_every_n_steps: int = 1,
