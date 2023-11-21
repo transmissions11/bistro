@@ -101,15 +101,7 @@ class LitModel(L.LightningModule):
 
         self.current_hard_prompt = candidates[min_idx]  # Update the hard prompt.
 
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(0 == torch.distributed.get_rank())
-            if torch.distributed.is_initialized()
-            else True
-        )
-
-        if batch_idx % self.trainer.log_every_n_steps:
+        if batch_idx % self.trainer.log_every_n_steps == 0:
             # If this is a log step, log the current hard prompt.
             self.print("Current hard prompt: |", self.current_hard_prompt, "|")
 
