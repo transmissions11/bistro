@@ -192,6 +192,7 @@ def clean_hard_prompt_candidates(
     )
 
 
+@torch.inference_mode()
 def test_hard_prompt_candidates(
     model: GPT,
     *,  # Force keyword arguments.
