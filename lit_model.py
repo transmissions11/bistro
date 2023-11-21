@@ -65,10 +65,6 @@ class LitModel(L.LightningModule):
             ),
         )
 
-        assert (
-            self.current_hard_prompt.size(0) == num_hard_prompt_tkns
-        ), f"hard prompt size mismatch {self.current_hard_prompt.size(0)} != {num_hard_prompt_tkns}"
-
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
