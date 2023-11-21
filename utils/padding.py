@@ -7,7 +7,7 @@ from typing import List, Dict
 ignored_tkn, pad_tkn = -1, 0  # Some special tokens.
 
 
-def pad_collate_fn(batch: List[Dict[str, torch.Tensor]]):
+def pad_collate_fn(batch: List[Dict[str, torch.Tensor]]) -> Dict[str, torch.Tensor]:
     max_len = max([len(item["inputs"]) for item in batch])
 
     inputs, targets = [], []
