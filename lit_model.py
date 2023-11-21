@@ -67,6 +67,14 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
+        import ipdb
+
+        ipdb.set_trace(
+            cond=(0 == torch.distributed.get_rank())
+            if torch.distributed.is_initialized()
+            else True
+        )
+
         # Compute gradients for each token of the hard prompt.
         grads = get_hard_prompt_gradients(
             self.model,
