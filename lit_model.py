@@ -18,7 +18,6 @@ from utils.hard_prompting import (
     get_non_ascii_tkns,
     get_hard_prompt_gradients,
     create_hard_prompt_candidates,
-    clean_hard_prompt_candidates,
     test_hard_prompt_candidates,
 )
 
@@ -33,6 +32,9 @@ class LitModel(L.LightningModule):
         ########################################
         hard_prompt_tkn: int,
         num_hard_prompt_tkns: int,
+        topk: int,
+        candidate_batch_size: int,
+        num_candidate_batches: int,
         only_ascii_tkns: bool = True,
         ########################################
         checkpoint_path: Optional[Path] = None,

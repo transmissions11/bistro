@@ -39,6 +39,10 @@ def main(
     ####################################################################
     num_hard_prompt_tkns: int = 20,
     hard_prompt_tkn: str = "✅",
+    topk: int = 64,
+    candidate_batch_size: int = 128,
+    num_candidate_batches: int = 1,
+    only_ascii_tkns: bool = True,
     ####################################################################
     val_split_ratio: float = 0.01,  # 1% of training dataset.
     val_check_interval: float = 0.01,  # After every 1% of train steps.
@@ -100,6 +104,10 @@ def main(
         tokenizer=tokenizer,
         hard_prompt_tkn=tokenizer.token_to_id(hard_prompt_tkn),
         num_hard_prompt_tkns=num_hard_prompt_tkns,
+        topk=topk,
+        candidate_batch_size=candidate_batch_size,
+        num_candidate_batches=num_candidate_batches,
+        only_ascii_tkns=only_ascii_tkns,
         checkpoint_path=base_model_dir / "lit_model.pth",
     )
 
