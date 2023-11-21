@@ -114,19 +114,11 @@ class LitModel(L.LightningModule):
             hard_prompt_tkn=self.hparams.hard_prompt_tkn,
             input_ids=inputs,
             target_ids=targets,
-        )
-
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(0 == torch.distributed.get_rank())
-            if torch.distributed.is_initialized()
-            else True
-        )
+        )  # (1)
 
         self.log(
             "val_loss",
-            candidate_losses[0],
+            candidate_losses.mean(dim=0),
             on_epoch=True,
             prog_bar=True,
             sync_dist=True,

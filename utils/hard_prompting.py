@@ -10,7 +10,7 @@ from utils.padding import pad_collate_fn
 from model import GPT
 
 
-def get_non_ascii_tkns(tokenizer: Tokenizer):
+def get_non_ascii_tkns(tokenizer: Tokenizer) -> torch.Tensor:
     """Returns a tensor of all non-ASCII token ids in the tokenizer's vocabulary."""
 
     def is_ascii(s):
@@ -194,20 +194,18 @@ def test_hard_prompt_candidates(
     input_ids = input_ids.squeeze(0)  # (t)
     target_ids = target_ids.squeeze(0)  # (t)
 
-    # Find the position of the hard prompt template in input_ids.
-    hard_prompt_positions = torch.where(input_ids == hard_prompt_tkn)[0]
-    hard_prompt_start_pos = hard_prompt_positions[0].item()
-    hard_prompt_end_pos = hard_prompt_positions[-1].item()
-
     # Create a list to store input_id/target_id pairs for each candidate.
     # This is called a "mega batch" as we'll be splitting this into smaller
     # batches of size candidate_batch_size when actually testing them later on.
     mega_batch = []
 
     for candidate in hard_prompt_candidates:
-        # Replace the hard prompt in the input sequence with the candidate.
-        new_input_ids = input_ids.clone()
-        new_input_ids[hard_prompt_start_pos : hard_prompt_end_pos + 1] = candidate
+        # Insert the hard prompt candidate into the input sequence.
+        new_input_ids = insert_hard_prompt_into_template(
+            template_input_ids=input_ids,
+            hard_prompt=candidate,
+            hard_prompt_tkn=hard_prompt_tkn,
+        )
 
         # Add the new input/target pair to the mega batch.
         mega_batch.append({"inputs": new_input_ids, "targets": target_ids})
@@ -216,6 +214,7 @@ def test_hard_prompt_candidates(
     # NOTE: We don't actually need to pad since we're using the same input_ids
     # for each candidate, but we may need to in the future to support using
     # multiple input_ids, so leaving this in here for future compatibility.
+    # {"inputs": (num_candidates, t), "targets": (num_candidates, t)}
     collated_mega_batch = pad_collate_fn(mega_batch)
 
     # Split the mega batch into smaller batches of size candidate_batch_size.
@@ -242,3 +241,24 @@ def test_hard_prompt_candidates(
 
     # Ignore losses of 0, as they are due to padding, return the mean of the rest.
     return losses[losses != 0].view(losses.size(0), -1).mean(dim=-1)  # (num_candidates)
+
+
+def insert_hard_prompt_into_template(
+    *,  # Force keyword arguments.
+    template_input_ids: torch.Tensor,  # (t)
+    hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
+    hard_prompt_tkn: int,
+):
+    # Find the position of where the hard prompt should go in input_ids.
+    hard_prompt_positions = torch.where(template_input_ids == hard_prompt_tkn)[0]
+    hard_prompt_start_pos = hard_prompt_positions[0].item()  # Inclusive.
+    hard_prompt_end_pos = hard_prompt_positions[-1].item()  # Inclusive.
+
+    # Replace the hard prompt in the input sequence with the candidate.
+    return torch.cat(
+        [
+            template_input_ids[:hard_prompt_start_pos],
+            hard_prompt,
+            template_input_ids[hard_prompt_end_pos + 1 :],
+        ]
+    )  # (t)
