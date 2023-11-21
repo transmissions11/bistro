@@ -199,11 +199,11 @@ def test_hard_prompt_candidates(
     # batches of size candidate_batch_size when actually testing them later on.
     mega_batch = []
 
-    for candidate in hard_prompt_candidates:
+    for candidate_hard_prompt in hard_prompt_candidates:
         # Insert the hard prompt candidate into the input sequence.
         new_input_ids = insert_hard_prompt_into_template(
             template_input_ids=input_ids,
-            hard_prompt=candidate,
+            hard_prompt=candidate_hard_prompt,
             hard_prompt_tkn=hard_prompt_tkn,
         )
 
