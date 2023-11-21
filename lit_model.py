@@ -59,10 +59,7 @@ class LitModel(L.LightningModule):
 
         self.register_buffer(
             "current_hard_prompt",
-            torch.tensor(
-                [hard_prompt_tkn] * num_hard_prompt_tkns,
-                dtype=torch.int64,
-            ),
+            torch.tensor([hard_prompt_tkn] * num_hard_prompt_tkns),
         )
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
