@@ -138,6 +138,7 @@ class LitModel(L.LightningModule):
                 sample = strip_right_pad(sample)
                 target = strip_right_pad(target)
 
+                # Insert the hard prompt into the given input sequence.
                 input_ids = insert_hard_prompt_into_template(
                     input_ids=sample[: find_subtensor_end(sample, prompt_end_tkns) + 1],
                     hard_prompt=self.current_hard_prompt,
