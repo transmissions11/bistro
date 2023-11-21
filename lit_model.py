@@ -103,7 +103,11 @@ class LitModel(L.LightningModule):
 
         if batch_idx % self.trainer.log_every_n_steps == 0:
             # If this is a log step, log the current hard prompt.
-            self.print("Current hard prompt: |", self.current_hard_prompt, "|")
+            self.print(
+                "Current hard prompt: |",
+                self.hparams.tokenizer.decode(self.current_hard_prompt),
+                "|",
+            )
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
