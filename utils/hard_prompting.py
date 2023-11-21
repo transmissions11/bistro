@@ -240,8 +240,7 @@ def test_hard_prompt_candidates(
 
     # TODO Use a list comprehension instead of a loop?
     for inputs, targets in zip(input_batches, target_batches):
-        # TODO: Use inference mode decorator or something instead?
-        with torch.no_grad():
+        with torch.inference_mode():
             # compute_loss -> (candidate_batch_size * t)
             # .view(...) -> (candidate_batch_size, t)
             loss = compute_loss(
