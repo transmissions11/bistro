@@ -66,50 +66,43 @@ class LitModel(L.LightningModule):
         inputs, targets = batch["inputs"], batch["targets"]
 
         # Compute gradients for each token of the hard prompt.
-        hard_prompt_grads = get_hard_prompt_gradients(
+        grads = get_hard_prompt_gradients(
             self.model,
             current_hard_prompt=self.current_hard_prompt,
             hard_prompt_tkn=self.hparams.hard_prompt_tkn,
             input_ids=inputs,
             target_ids=targets,
-        )
+        )  # (num_hard_prompt_tkns, vocab_size)
 
-        candidate_batch_size = 512
-        num_candidate_batches_to_test = 1
-
-        hard_prompt_candidates = create_hard_prompt_candidates(
+        candidates = create_hard_prompt_candidates(
             current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_grads=hard_prompt_grads,
-            num_candidates=candidate_batch_size * num_candidate_batches_to_test,
+            hard_prompt_grads=grads,
+            tokenizer=self.hparams.tokenizer,
+            topk=self.hparams.topk,
+            num_candidates=(
+                self.hparams.candidate_batch_size * self.hparams.num_candidate_batches
+            ),
             not_allowed_tokens=self.not_allowed_tokens,
-            topk=256,  # TODO: make configurable
-        )
-
-        # TODO: make sure cands are all in the same place
-
-        hard_prompt_candidates = clean_hard_prompt_candidates(
-            self.hparams.tokenizer,
-            current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_candidates=hard_prompt_candidates,
-        )
-
-        # TODO: ensure every proc has the same cands
+        )  # (num_candidates, num_hard_prompt_tkns)
 
         candidate_losses = test_hard_prompt_candidates(
             self.model,
-            candidate_batch_size=candidate_batch_size,
-            hard_prompt_candidates=hard_prompt_candidates,
+            candidate_batch_size=self.hparams.candidate_batch_size,
+            hard_prompt_candidates=candidates,
             hard_prompt_tkn=self.hparams.hard_prompt_tkn,
             input_ids=inputs,
             target_ids=targets,
-        )
+        )  # (num_candidates)
 
-        min_loss_candidate_idx = torch.argmin(candidate_losses).item()
-        min_loss = candidate_losses[min_loss_candidate_idx]
+        # TODO: confirm shapes
 
-        self.current_hard_prompt = hard_prompt_candidates[min_loss_candidate_idx]
+        min_loss, min_idx = torch.min(
+            candidate_losses, dim=0
+        )  # TODO: confirm we need dim=0
 
         self.log("train_loss", min_loss)
+
+        self.current_hard_prompt = candidates[min_idx]
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]

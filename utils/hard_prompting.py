@@ -91,9 +91,10 @@ def get_hard_prompt_gradients(
 
 
 def create_hard_prompt_candidates(
+    *,  # Force keyword arguments.
     current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
     hard_prompt_grads: torch.Tensor,  # (num_hard_prompt_tkns, vocab_size)
-    *,  # Force keyword arguments.
+    tokenizer: Tokenizer,
     num_candidates: int,
     topk: int,
     # Can be used to use only ASCII tokens, for example.
@@ -146,50 +147,15 @@ def create_hard_prompt_candidates(
 
     # (num_candidates, num_hard_prompt_tkns) — replace the new_token_pos
     # index for each candidate with the corresponding new_token_val token.
-    return candidates.scatter_(1, new_token_pos.unsqueeze(-1), new_token_val)
-
-
-def clean_hard_prompt_candidates(
-    tokenizer: Tokenizer,
-    *,  # Force keyword arguments.
-    current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
-    hard_prompt_candidates: torch.Tensor,  # (num_candidates, num_hard_prompt_tkns)
-) -> torch.Tensor:
-    """
-    Filters candidates that don't match the current hard prompt's length and cleans others
-    so that candidates can be decoded and encoded again without changing their tokenization.
-
-    Needed since encode(decode(tkns)) might yield a different tokenization.
-    """
-
-    filtered = []
-
-    for candidate in hard_prompt_candidates:
-        # Ensure the candidate is not the same as the current hard prompt.
-        if torch.equal(candidate, current_hard_prompt):
-            continue
-
-        # Decode and encode it again, to ensure we can use the
-        # hard prompt on a model that only accepts text inputs.
-        reencoded_candidate = tokenizer.encode(
-            tokenizer.decode(candidate),
-            # bos/eos=False because the candidates
-            # will be in the middle of the sequence.
-            bos=False,
-            eos=False,
-        ).to(
-            hard_prompt_candidates  # Move to same device and dtype as candidates.
-        )
-
-        # Ensure the candidate is the same length after decoding and encoding.
-        if candidate.size(0) == reencoded_candidate.size(0):
-            filtered.append(reencoded_candidate)
-
-    # If the number of filtered candidates is less than the number of hard
-    # prompt candidates, pad the list with the last candidate and return.
-    return torch.stack(
-        filtered + [filtered[-1]] * (len(hard_prompt_candidates) - len(filtered))
+    raw_hard_prompt_candidates = candidates.scatter_(
+        1, new_token_pos.unsqueeze(-1), new_token_val
     )
+
+    return __clean_hard_prompt_candidates(
+        tokenizer,
+        current_hard_prompt=current_hard_prompt,
+        hard_prompt_candidates=raw_hard_prompt_candidates,
+    )  # still (num_candidates, num_hard_prompt_tkns)
 
 
 @torch.inference_mode()
@@ -255,3 +221,46 @@ def test_hard_prompt_candidates(
 
     # Ignore losses of 0, as they are due to padding, return the mean of the rest.
     return losses[losses != 0].view(losses.size(0), -1).mean(dim=-1)  # (num_candidates)
+
+
+def __clean_hard_prompt_candidates(
+    tokenizer: Tokenizer,
+    *,  # Force keyword arguments.
+    current_hard_prompt: torch.Tensor,  # (num_hard_prompt_tkns)
+    hard_prompt_candidates: torch.Tensor,  # (num_candidates, num_hard_prompt_tkns)
+) -> torch.Tensor:
+    """
+    Filters candidates that don't match the current hard prompt's length and cleans others
+    so that candidates can be decoded and encoded again without changing their tokenization.
+
+    Needed since encode(decode(tkns)) might yield a different tokenization.
+    """
+
+    filtered = []
+
+    for candidate in hard_prompt_candidates:
+        # Ensure the candidate is not the same as the current hard prompt.
+        if torch.equal(candidate, current_hard_prompt):
+            continue
+
+        # Decode and encode it again, to ensure we can use the
+        # hard prompt on a model that only accepts text inputs.
+        reencoded_candidate = tokenizer.encode(
+            tokenizer.decode(candidate),
+            # bos/eos=False because the candidates
+            # will be in the middle of the sequence.
+            bos=False,
+            eos=False,
+        ).to(
+            hard_prompt_candidates  # Move to same device and dtype as candidates.
+        )
+
+        # Ensure the candidate is the same length after decoding and encoding.
+        if candidate.size(0) == reencoded_candidate.size(0):
+            filtered.append(reencoded_candidate)
+
+    # If the number of filtered candidates is less than the number of hard
+    # prompt candidates, pad the list with the last candidate and return.
+    return torch.stack(
+        filtered + [filtered[-1]] * (len(hard_prompt_candidates) - len(filtered))
+    )
