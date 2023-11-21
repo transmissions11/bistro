@@ -102,6 +102,8 @@ class LitModel(L.LightningModule):
         self.current_hard_prompt = candidates[min_idx]  # Update the hard prompt.
 
         if batch_idx % self.trainer.log_every_n_steps == 0:
+            # TODO: Log the raw ids anywhere?
+
             # If this is a log step, log the current hard prompt.
             self.print(
                 "Current hard prompt: |"
