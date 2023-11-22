@@ -31,6 +31,9 @@ class LitModel(L.LightningModule):
         ################################
         weight_decay: float,
         ################################
+        num_soft_prompt_tkns: int,
+        soft_prompt_tkn: str,
+        ################################
         # If None, will use random weights.
         checkpoint_path: Optional[Path] = None,
         # If None, all parameters will be trained.
@@ -151,7 +154,13 @@ class LitModel(L.LightningModule):
             return time.time()  # For timing convenience.
 
         t0 = g0_print("Initializing model...")
-        self.model = GPT(config=self.hparams.model_config)
+        self.model = GPT(
+            config=self.hparams.model_config,
+            soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
+                self.hparams.soft_prompt_tkn
+            ),
+            num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
+        )
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
         if self.checkpoint_path is not None:

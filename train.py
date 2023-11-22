@@ -140,6 +140,8 @@ def main(
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         weight_decay=weight_decay,
+        num_soft_prompt_tkns=num_soft_prompt_tkns,
+        soft_prompt_tkn=soft_prompt_tkn,
         requires_grad=(
             # If params_to_freeze is set, freeze all
             # params except those in params_to_freeze.
@@ -159,6 +161,8 @@ def main(
         tokenizer=tokenizer,
         micro_batch_size=micro_batch_size,
         val_split_ratio=val_split_ratio,
+        num_soft_prompt_tkns=num_soft_prompt_tkns,
+        soft_prompt_tkn=soft_prompt_tkn,
     )
 
     if trainer.is_global_zero:

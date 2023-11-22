@@ -8,11 +8,22 @@ from lit_gpt.model import Block, build_rope_cache
 
 
 class GPT(nn.Module):
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: Config, soft_prompt_tkn, num_soft_prompt_tkns) -> None:
         super().__init__()
 
         assert config.padded_vocab_size is not None
         self.config = config
+
+        ############################################################################
+
+        self.soft_prompt_tkn = soft_prompt_tkn
+        self.num_soft_prompt_tkns = num_soft_prompt_tkns
+        self.soft_prompt = nn.Parameter(
+            # TODO: Allow initializing this with some reasonable starting sequence.
+            torch.randn(num_soft_prompt_tkns, config.n_embd)
+        )
+
+        ############################################################################
 
         self.lm_head = nn.Linear(config.n_embd, config.padded_vocab_size, bias=False)
         self.transformer = nn.ModuleDict(
@@ -36,7 +47,22 @@ class GPT(nn.Module):
         elif input_embs is not None:
             x = input_embs  # (b, t, n_embd)
         elif input_ids is not None:
+            # pass input tokens through the embedding layer
             x = self.embed(input_ids)  # (b, t, n_embd)
+
+            ############################################################################
+
+            # find the position of the first occurrence of the soft_prompt_tkn in idx
+            soft_prompt_start_pos = torch.where(input_ids == self.soft_prompt_tkn)[1][0]
+
+            # starting at soft_prompt_start_pos, replace num_tokens_in_soft_prompt tokens with the soft prompt
+            x[
+                :,
+                soft_prompt_start_pos : soft_prompt_start_pos
+                + self.num_soft_prompt_tkns,
+            ] = self.soft_prompt
+
+            ############################################################################
         else:
             raise ValueError("[!] you must specify either input_ids or input_embs")
 
