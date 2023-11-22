@@ -1,5 +1,5 @@
-# torch>=2.1.0dev, install with pip install --index-url https://download.pytorch.org/whl/nightly/cu118 --pre 'torch>=2.1.0dev'
-lightning @ git+https://github.com/Lightning-AI/lightning@master
+torch>=2.1.0
+lightning>=2.1.2
 tokenizers
 requests
 jsonargparse[signatures]==4.20.0  # CLI
@@ -7,3 +7,6 @@ lit_gpt @ git+https://github.com/Lightning-AI/lit-gpt@main
 sentencepiece
 wandb
 datasets
+pprintjson
+decorator
+ipdb

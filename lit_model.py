@@ -1,8 +1,6 @@
 import time
 import torch
 
-from torch.nn import functional as F
-
 import lightning as L
 
 from pathlib import Path
@@ -13,6 +11,7 @@ from lightning.pytorch.loggers import WandbLogger
 
 from lit_gpt import Config, Tokenizer
 
+from utils.loss import compute_loss
 from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
 from utils.padding import strip_right_pad, ignored_tkn
@@ -26,15 +25,12 @@ class LitModel(L.LightningModule):
         self,
         model_config: Config,
         tokenizer: Tokenizer,
-        ###############################
+        ################################
         learning_rate: float,
         warmup_ratio: float,
-        ###############################
+        ################################
         weight_decay: float,
-        ###############################
-        num_soft_prompt_tkns: int,
-        soft_prompt_tkn: str,
-        ###############################
+        ################################
         # If None, will use random weights.
         checkpoint_path: Optional[Path] = None,
         # If None, all parameters will be trained.
@@ -60,7 +56,7 @@ class LitModel(L.LightningModule):
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
-        loss = self.compute_loss(inputs, targets)
+        loss = compute_loss(self.model, input_ids=inputs, target_ids=targets)
 
         self.log("train_loss", loss)
 
@@ -68,7 +64,7 @@ class LitModel(L.LightningModule):
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
-        loss = self.compute_loss(inputs, targets)
+        loss = compute_loss(self.model, input_ids=inputs, target_ids=targets)
 
         self.log("val_loss", loss, on_epoch=True, prog_bar=True, sync_dist=True)
 
@@ -77,7 +73,12 @@ class LitModel(L.LightningModule):
             tokenizer = self.hparams.tokenizer
 
             prompt_end_tkns = tokenizer.encode(
-                VICUNA_END_OF_USER_PROMPT_SEQUENCE, device=self.device
+                VICUNA_END_OF_USER_PROMPT_SEQUENCE,
+                device=self.device,
+                # bos/eos=False because the "end tokens"
+                # will be in the middle of the sequence.
+                bos=False,
+                eos=False,
             )
 
             def process_val_sample(sample, target):
@@ -150,13 +151,7 @@ class LitModel(L.LightningModule):
             return time.time()  # For timing convenience.
 
         t0 = g0_print("Initializing model...")
-        self.model = GPT(
-            config=self.hparams.model_config,
-            soft_prompt_tkn=self.hparams.tokenizer.token_to_id(
-                self.hparams.soft_prompt_tkn
-            ),
-            num_soft_prompt_tkns=self.hparams.num_soft_prompt_tkns,
-        )
+        self.model = GPT(config=self.hparams.model_config)
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
         if self.checkpoint_path is not None:
@@ -180,13 +175,3 @@ class LitModel(L.LightningModule):
             cast(WandbLogger, self.trainer.logger).watch(self.model)
 
         g0_print("Done loading & configuring model.")
-
-    def on_train_start(self):
-        self.print(f"\nResetting model caches for training...\n")
-        self.model.reset_caches()
-
-    def compute_loss(self, inputs, targets):
-        logits = self.model(input_ids=inputs)
-        return F.cross_entropy(
-            logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=ignored_tkn
-        )

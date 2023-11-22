@@ -13,10 +13,8 @@ def inference_model(
     temperature: float = 0.7,
     eos_id: Optional[int] = None,
 ) -> torch.Tensor:
-    device, dtype = input_ids.device, input_ids.dtype
-
     # Create a tensor to hold the decoded tokens as we sample.
-    decoded_tkns = torch.empty(0, device=device, dtype=dtype)
+    decoded_tkns = torch.empty(0, device=input_ids.device, dtype=input_ids.dtype)
 
     for _ in range(max_new_tokens):
         # Forward pass through the model, unsqueeze to add a batch dimension.
