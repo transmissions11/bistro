@@ -1,6 +1,5 @@
 VICUNA_END_OF_SYSTEM_PROMPT_SEQUENCE = "USER:"
 VICUNA_END_OF_USER_PROMPT_SEQUENCE = "ASSISTANT:"
-# TODO: Should the above have a space in front of it or not? Inconsistent across tokenizers.
 
 
 def fmt_vicuna_input(
