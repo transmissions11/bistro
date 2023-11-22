@@ -46,7 +46,7 @@ def main(
     ####################################################################
     val_split_ratio: float = 0.0001,  # 0.01% of training dataset.
     val_check_interval: float = 0.0001,  # After every 0.01% of training steps.
-    skip_starting_validation: bool = False,  # To speed up debugging.
+    skip_starting_validation: bool = False,  # Useful for debugging.
     ####################################################################
     log_every_n_steps: int = 1,
     disable_wandb: bool = False,  # Also useful for debugging.
