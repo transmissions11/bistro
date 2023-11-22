@@ -54,7 +54,7 @@ def main(
     params_to_freeze: Optional[List[str]] = None,
     params_to_train: Optional[List[str]] = None,
     ####################################################################
-    log_every_n_steps: int = 50,
+    log_every_n_steps: int = 5,
     disable_wandb: bool = False,  # Also useful for debugging.
     watch_gradients: bool = False,  # Very slow if training many params.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
