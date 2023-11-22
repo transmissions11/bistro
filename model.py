@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from typing import Optional, Tuple
+from typing import Optional
 
 from lit_gpt.config import Config
 from lit_gpt.model import Block, build_rope_cache
