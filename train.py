@@ -22,7 +22,7 @@ from model import Config
 
 
 def main(
-    project: str = "bistro",
+    project: str = "soft-prompting",
     #################################################################
     data_dir: Path = Path("data"),
     base_model_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
