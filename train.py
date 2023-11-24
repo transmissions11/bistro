@@ -64,7 +64,7 @@ def main(
     save_checkpoints: bool = True,
     save_top_k_checkpoints: int = 5,
     ####################################################################
-    run_name: str = f'{Repo(".").head.commit.message.strip()} — {datetime.now().strftime("%m-%d+%H:%M:%S")}',
+    run_name: str = f'{Repo(".").head.commit.message.strip()} [{datetime.now().strftime("H:%M:%S")}]',
 ):
     """
     Bistro: ♪ The finest of the finer things, 24 hours a day, 7 days a week ♪
