@@ -66,14 +66,6 @@ def main(
     ####################################################################
     run_name: str = f'{Repo(".").head.commit.message.strip()} — {datetime.now().strftime("%m-%d+%H:%M:%S")}',
 ):
-    import ipdb
-
-    ipdb.set_trace(
-        cond=(0 == torch.distributed.get_rank())
-        if torch.distributed.is_initialized()
-        else True
-    )
-
     """
     Bistro: ♪ The finest of the finer things, 24 hours a day, 7 days a week ♪
     """
