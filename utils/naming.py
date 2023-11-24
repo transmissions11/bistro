@@ -14,7 +14,7 @@ def get_clean_commit_msg():
 def get_safe_ckpt_dirpath(project: str, run_name: str):
     ckpt_dirpath = f'checkpoints/trained/{project}/{run_name.replace(" ", "-")}'
 
-    if os.path.exists(ckpt_dirpath):
+    if not os.path.exists(ckpt_dirpath):
         return ckpt_dirpath
     else:
         # Append the current datetime to the checkpoint path to avoid the collision.
@@ -22,3 +22,5 @@ def get_safe_ckpt_dirpath(project: str, run_name: str):
 
         if os.path.exists(ckpt_dirpath):  # This shouldn't happen, kick it to the user.
             raise RuntimeError(f"Checkpoint dirpath {ckpt_dirpath} already exists.")
+
+        return ckpt_dirpath
