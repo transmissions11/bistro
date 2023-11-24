@@ -14,7 +14,7 @@ from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 
 from utils.debugging import iexd
-from utils.naming import get_cleaned_commit_msg, get_safe_ckpt_dirpath
+from utils.naming import get_clean_commit_msg, get_safe_ckpt_dirpath
 from utils.warnings import suppress_uncontrollable_warnings, elevate_important_warnings
 
 from lit_datamodule import LitDataModule
@@ -61,7 +61,7 @@ def main(
     save_checkpoints: bool = True,
     save_top_k_checkpoints: int = 5,
     ####################################################################
-    run_name: str = get_cleaned_commit_msg(),
+    run_name: str = get_clean_commit_msg(),
 ):
     """
     Bistro: ♪ The finest of the finer things, 24 hours a day, 7 days a week ♪
