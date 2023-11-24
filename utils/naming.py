@@ -18,7 +18,7 @@ def get_safe_ckpt_dirpath(project: str, run_name: str):
         return ckpt_dirpath
     else:
         # Append the current datetime to the checkpoint path to avoid the collision.
-        ckpt_dirpath = f'{ckpt_dirpath}-{datetime.now().strftime("%m-%d+%H:%M:%S")}'
+        ckpt_dirpath = f'{ckpt_dirpath}-{datetime.now().strftime("%m-%d+%H-%M-%S")}'
 
         if os.path.exists(ckpt_dirpath):  # This shouldn't happen, kick it to the user.
             raise RuntimeError(f"Checkpoint dirpath {ckpt_dirpath} already exists.")
