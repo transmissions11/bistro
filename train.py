@@ -13,9 +13,8 @@ from lit_gpt.tokenizer import Tokenizer
 from lightning.pytorch.loggers import WandbLogger
 
 from utils.debugging import iexd
+from utils.naming import get_clean_commit_msg, get_safe_ckpt_dirpath
 from utils.warnings import suppress_uncontrollable_warnings, elevate_important_warnings
-
-from datetime import datetime
 
 from lit_datamodule import LitDataModule
 from lit_model import LitModel
@@ -52,7 +51,7 @@ def main(
     disable_wandb: bool = False,  # Also useful for debugging.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
     ####################################################################
-    run_name: str = datetime.now().strftime("%m-%d+%H:%M:%S"),
+    run_name: str = get_clean_commit_msg(),  # Used for ckpt dirpath and W&B.
 ):
     """
     Bistro: ♪ The finest of the finer things, 24 hours a day, 7 days a week ♪
