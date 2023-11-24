@@ -1,7 +1,5 @@
 import torch
 
-from git import Repo
-
 import lightning as L
 
 from pathlib import Path
@@ -16,9 +14,8 @@ from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 
 from utils.debugging import iexd
+from utils.naming import get_cleaned_commit_msg, get_safe_ckpt_dirpath
 from utils.warnings import suppress_uncontrollable_warnings, elevate_important_warnings
-
-from datetime import datetime
 
 from lit_datamodule import LitDataModule
 from lit_model import LitModel
@@ -64,7 +61,7 @@ def main(
     save_checkpoints: bool = True,
     save_top_k_checkpoints: int = 5,
     ####################################################################
-    run_name: str = f'{Repo(".").head.commit.message.strip()}',
+    run_name: str = get_cleaned_commit_msg(),
 ):
     """
     Bistro: ♪ The finest of the finer things, 24 hours a day, 7 days a week ♪
@@ -121,8 +118,7 @@ def main(
                     verbose=True,
                     monitor="val_loss",
                     save_top_k=save_top_k_checkpoints,
-                    # Append the current datetime to the checkpoint path to avoid overwriting old checkpoints.
-                    dirpath=f'checkpoints/trained/{project}/{run_name}-{datetime.now().strftime("%m-%d+%H:%M:%S")}',
+                    dirpath=get_safe_ckpt_dirpath(project, run_name),
                     filename="{epoch}-{step}-{val_loss:.2f}",
                 )
             ]
