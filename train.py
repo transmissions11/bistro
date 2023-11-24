@@ -64,7 +64,7 @@ def main(
     save_checkpoints: bool = True,
     save_top_k_checkpoints: int = 5,
     ####################################################################
-    run_name: str = f'{Repo(".").head.commit.message.strip()} [{datetime.now().strftime("%H:%M:%S")}]',
+    run_name: str = f'{Repo(".").head.commit.message.strip()}',
 ):
     """
     Bistro: ♪ The finest of the finer things, 24 hours a day, 7 days a week ♪
@@ -121,7 +121,8 @@ def main(
                     verbose=True,
                     monitor="val_loss",
                     save_top_k=save_top_k_checkpoints,
-                    dirpath=f"checkpoints/trained/{project}/{run_name}",
+                    # Append the current datetime to the checkpoint path to avoid overwriting old checkpoints.
+                    dirpath=f'checkpoints/trained/{project}/{run_name}-{datetime.now().strftime("%m-%d+%H:%M:%S")}',
                     filename="{epoch}-{step}-{val_loss:.2f}",
                 )
             ]
