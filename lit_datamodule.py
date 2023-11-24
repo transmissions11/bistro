@@ -36,9 +36,8 @@ class LitDataModule(L.LightningDataModule):
         ):
             seq = tokenizer.encode(
                 fmt_vicuna_input(
-                    f"{hard_prompt_tkn * num_hard_prompt_tkns} {x['inputs']}",
+                    f"{x['inputs']} {hard_prompt_tkn * num_hard_prompt_tkns}",
                     x["targets"],
-                    space_before_prompt=False,  # We don't want a space before the hard prompt tokens.
                 ),
                 eos=True,  # Don't see why you wouldn't want to train with an eos_token.
             )
