@@ -34,9 +34,6 @@ class LitDataModule(L.LightningDataModule):
         def transform(
             x, tokenizer: Tokenizer, hard_prompt_tkn: str, num_hard_prompt_tkns: int
         ):
-            print(f"|{x['inputs']}|")
-            print(f"|{x['inputs']} {hard_prompt_tkn * num_hard_prompt_tkns}|")
-
             seq = tokenizer.encode(
                 fmt_vicuna_input(
                     f"{x['inputs']} {hard_prompt_tkn * num_hard_prompt_tkns}",
