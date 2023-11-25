@@ -159,14 +159,6 @@ class LitModel(L.LightningModule):
                     hard_prompt_tkn=self.hparams.hard_prompt_tkn,
                 )
 
-                import ipdb
-
-                ipdb.set_trace(
-                    cond=(0 == torch.distributed.get_rank())
-                    if torch.distributed.is_initialized()
-                    else True
-                )
-
                 return (
                     tokenizer.decode(input_ids),
                     tokenizer.decode(
