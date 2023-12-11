@@ -86,6 +86,7 @@ class LitDataModule(L.LightningDataModule):
             num_workers=8,
             pin_memory=True,
             shuffle=True,
+            drop_last=True,
         )
 
     def val_dataloader(self):
@@ -97,4 +98,6 @@ class LitDataModule(L.LightningDataModule):
             batch_size=1,  # Can only compute hard prompt grads on 1 seq at a time at the moment.
             num_workers=8,
             pin_memory=True,
+            shuffle=False,
+            drop_last=True,
         )
