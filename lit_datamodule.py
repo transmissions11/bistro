@@ -23,13 +23,17 @@ class LitDataModule(L.LightningDataModule):
         ############################
         num_hard_prompt_tkns: int,
         hard_prompt_tkn: str,
+        ############################
+        curriculum_collate: CurriculumCollate,
     ):
         super().__init__()
 
-        # logger=False since we already log hparams manually in train.py.
-        self.save_hyperparameters(logger=False)
+        # Assign these manually as they don't pickle well
+        # or shouldn't be saved via save_hyperparameters.
+        self.curriculum_collate = curriculum_collate
 
-        self.curriculum_collate = CurriculumCollate()
+        # logger=False since we already log hparams manually in train.py.
+        self.save_hyperparameters(logger=False, ignore=["curriculum_collate"])
 
     def load_mapped_datasets(self):
         # Note: This function cannot access any properties of self directly, or it

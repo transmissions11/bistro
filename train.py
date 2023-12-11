@@ -13,7 +13,8 @@ from lit_gpt.tokenizer import Tokenizer
 from lightning.pytorch.loggers import WandbLogger
 
 from utils.debugging import iexd
-from utils.naming import get_clean_commit_msg, get_safe_ckpt_dirpath
+from utils.naming import get_clean_commit_msg
+from utils.curriculum import CurriculumCollate
 from utils.warnings import suppress_uncontrollable_warnings, elevate_important_warnings
 
 from lit_datamodule import LitDataModule
@@ -98,6 +99,8 @@ def main(
 
     tokenizer = Tokenizer(base_model_dir)
 
+    curriculum_collate = CurriculumCollate()
+
     model = LitModel(
         model_config=Config.from_name(name=base_model_dir.name),
         tokenizer=tokenizer,
@@ -107,6 +110,7 @@ def main(
         candidate_batch_size=candidate_batch_size,
         num_candidate_batches=num_candidate_batches,
         only_ascii_tkns=only_ascii_tkns,
+        curriculum_collate=curriculum_collate,
         checkpoint_path=base_model_dir / "lit_model.pth",
     )
 
@@ -116,6 +120,7 @@ def main(
         val_split_ratio=val_split_ratio,
         num_hard_prompt_tkns=num_hard_prompt_tkns,
         hard_prompt_tkn=hard_prompt_tkn,
+        curriculum_collate=curriculum_collate,
     )
 
     if trainer.is_global_zero:

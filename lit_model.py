@@ -11,6 +11,7 @@ from lit_gpt import Config, Tokenizer
 
 from utils.inference import inference_model
 from utils.tensors import find_subtensor_end
+from utils.curriculum import CurriculumCollate
 from utils.padding import strip_right_pad, ignored_tkn
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
 from utils.hard_prompting import (
@@ -35,8 +36,9 @@ class LitModel(L.LightningModule):
         topk: int,
         candidate_batch_size: int,
         num_candidate_batches: int,
-        only_ascii_tkns: bool = True,
+        only_ascii_tkns: bool,
         ########################################
+        curriculum_collate: CurriculumCollate,
         checkpoint_path: Optional[Path] = None,
     ):
         super().__init__()
@@ -45,12 +47,15 @@ class LitModel(L.LightningModule):
 
         # Assign these manually as they don't pickle well
         # or shouldn't be saved via save_hyperparameters.
+        self.curriculum_collate = curriculum_collate
         self.checkpoint_path = checkpoint_path
 
         self.automatic_optimization = False  # We'll handle it ourselves.
 
         # logger=False since we already log hparams manually in train.py.
-        self.save_hyperparameters(ignore=["checkpoint_path"], logger=False)
+        self.save_hyperparameters(
+            ignore=["curriculum_collate", "checkpoint_path"], logger=False
+        )
 
         ####################################################################
 
