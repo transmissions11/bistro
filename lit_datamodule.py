@@ -10,6 +10,7 @@ from datasets import load_dataset
 
 from utils.padding import pad_collate_fn
 from utils.masking import mask_before_inclusive
+from utils.curriculum import CurriculumCollate
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE, fmt_vicuna_input
 
 
@@ -27,6 +28,8 @@ class LitDataModule(L.LightningDataModule):
 
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(logger=False)
+
+        self.curriculum_collate = CurriculumCollate()
 
     def load_mapped_datasets(self):
         # Note: This function cannot access any properties of self directly, or it
@@ -81,8 +84,8 @@ class LitDataModule(L.LightningDataModule):
     def train_dataloader(self):
         return DataLoader(
             self.hf_datasets["train"],
-            collate_fn=pad_collate_fn,
-            batch_size=1,  # Can only compute hard prompt grads on 1 seq at a time at the moment.
+            collate_fn=self.curriculum_collate,  # Will control when to mix in new samples.
+            batch_size=1,  # We only want to feed the collate 1 new batch at a time.
             num_workers=8,
             pin_memory=True,
             shuffle=True,
@@ -95,7 +98,7 @@ class LitDataModule(L.LightningDataModule):
             collate_fn=pad_collate_fn,
             # Since we're not computing and storing gradients
             # while validating, we can use a larger batch size.
-            batch_size=1,  # Can only compute hard prompt grads on 1 seq at a time at the moment.
+            batch_size=1,  # TODO: This could be larger?
             num_workers=8,
             pin_memory=True,
             shuffle=False,
