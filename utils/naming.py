@@ -8,7 +8,8 @@ from datetime import datetime
 def get_clean_commit_msg():
     # Often commit messages will start with feat:, fix:, etc.
     # We don't want that in our run names, so we'll strip it out.
-    return Repo(".").head.commit.message.strip().split(": ", 1)[-1]
+    # Also ignore everything after a newline, if there is one.
+    return Repo(".").head.commit.message.strip().split(": ", 1)[-1].split("\n", 1)[0]
 
 
 def get_safe_ckpt_dirpath(project: str, run_name: str):
