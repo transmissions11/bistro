@@ -1,5 +1,7 @@
 from utils.padding import pad_collate_fn
 
+import torch
+
 
 class CurriculumCollate:
     def __init__(self):
