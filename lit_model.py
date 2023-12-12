@@ -116,7 +116,7 @@ class LitModel(L.LightningModule):
                 )  # (num_candidates)
                 for input, target in zip(inputs, targets)
             ]
-        ).sum(dim=0)
+        ).mean(dim=0)
 
         min_loss, min_idx = torch.min(candidate_losses, dim=0)
 
@@ -145,7 +145,9 @@ class LitModel(L.LightningModule):
                 f"Min Loss ({min_loss}) <= Threshold ({self.hparams.expansion_loss_threshold}), expanded curriculum to {self.curriculum_collate.num_learned_samples + 1} samples."
             )
 
-        self.log("num_learned_samples", self.curriculum_collate.num_learned_samples)
+        self.log(
+            "num_learned_samples", float(self.curriculum_collate.num_learned_samples)
+        )
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
