@@ -19,6 +19,11 @@ def suppress_uncontrollable_warnings():
         message=r".*Using `DistributedSampler` with the dataloaders",
         module="lightning",
     )
+    warnings.filterwarnings(
+        "ignore",
+        message=r".*does not have many workers which may be a bottleneck.*",
+        module="lightning",
+    )
 
 
 def elevate_important_warnings():
