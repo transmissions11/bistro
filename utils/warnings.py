@@ -24,6 +24,7 @@ def suppress_uncontrollable_warnings():
     )
     warnings.filterwarnings(
         "ignore",
+        # since we cannot use num_workers > 0 with CurriculumCollate
         message=r".*does not have many workers which may be a bottleneck.*",
         module="lightning",
     )
