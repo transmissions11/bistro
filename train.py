@@ -42,6 +42,7 @@ def main(
     topk: int = 64,
     candidate_batch_size: int = 128,
     num_candidate_batches: int = 1,
+    expansion_loss_threshold: float = 0.75,
     only_ascii_tkns: bool = True,
     ####################################################################
     val_split_ratio: float = 0.0001,  # 0.01% of training dataset.
@@ -109,6 +110,7 @@ def main(
         topk=topk,
         candidate_batch_size=candidate_batch_size,
         num_candidate_batches=num_candidate_batches,
+        expansion_loss_threshold=expansion_loss_threshold,
         only_ascii_tkns=only_ascii_tkns,
         curriculum_collate=curriculum_collate,
         checkpoint_path=base_model_dir / "lit_model.pth",

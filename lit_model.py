@@ -36,6 +36,7 @@ class LitModel(L.LightningModule):
         topk: int,
         candidate_batch_size: int,
         num_candidate_batches: int,
+        expansion_loss_threshold: float,
         only_ascii_tkns: bool,
         ########################################
         curriculum_collate: CurriculumCollate,
@@ -105,6 +106,11 @@ class LitModel(L.LightningModule):
         self.log("train_loss", min_loss)
 
         self.current_hard_prompt = candidates[min_idx]  # Update the hard prompt.
+
+        if min_loss <= self.hparams.expansion_loss_threshold:
+            # If the new hard prompt meets the loss threshold for
+            # expanding the curriculum, expand it with a new sample.
+            self.curriculum_collate.expand_curriculum()
 
         if batch_idx % self.trainer.log_every_n_steps == 0:
             # TODO: Log the raw ids anywhere? Ideally just log the running best one?
