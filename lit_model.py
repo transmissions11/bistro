@@ -108,6 +108,10 @@ class LitModel(L.LightningModule):
         self.current_hard_prompt = candidates[min_idx]  # Update the hard prompt.
 
         if min_loss <= self.hparams.expansion_loss_threshold:
+            self.print(
+                f"Min Loss ({min_loss}) <= Threshold ({self.hparams.expansion_loss_threshold}), expanding curriculum..."
+            )
+
             # If the new hard prompt meets the loss threshold for
             # expanding the curriculum, expand it with a new sample.
             self.curriculum_collate.expand_curriculum()
