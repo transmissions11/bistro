@@ -114,14 +114,6 @@ class LitModel(L.LightningModule):
                 f"Min Loss ({min_loss}) <= Threshold ({self.hparams.expansion_loss_threshold}), expanding curriculum..."
             )
 
-            import ipdb
-
-            ipdb.set_trace(
-                cond=(0 == torch.distributed.get_rank())
-                if torch.distributed.is_initialized()
-                else True
-            )
-
             # If the new hard prompt meets the loss threshold for
             # expanding the curriculum, expand it with a new sample.
             self.curriculum_collate.expand_curriculum()

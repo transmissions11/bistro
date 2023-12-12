@@ -100,15 +100,9 @@ def main(
 
     tokenizer = Tokenizer(base_model_dir)
 
+    # NOTE: This won't work if it gets spread across multiple processes.
+    # We'll have to use a shared memory array or something when we get there.
     curriculum_collate = CurriculumCollate()
-
-    import ipdb
-
-    ipdb.set_trace(
-        cond=(0 == torch.distributed.get_rank())
-        if torch.distributed.is_initialized()
-        else True
-    )
 
     model = LitModel(
         model_config=Config.from_name(name=base_model_dir.name),

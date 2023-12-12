@@ -14,9 +14,6 @@ from utils.curriculum import CurriculumCollate
 from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE, fmt_vicuna_input
 
 
-import torch  # TODO: TEMP DELETE THSI!!!!!!!!!!!!
-
-
 class LitDataModule(L.LightningDataModule):
     def __init__(
         self,
@@ -34,14 +31,6 @@ class LitDataModule(L.LightningDataModule):
         # Assign these manually as they don't pickle well
         # or shouldn't be saved via save_hyperparameters.
         self.curriculum_collate = curriculum_collate
-
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(0 == torch.distributed.get_rank())
-            if torch.distributed.is_initialized()
-            else True
-        )
 
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(logger=False, ignore=["curriculum_collate"])
@@ -97,19 +86,12 @@ class LitDataModule(L.LightningDataModule):
         self.hf_datasets = self.load_mapped_datasets()
 
     def train_dataloader(self):
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(0 == torch.distributed.get_rank())
-            if torch.distributed.is_initialized()
-            else True
-        )
-
         return DataLoader(
             self.hf_datasets["train"],
             collate_fn=self.curriculum_collate,  # Will control when to mix in new samples.
             batch_size=1,  # We only want to feed the collate 1 new batch at a time.
-            # num_workers=8,
+            # NOTE: Cannot use num_workers > 0 with CurriculumCollate, it
+            # will get copied to all processes and mess up the curriculum.
             pin_memory=True,
             shuffle=True,
             drop_last=True,
