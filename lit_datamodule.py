@@ -109,7 +109,7 @@ class LitDataModule(L.LightningDataModule):
             self.hf_datasets["train"],
             collate_fn=self.curriculum_collate,  # Will control when to mix in new samples.
             batch_size=1,  # We only want to feed the collate 1 new batch at a time.
-            num_workers=8,
+            # num_workers=8,
             pin_memory=True,
             shuffle=True,
             drop_last=True,
