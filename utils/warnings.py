@@ -6,16 +6,19 @@ def suppress_uncontrollable_warnings():
 
     warnings.filterwarnings(
         "ignore",
+        # https://github.com/wandb/wandb/issues/6227
         message=r".*DtypeTensor constructors are no longer recommended.*",
         module="wandb",
     )
     warnings.filterwarnings(
         "ignore",
+        # internal wandb error with deterministic CUDA
         message=r".*_histc_cuda does not have a deterministic implementation.*",
         module="wandb",
     )
     warnings.filterwarnings(
         "ignore",
+        # https://github.com/Lightning-AI/pytorch-lightning/issues/12862
         message=r".*Using `DistributedSampler` with the dataloaders",
         module="lightning",
     )
