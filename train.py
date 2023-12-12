@@ -102,6 +102,14 @@ def main(
 
     curriculum_collate = CurriculumCollate()
 
+    import ipdb
+
+    ipdb.set_trace(
+        cond=(0 == torch.distributed.get_rank())
+        if torch.distributed.is_initialized()
+        else True
+    )
+
     model = LitModel(
         model_config=Config.from_name(name=base_model_dir.name),
         tokenizer=tokenizer,

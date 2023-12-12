@@ -32,6 +32,14 @@ class LitDataModule(L.LightningDataModule):
         # or shouldn't be saved via save_hyperparameters.
         self.curriculum_collate = curriculum_collate
 
+        import ipdb
+
+        ipdb.set_trace(
+            cond=(0 == torch.distributed.get_rank())
+            if torch.distributed.is_initialized()
+            else True
+        )
+
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(logger=False, ignore=["curriculum_collate"])
 
@@ -86,6 +94,14 @@ class LitDataModule(L.LightningDataModule):
         self.hf_datasets = self.load_mapped_datasets()
 
     def train_dataloader(self):
+        import ipdb
+
+        ipdb.set_trace(
+            cond=(0 == torch.distributed.get_rank())
+            if torch.distributed.is_initialized()
+            else True
+        )
+
         return DataLoader(
             self.hf_datasets["train"],
             collate_fn=self.curriculum_collate,  # Will control when to mix in new samples.
