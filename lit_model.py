@@ -150,6 +150,8 @@ class LitModel(L.LightningModule):
         )
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
+        # TODO: Actually validate multiple samples instead of just 1.
+
         inputs, targets = batch["inputs"], batch["targets"]
 
         candidate_losses = test_hard_prompt_candidates(
