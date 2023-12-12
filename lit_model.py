@@ -73,15 +73,23 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
-        self.print("inputs", inputs.shape, "targets", targets.shape)
+        # Ensure the batches being passed in are the right size, in sync with the curriculum.
+        assert self.curriculum_collate.num_learned_samples + 1 == inputs.size(0)
 
-        grads = get_hard_prompt_gradients(
-            self.model,
-            current_hard_prompt=self.current_hard_prompt,
-            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-            input_ids=inputs,
-            target_ids=targets,
-        )  # (num_hard_prompt_tkns, vocab_size)
+        # .stack(...) -> (num_learned_samples + 1, num_hard_prompt_tkns, vocab_size)
+        # .sum(dim=0) -> (num_hard_prompt_tkns, vocab_size)
+        grads = torch.stack(
+            [
+                get_hard_prompt_gradients(
+                    self.model,
+                    current_hard_prompt=self.current_hard_prompt,
+                    hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                    input_ids=input,
+                    target_ids=target,
+                )  # (num_hard_prompt_tkns, vocab_size)
+                for input, target in zip(inputs, targets)
+            ]
+        ).sum(dim=0)
 
         candidates = create_hard_prompt_candidates(
             current_hard_prompt=self.current_hard_prompt,
@@ -94,29 +102,27 @@ class LitModel(L.LightningModule):
             not_allowed_tokens=self.not_allowed_tokens,
         )  # (num_candidates, num_hard_prompt_tkns)
 
-        candidate_losses = test_hard_prompt_candidates(
-            self.model,
-            candidate_batch_size=self.hparams.candidate_batch_size,
-            hard_prompt_candidates=candidates,
-            hard_prompt_tkn=self.hparams.hard_prompt_tkn,
-            input_ids=inputs,
-            target_ids=targets,
-        )  # (num_candidates)
+        # .stack(...) -> (num_learned_samples + 1, num_candidates)
+        # .sum(dim=0) -> (num_candidates)
+        candidate_losses = torch.stack(
+            [
+                test_hard_prompt_candidates(
+                    self.model,
+                    candidate_batch_size=self.hparams.candidate_batch_size,
+                    hard_prompt_candidates=candidates,
+                    hard_prompt_tkn=self.hparams.hard_prompt_tkn,
+                    input_ids=input,
+                    target_ids=target,
+                )  # (num_candidates)
+                for input, target in zip(inputs, targets)
+            ]
+        ).sum(dim=0)
 
         min_loss, min_idx = torch.min(candidate_losses, dim=0)
 
         self.log("train_loss", min_loss)
 
         self.current_hard_prompt = candidates[min_idx]  # Update the hard prompt.
-
-        if min_loss <= self.hparams.expansion_loss_threshold:
-            self.print(
-                f"Min Loss ({min_loss}) <= Threshold ({self.hparams.expansion_loss_threshold}), expanding curriculum..."
-            )
-
-            # If the new hard prompt meets the loss threshold for
-            # expanding the curriculum, expand it with a new sample.
-            self.curriculum_collate.expand_curriculum()
 
         if batch_idx % self.trainer.log_every_n_steps == 0:
             # TODO: Log the raw ids anywhere? Ideally just log the running best one?
@@ -129,6 +135,17 @@ class LitModel(L.LightningModule):
                 + self.hparams.tokenizer.decode(self.current_hard_prompt)
                 + "|",
             )
+
+        if min_loss <= self.hparams.expansion_loss_threshold:
+            # If the new hard prompt meets the loss threshold for
+            # expanding the curriculum, expand it with a new sample.
+            self.curriculum_collate.expand_curriculum()
+
+            self.print(
+                f"Min Loss ({min_loss}) <= Threshold ({self.hparams.expansion_loss_threshold}), expanded curriculum to {self.curriculum_collate.num_learned_samples + 1} samples."
+            )
+
+        self.log("num_learned_samples", self.curriculum_collate.num_learned_samples)
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         inputs, targets = batch["inputs"], batch["targets"]
