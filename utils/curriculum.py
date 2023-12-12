@@ -12,4 +12,6 @@ class CurriculumCollate:
     def __call__(self, batch):
         self.prev_samples.extend(batch)
 
+        print(" -------- ", len(self.prev_samples), self.num_learned_samples)
+
         return pad_collate_fn(self.prev_samples[: (self.num_learned_samples + 1)])
