@@ -66,7 +66,7 @@ class LitModel(L.LightningModule):
         )
 
         self.register_buffer(
-            "current_hard_prompt", tokenizer.encode("✅579 * 640 = 370,560✅")
+            "current_hard_prompt", tokenizer.encode("✅579 * 640 = 370,560✅", bos=False)
         )
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
