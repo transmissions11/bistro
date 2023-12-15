@@ -27,7 +27,7 @@ python lit_script.py convert_hf_checkpoint --checkpoint_dir checkpoints/lmsys/vi
 _(Optional)_ Use Flash Attention 2 (only available in PyTorch 2.2)
 
 ```bash
-pip uninstall -y torch
+pip uninstall -y torch torchvision torchaudio torchtext
 pip install --pre torch --index-url https://download.pytorch.org/whl/nightly/cu121
 ```
 
