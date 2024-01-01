@@ -7,7 +7,7 @@ Opinionated GPT implementation and finetuning harness.
 Cloning the repo:
 
 ```sh
-git clone https://github.com/transmisisons11/bistro
+git clone git@github.com:transmissions11/bistro.git
 cd bistro
 ```
 
