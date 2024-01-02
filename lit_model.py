@@ -72,7 +72,7 @@ class LitModel(L.LightningModule):
         )
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
-        inputs, targets = batch["inputs"], batch["targets"]
+        inputs, targets = batch["inputs"], batch["targets"]  # (b, t), (b, t)
 
         for n in range(100):
             import time
@@ -81,7 +81,8 @@ class LitModel(L.LightningModule):
             with torch.inference_mode():
                 loss = compute_loss(
                     self.model,
-                    input_ids=inputs.repeat(n),
+                    # inputs.repeat(n,1) -> (b * n, t * 1)
+                    input_ids=inputs.repeat(n, 1),
                     target_ids=targets,
                     reduction="none",
                 )
