@@ -6,6 +6,7 @@ build
 .venv
 .vscode
 *.ipynb
+secrets
 
 checkpoints
 out
