@@ -82,8 +82,8 @@ class LitModel(L.LightningModule):
                 loss = compute_loss(
                     self.model,
                     # .repeat(n,1) -> (b * n, t * 1)
-                    input_ids=inputs.repeat(n, 1),
-                    target_ids=targets.repeat(n, 1),
+                    input_ids=inputs,  # .repeat(n, 1),
+                    target_ids=targets,  # .repeat(n, 1),
                     # reduction="none",
                 )
             end_time = time.perf_counter()
