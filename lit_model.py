@@ -90,15 +90,13 @@ class LitModel(L.LightningModule):
 
             start_time = time.perf_counter()
             with torch.inference_mode():
-                loss = compute_loss(
+                compute_loss(
                     self.model,
                     # .repeat(n,1) -> (b * n, t * 1)
                     input_ids=inputs.repeat(n, 1),
                     target_ids=targets.repeat(n, 1),
                     # reduction="none",
                 )
-
-            del loss
 
             end_time = time.perf_counter()
             print(
