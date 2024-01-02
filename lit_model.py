@@ -74,12 +74,16 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]  # (b, t), (b, t)
 
+        import gc
+        import torch
+
         for n in range(1, 1000):
-            import time
+            torch.cuda.empty_cache()  # Clear CUDA cache
+            gc.collect()  # Trigger garbage collection
 
             start_time = time.perf_counter()
             with torch.inference_mode():
-                loss = compute_loss(
+                compute_loss(
                     self.model,
                     # .repeat(n,1) -> (b * n, t * 1)
                     input_ids=inputs.repeat(n, 1),
@@ -88,7 +92,7 @@ class LitModel(L.LightningModule):
                 )
             end_time = time.perf_counter()
             print(
-                f"n: {n}, loss: {loss} — Computation time: {end_time - start_time} seconds"
+                f"n: {n} — Computation time: {end_time - start_time} seconds — GPU memory used: {torch.cuda.memory_allocated() / 1024 ** 2} MB"
             )
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
