@@ -74,24 +74,20 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]
 
-        ####################################################
+        for n in range(100):
+            import time
 
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(0 == torch.distributed.get_rank())
-            if torch.distributed.is_initialized()
-            else True
-        )
-
-        ####################################################
-
-        with torch.inference_mode():
-            loss = compute_loss(
-                self.model,
-                input_ids=inputs,
-                target_ids=targets,
-                reduction="none",
+            start_time = time.perf_counter()
+            with torch.inference_mode():
+                loss = compute_loss(
+                    self.model,
+                    input_ids=inputs.repeat(n),
+                    target_ids=targets,
+                    reduction="none",
+                )
+            end_time = time.perf_counter()
+            print(
+                f"n: {n}, loss: {loss} — Computation time: {end_time - start_time} seconds"
             )
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
