@@ -87,8 +87,8 @@ class LitModel(L.LightningModule):
                 )
 
         for n in range(1, 1000):
-            torch.cuda.empty_cache()  # Clear CUDA cache
-            gc.collect()  # Trigger garbage collection
+            # torch.cuda.empty_cache()  # Clear CUDA cache
+            # gc.collect()  # Trigger garbage collection
 
             start_time = time.perf_counter()
             with torch.inference_mode():
