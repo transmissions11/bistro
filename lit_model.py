@@ -74,7 +74,7 @@ class LitModel(L.LightningModule):
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
         inputs, targets = batch["inputs"], batch["targets"]  # (b, t), (b, t)
 
-        for n in range(1, 500):
+        for n in range(1, 1000):
             import time
 
             start_time = time.perf_counter()
