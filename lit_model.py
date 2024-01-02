@@ -77,6 +77,15 @@ class LitModel(L.LightningModule):
         import gc
         import torch
 
+        # Warmup rounds
+        for _ in range(10):
+            with torch.inference_mode():
+                compute_loss(
+                    self.model,
+                    input_ids=inputs,
+                    target_ids=targets,
+                )
+
         for n in range(1, 1000):
             torch.cuda.empty_cache()  # Clear CUDA cache
             gc.collect()  # Trigger garbage collection
