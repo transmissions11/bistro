@@ -84,7 +84,7 @@ class LitModel(L.LightningModule):
                     # .repeat(n,1) -> (b * n, t * 1)
                     input_ids=inputs.repeat(n, 1),
                     target_ids=targets.repeat(n, 1),
-                    reduction="none",
+                    # reduction="none",
                 )
             end_time = time.perf_counter()
             print(
