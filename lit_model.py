@@ -92,7 +92,7 @@ class LitModel(L.LightningModule):
                 )
             end_time = time.perf_counter()
             print(
-                f"n: {n} — Computation time: {end_time - start_time} seconds — GPU memory used: {torch.cuda.memory_allocated() / 1024 ** 2} MB"
+                f"n: {n} — Computation time: {end_time - start_time} seconds — GPU memory used: {torch.cuda.memory_reserved() / 1024 ** 2} MB"
             )
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
