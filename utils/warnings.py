@@ -22,6 +22,12 @@ def suppress_uncontrollable_warnings():
         message=r".*Using `DistributedSampler` with the dataloaders",
         module="lightning",
     )
+    warnings.filterwarnings(
+        "ignore",
+        # https://github.com/huggingface/transformers/issues/5421
+        message=r".*should probably TRAIN this model on a down-stream task",
+        module="lightning",
+    )
 
 
 def elevate_important_warnings():
