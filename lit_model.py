@@ -119,8 +119,12 @@ class LitModel(L.LightningModule):
             model_id,
             problem_type="multi_label_classification",
             id2label={0: "lturn", 1: "rturn", 2: "noturn"},
-            config={"vision_use_head": False},
+            config={"vision_config": {"vision_use_head": False}},
         )
+
+        # print(self.model.config)
+        # print(self.model.use_head)
+        # print(self.model.vision_use_head)
 
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
