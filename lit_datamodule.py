@@ -30,8 +30,6 @@ class MultiLabelDataset(Dataset):
 
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 
-        labels = torch.tensor(item[1:].values)
-
         import ipdb
 
         ipdb.set_trace(
@@ -41,6 +39,8 @@ class MultiLabelDataset(Dataset):
                 else True
             )
         )
+
+        labels = torch.tensor(item[1:].values)
 
         return pixel_values, labels
 
