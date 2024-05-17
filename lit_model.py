@@ -95,6 +95,8 @@ class LitModel(L.LightningModule):
         for name, p in self.named_parameters():
             if p.grad is None:
                 print("unused parameter (check code or freeze it):", name)
+            else:
+                print("used parameter:", name)
 
     def configure_model(self):
         # Ensure this function is idempotent, as
