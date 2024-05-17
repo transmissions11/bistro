@@ -5,7 +5,6 @@ from torch.utils.data import DataLoader, Dataset
 from PIL import Image
 
 import torch
-from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 
 from datasets import load_dataset
 
@@ -13,7 +12,6 @@ import pandas as pd
 import numpy as np
 
 from transformers import AutoImageProcessor
-
 
 import os
 
@@ -31,24 +29,9 @@ class MultiLabelDataset(Dataset):
 
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 
-        size = self.processor.size["height"]
-        mean = self.processor.image_mean
-        std = self.processor.image_std
+        labels = torch.from_numpy(item[1:].values)
 
-        transform = Compose(
-            [
-                Resize((size, size)),
-                ToTensor(),
-                Normalize(mean=mean, std=std),
-            ]
-        )
-
-        print("pix", pixel_values.shape)
-        print("trans", transform(image).shape)
-
-        labels = torch.from_numpy(item[1:].values.astype(np.float32))
-
-        return pixel_values, labels
+        return pixel_values.squeeze(0), labels  # Squeeze off the batch dimension.
 
     def __len__(self):
         return len(self.df)
