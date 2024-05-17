@@ -40,7 +40,7 @@ class LitDataModule(L.LightningDataModule):
             processor: AutoImageProcessor,
             data_dir: str,
         ):
-            image = Image.open(os.path.join(data_dir, x["file_path"])).convert("RGB")
+            image = Image.open(os.path.join(data_dir, x["file_name"])).convert("RGB")
 
             pixel_values = processor(image, return_tensors="pt").pixel_values
 
