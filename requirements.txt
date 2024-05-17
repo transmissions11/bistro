@@ -10,6 +10,6 @@ datasets
 pprintjson
 decorator
 ipdb
-PIL
+pillow
 pandas
 transformers
