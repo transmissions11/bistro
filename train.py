@@ -22,7 +22,7 @@ from lit_model import LitModel
 
 @iexd  # Will drop into ipdb if an exception is raised on rank zero.
 def main(
-    project: str = "bistro",
+    project: str = "siglip-classifier",
     ####################################################################
     data_dir: Path = Path("data"),
     ####################################################################
