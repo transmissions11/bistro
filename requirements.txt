@@ -12,4 +12,4 @@ decorator
 ipdb
 pillow
 pandas
-transformers
+transformers @ git+https://github.com/huggingface/transformers.git

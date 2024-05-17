@@ -25,6 +25,7 @@ from lit_model import LitModel
 def main(
     project: str = "siglip-classifier",
     ####################################################################
+    model_id: str = "google/siglip-so400m-patch14-384",
     data_dir: Path = Path("data"),
     ####################################################################
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
@@ -125,6 +126,7 @@ def main(
     )
 
     model = LitModel(
+        model_id=model_id,
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         weight_decay=weight_decay,

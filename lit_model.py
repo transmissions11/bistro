@@ -16,6 +16,7 @@ from transformers import AutoModelForImageClassification, AutoConfig
 class LitModel(L.LightningModule):
     def __init__(
         self,
+        model_id: str,
         ################################
         learning_rate: float,
         warmup_ratio: float,
@@ -94,19 +95,22 @@ class LitModel(L.LightningModule):
         # RuntimeError: It looks like your LightningModule has parameters that were not used in producing the loss returned by training_step.
         for name, p in self.named_parameters():
             if p.grad is None:
-                print("unused parameter (check code or freeze it):", name)
+                print(
+                    "unused parameter (check code or freeze it):",
+                    name,
+                    "requires_grad:",
+                    p.requires_grad,
+                )
             else:
-                print("used parameter:", name)
+                print(
+                    "used parameter:",
+                    name,
+                    "requires_grad:",
+                    p.requires_grad,
+                )
 
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(
-                (0 == torch.distributed.get_rank())
-                if torch.distributed.is_initialized()
-                else True
-            )
-        )
+        # TODO verify model is bfloat16
+        # TODO verify nothing is frozen
 
     def configure_model(self):
         # Ensure this function is idempotent, as
@@ -124,22 +128,20 @@ class LitModel(L.LightningModule):
 
         t0 = g0_print("Initializing model...")
 
-        model_id = "google/siglip-so400m-patch14-384"
-
         config = AutoConfig.from_pretrained(
-            model_id,
+            self.hparams.model_id,
             problem_type="multi_label_classification",
             id2label={0: "lturn", 1: "rturn", 2: "noturn"},
         )
 
+        # To avoid the error "It looks like your LightningModule has parameters
+        # that were not used in producing the loss returned by training_step."
+        config.vision_config.vision_use_head = False
+
         self.model = AutoModelForImageClassification.from_pretrained(
-            model_id,
+            config._name_or_path,
             config=config,
         )
-
-        del self.model.vision_model.head
-
-        # TODO verify model is bfloat16
 
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
