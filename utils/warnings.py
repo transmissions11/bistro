@@ -28,6 +28,12 @@ def suppress_uncontrollable_warnings():
         message=r".*should probably TRAIN this model on a down-stream task.*",
         module="transformers",
     )
+    warnings.filterwarnings(
+        "ignore",
+        # https://github.com/huggingface/transformers/issues/30618
+        message=r".*resume_download.*",
+        module="huggingface_hub",
+    )
 
 
 def elevate_important_warnings():
