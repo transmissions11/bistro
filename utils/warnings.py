@@ -24,12 +24,6 @@ def suppress_uncontrollable_warnings():
     )
     warnings.filterwarnings(
         "ignore",
-        # https://github.com/huggingface/transformers/issues/5421
-        message=r".*should probably TRAIN this model on a down-stream task.*",
-        module="transformers",
-    )
-    warnings.filterwarnings(
-        "ignore",
         # https://github.com/huggingface/transformers/issues/30618
         message=r".*resume_download.*",
         module="huggingface_hub",
