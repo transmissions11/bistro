@@ -86,42 +86,6 @@ class LitModel(L.LightningModule):
             },
         }
 
-    def on_after_backward(self) -> None:
-        super().on_after_backward()
-        if self.current_epoch != 0:
-            return
-
-        # This function is useful for debuging the following error:
-        # RuntimeError: It looks like your LightningModule has parameters that were not used in producing the loss returned by training_step.
-        for name, p in self.named_parameters():
-            if p.grad is None:
-                print(
-                    "unused parameter (check code or freeze it):",
-                    name,
-                    "requires_grad:",
-                    p.requires_grad,
-                )
-            else:
-                print(
-                    "used parameter:",
-                    name,
-                    "requires_grad:",
-                    p.requires_grad,
-                )
-
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(
-                (0 == torch.distributed.get_rank())
-                if torch.distributed.is_initialized()
-                else True
-            )
-        )
-
-        # TODO verify model is bfloat16
-        # TODO verify nothing is frozen
-
     def configure_model(self):
         # Ensure this function is idempotent, as
         # the trainer may call it multiple times.
@@ -141,11 +105,13 @@ class LitModel(L.LightningModule):
         config = AutoConfig.from_pretrained(
             self.hparams.model_id,
             problem_type="multi_label_classification",
+            # TODO: Auto-derive mapping from the dataset?
             id2label={0: "lturn", 1: "rturn", 2: "noturn"},
         )
 
         # To avoid the error "It looks like your LightningModule has parameters
         # that were not used in producing the loss returned by training_step."
+        # Option added in https://github.com/huggingface/transformers/pull/30814.
         config.vision_config.vision_use_head = False
 
         self.model = AutoModelForImageClassification.from_pretrained(
