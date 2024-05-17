@@ -31,8 +31,8 @@ def main(
     ####################################################################
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
-    micro_batch_size: int = 32,
-    gradient_accumulation_iters: int = 1,
+    micro_batch_size: int = 2,
+    gradient_accumulation_iters: int = 16,
     precision: str = "bf16-true",
     ####################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
