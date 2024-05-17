@@ -29,7 +29,7 @@ class MultiLabelDataset(Dataset):
 
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 
-        labels = torch.tensor(item[1:].values.astype(np.float32))
+        labels = torch.from_numpy(item[1:].values.astype(np.float32))
 
         return pixel_values, labels
 
