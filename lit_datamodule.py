@@ -22,7 +22,7 @@ class MultiLabelDataset(Dataset):
     def __init__(self, root, df, processor):
         self.root = root
         self.df = df
-        self.pr
+        self.processor = processor
 
     def __getitem__(self, idx):
         item = self.df.iloc[idx]
@@ -81,6 +81,9 @@ class LitDataModule(L.LightningDataModule):
         self.hf_datasets = self.load_mapped_datasets()
 
     def train_dataloader(self):
+
+        # TODO: why is estimated stepping batches so low????
+
         return DataLoader(
             self.hf_datasets["train"],
             collate_fn=collate_fn,
