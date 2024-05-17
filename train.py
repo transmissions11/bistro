@@ -20,8 +20,6 @@ from utils.warnings import suppress_uncontrollable_warnings, elevate_important_w
 from lit_datamodule import LitDataModule
 from lit_model import LitModel
 
-# TODO: whu unsued params
-
 
 @iexd  # Will drop into ipdb if an exception is raised on rank zero.
 def main(
@@ -88,7 +86,7 @@ def main(
 
     trainer = L.Trainer(
         devices=devices,
-        strategy=DDPStrategy(find_unused_parameters=True),
+        strategy=strategy,
         max_epochs=epochs,
         max_time=max_time,
         profiler=profiler,
