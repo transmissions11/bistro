@@ -30,7 +30,17 @@ class MultiLabelDataset(Dataset):
 
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 
-        labels = torch.tensor(item[1:])
+        labels = torch.tensor(item[1:].values)
+
+        import ipdb
+
+        ipdb.set_trace(
+            cond=(
+                (0 == torch.distributed.get_rank())
+                if torch.distributed.is_initialized()
+                else True
+            )
+        )
 
         return pixel_values, labels
 
