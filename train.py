@@ -20,6 +20,8 @@ from utils.warnings import suppress_uncontrollable_warnings, elevate_important_w
 from lit_datamodule import LitDataModule
 from lit_model import LitModel
 
+# TODO: whu unsued params
+
 
 @iexd  # Will drop into ipdb if an exception is raised on rank zero.
 def main(
@@ -29,8 +31,8 @@ def main(
     ####################################################################
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
-    micro_batch_size: int = 2,
-    gradient_accumulation_iters: int = 16,
+    micro_batch_size: int = 32,
+    gradient_accumulation_iters: int = 4,
     precision: str = "bf16-true",
     ####################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
