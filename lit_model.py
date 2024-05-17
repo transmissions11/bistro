@@ -109,6 +109,16 @@ class LitModel(L.LightningModule):
                     p.requires_grad,
                 )
 
+        import ipdb
+
+        ipdb.set_trace(
+            cond=(
+                (0 == torch.distributed.get_rank())
+                if torch.distributed.is_initialized()
+                else True
+            )
+        )
+
         # TODO verify model is bfloat16
         # TODO verify nothing is frozen
 
