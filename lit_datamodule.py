@@ -8,9 +8,8 @@ import torch
 
 from datasets import load_dataset
 
-from torchvision.transforms import Compose, Resize, ToTensor, Normalize
-
 import pandas as pd
+import numpy as np
 
 from transformers import AutoImageProcessor
 
@@ -30,17 +29,7 @@ class MultiLabelDataset(Dataset):
 
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(
-                (0 == torch.distributed.get_rank())
-                if torch.distributed.is_initialized()
-                else True
-            )
-        )
-
-        labels = torch.tensor(item[1:].values)
+        labels = torch.tensor(item[1:].values.astype(np.float32))
 
         return pixel_values, labels
 
