@@ -30,13 +30,13 @@ def main(
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
     micro_batch_size: int = 32,
-    gradient_accumulation_iters: int = 6,
+    gradient_accumulation_iters: int = 16,
     precision: str = "bf16-true",
     ####################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
     epochs: int = 1,  # Make this -1 to train forever / until max_time.
     ####################################################################
-    learning_rate: float = 5e-6,
+    learning_rate: float = 5e-5,
     warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
     weight_decay: float = 0.00,  # Generally not used for finetuning.
     ####################################################################
@@ -56,7 +56,7 @@ def main(
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
     ####################################################################
     save_checkpoints: bool = True,
-    save_top_k_checkpoints: int = 5,
+    save_top_k_checkpoints: int = 3,
     ####################################################################
     run_name: str = get_clean_commit_msg(),  # Used for ckpt dirpath and W&B.
 ):
