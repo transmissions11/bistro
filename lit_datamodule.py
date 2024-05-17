@@ -1,69 +1,65 @@
+import torch
+
 import lightning.pytorch as L
 
-from torch.utils.data import DataLoader, Dataset
+from functools import partial
 
-from PIL import Image
-
-import torch
+from torch.utils.data import DataLoader
 
 from datasets import load_dataset
 
-import pandas as pd
-import numpy as np
-
 from transformers import AutoImageProcessor
 
-import os
-
-
-class MultiLabelDataset(Dataset):
-    def __init__(self, root, df, processor):
-        self.root = root
-        self.df = df
-        self.processor = processor
-
-    def __getitem__(self, idx):
-        item = self.df.iloc[idx]
-
-        image = Image.open(os.path.join(self.root, item["file_path"])).convert("RGB")
-
-        pixel_values = self.processor(image, return_tensors="pt").pixel_values
-
-        labels = torch.from_numpy(item[1:].values.astype(np.float32))
-
-        return pixel_values.squeeze(0), labels  # Squeeze off the batch dimension.
-
-    def __len__(self):
-        return len(self.df)
-
-
-def collate_fn(batch):
-    data = torch.stack([item[0] for item in batch])  # pixel values
-    target = torch.stack([item[1] for item in batch])  # class values vector
-    return data, target
+from utils.collate import collate_fn
 
 
 class LitDataModule(L.LightningDataModule):
     def __init__(
         self,
+        model_id: str,
         data_dir: str,
         micro_batch_size: int,
         val_split_ratio: float,
     ):
         super().__init__()
 
+        self.processor = AutoImageProcessor.from_pretrained(model_id)
+
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(logger=False)
 
     def load_mapped_datasets(self):
 
-        df = pd.read_csv("FINAL_expanded_2_3.csv")
-        df.head()
+        # Note: This function cannot access any properties of self directly, or it
+        # will mess up deterministic serialization. Instead, pass them as arguments.
+        def transform(
+            x,
+            processor: AutoImageProcessor,
+        ):
+            pixel_values = processor(x["image"], return_tensors="pt").pixel_values
 
-        model_id = "google/siglip-so400m-patch14-384"
-        processor = AutoImageProcessor.from_pretrained(model_id)
+            labels = torch.tensor([x["lturn"], x["rturn"], x["noturn"]])
 
-        return {"train": MultiLabelDataset(root="./data", df=df, processor=processor)}
+            return pixel_values.squeeze(0), labels  # Squeeze off the batch dimension.
+
+        # All the data will be in the root level of data_dir,
+        # so it's all considered part of the "train" split.
+        return (
+            load_dataset(
+                "imagefolder", data_dir=self.hparams.data_dir, split="train"
+            ).map(
+                partial(
+                    transform,
+                    tokenizer=self.hparams.tokenizer,
+                ),
+                num_proc=32,
+            )
+            # After map so changing test_size doesn't bust the cache.
+            # Seed so the auto shuffle is 100% idempotent, just in case.
+            .train_test_split(test_size=self.hparams.val_split_ratio, seed=1337)
+            # Convert all relevant types to tensors. All int32s will become int64s.
+            .with_format("torch")
+        )
 
     def prepare_data(self):
         # Download the dataset and build caches on a
@@ -75,9 +71,6 @@ class LitDataModule(L.LightningDataModule):
         self.hf_datasets = self.load_mapped_datasets()
 
     def train_dataloader(self):
-
-        # TODO: why is estimated stepping batches so low????
-
         return DataLoader(
             self.hf_datasets["train"],
             collate_fn=collate_fn,

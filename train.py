@@ -8,7 +8,6 @@ from typing import List, Optional
 
 from pprintjson import pprintjson
 
-
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 from lightning.pytorch.strategies import DDPStrategy
