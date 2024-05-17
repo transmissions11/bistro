@@ -128,10 +128,10 @@ class LitModel(L.LightningModule):
             model_id,
             problem_type="multi_label_classification",
             id2label={0: "lturn", 1: "rturn", 2: "noturn"},
-            config=AutoConfig.from_pretrained(
-                model_id,
-                vision_config={"vision_use_head": False},
-            ),
+            # config=AutoConfig.from_pretrained(
+            #     model_id,
+            #     vision_config={"vision_use_head": False},
+            # ),
         )
 
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
