@@ -98,9 +98,6 @@ class LitModel(L.LightningModule):
             else:
                 print("used parameter:", name)
 
-        print(self.model.config)
-        print(self.model.vision_model.config)
-
     def configure_model(self):
         # Ensure this function is idempotent, as
         # the trainer may call it multiple times.
@@ -118,6 +115,15 @@ class LitModel(L.LightningModule):
         t0 = g0_print("Initializing model...")
 
         model_id = "google/siglip-so400m-patch14-384"
+        import ipdb
+
+        ipdb.set_trace(
+            cond=(
+                (0 == torch.distributed.get_rank())
+                if torch.distributed.is_initialized()
+                else True
+            )
+        )
         self.model = AutoModelForImageClassification.from_pretrained(
             model_id,
             problem_type="multi_label_classification",
