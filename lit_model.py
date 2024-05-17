@@ -127,12 +127,12 @@ class LitModel(L.LightningModule):
 
         config = AutoConfig.from_pretrained(
             model_id,
+            problem_type="multi_label_classification",
+            id2label={0: "lturn", 1: "rturn", 2: "noturn"},
             vision_config={"vision_use_head": False},
         )
         self.model = AutoModelForImageClassification.from_pretrained(
             model_id,
-            problem_type="multi_label_classification",
-            id2label={0: "lturn", 1: "rturn", 2: "noturn"},
             config=config,
         )
 
