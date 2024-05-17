@@ -19,7 +19,7 @@ def suppress_uncontrollable_warnings():
     warnings.filterwarnings(
         "ignore",
         # https://github.com/Lightning-AI/pytorch-lightning/issues/12862
-        message=r".*Using `DistributedSampler` with the dataloaders.*",
+        message=r".*Using `DistributedSampler` with the dataloaders",
         module="lightning",
     )
     warnings.filterwarnings(
