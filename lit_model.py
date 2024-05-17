@@ -5,7 +5,7 @@ import lightning as L
 
 from pathlib import Path
 
-from typing import Callable, Optional, cast
+from typing import Callable, Optional, Tuple, cast
 
 from lightning.pytorch.loggers import WandbLogger
 
@@ -21,6 +21,7 @@ class LitModel(L.LightningModule):
         warmup_ratio: float,
         ################################
         weight_decay: float,
+        betas: Tuple[float, float],
         ################################
         # If None, will use random weights.
         checkpoint_path: Optional[Path] = None,
@@ -66,6 +67,7 @@ class LitModel(L.LightningModule):
             self.model.parameters(),
             lr=self.hparams.learning_rate,
             weight_decay=self.hparams.weight_decay,
+            betas=self.hparams.betas,
         )
 
         if self.trainer.is_global_zero:

@@ -4,7 +4,7 @@ import lightning as L
 
 from pathlib import Path
 
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from pprintjson import pprintjson
 
@@ -38,7 +38,9 @@ def main(
     ####################################################################
     learning_rate: float = 5e-5,
     warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
-    weight_decay: float = 0.00,  # Generally not used for finetuning.
+    weight_decay: float = 0.00,  # Torch's AdamW class defaults to 0.01.
+    beta1: float = 0.9,
+    beta2: float = 0.999,
     ####################################################################
     val_split_ratio: float = 0.05,  # 5% of training dataset.
     val_check_interval: float = 0.05,  # After every 5% of training.
@@ -129,6 +131,7 @@ def main(
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         weight_decay=weight_decay,
+        betas=(beta1, beta2),
         requires_grad=(
             # If params_to_freeze is set, freeze all
             # params except those in params_to_freeze.
