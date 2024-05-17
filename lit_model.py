@@ -131,12 +131,13 @@ class LitModel(L.LightningModule):
             problem_type="multi_label_classification",
             id2label={0: "lturn", 1: "rturn", 2: "noturn"},
         )
-        config.vision_config.vision_use_head = False
 
         self.model = AutoModelForImageClassification.from_pretrained(
             model_id,
             config=config,
         )
+
+        del self.model.vision_model.head
 
         # TODO verify model is bfloat16
 
