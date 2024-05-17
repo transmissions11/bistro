@@ -1,4 +1,5 @@
 torch>=2.1.0
+torchvision>=2.1.0
 lightning>=2.1.2
 tokenizers
 requests
@@ -10,3 +11,6 @@ datasets
 pprintjson
 decorator
 ipdb
+PIL
+pandas
+transformers

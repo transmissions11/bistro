@@ -8,7 +8,6 @@ from typing import List, Optional
 
 from pprintjson import pprintjson
 
-from lit_gpt.tokenizer import Tokenizer
 
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
@@ -20,15 +19,12 @@ from utils.warnings import suppress_uncontrollable_warnings, elevate_important_w
 from lit_datamodule import LitDataModule
 from lit_model import LitModel
 
-from model import Config
-
 
 @iexd  # Will drop into ipdb if an exception is raised on rank zero.
 def main(
     project: str = "bistro",
     ####################################################################
     data_dir: Path = Path("data"),
-    base_model_dir: Path = Path("checkpoints/lmsys/vicuna-7b-v1.5"),
     ####################################################################
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
@@ -39,7 +35,7 @@ def main(
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
     epochs: int = 1,  # Make this -1 to train forever / until max_time.
     ####################################################################
-    learning_rate: float = 2e-5,
+    learning_rate: float = 5e-5,
     warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
     weight_decay: float = 0.00,  # Generally not used for finetuning.
     ####################################################################
@@ -127,12 +123,7 @@ def main(
         ),
     )
 
-    tokenizer = Tokenizer(base_model_dir)
-
     model = LitModel(
-        model_config=Config.from_name(name=base_model_dir.name),
-        tokenizer=tokenizer,
-        checkpoint_path=base_model_dir / "lit_model.pth",
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         weight_decay=weight_decay,
@@ -142,17 +133,18 @@ def main(
             (lambda name: name not in params_to_freeze)
             if params_to_freeze is not None
             # If params_to_train is set, only train those.
-            else (lambda name: name in params_to_train)
-            if params_to_train is not None
-            # Otherwise, train everything.
-            else None
+            else (
+                (lambda name: name in params_to_train)
+                if params_to_train is not None
+                # Otherwise, train everything.
+                else None
+            )
         ),
         watch_gradients=watch_gradients,
     )
 
     datamodule = LitDataModule(
         data_dir=str(data_dir),
-        tokenizer=tokenizer,
         micro_batch_size=micro_batch_size,
         val_split_ratio=val_split_ratio,
     )

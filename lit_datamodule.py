@@ -1,23 +1,62 @@
 import lightning.pytorch as L
 
-from functools import partial
+from torch.utils.data import DataLoader, Dataset
 
-from torch.utils.data import DataLoader
+from PIL import Image
 
-from lit_gpt import Tokenizer
+import numpy as np
+import torch
 
 from datasets import load_dataset
 
-from utils.padding import pad_collate_fn
-from utils.masking import mask_before_inclusive
-from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE, fmt_vicuna_input
+from torchvision.transforms import Compose, Resize, ToTensor, Normalize
+
+import pandas as pd
+
+from transformers import AutoImageProcessor
+
+import os
+
+
+class MultiLabelDataset(Dataset):
+    def __init__(self, root, df, transform):
+        self.root = root
+        self.df = df
+        self.transform = transform
+
+    def __getitem__(self, idx):
+        item = self.df.iloc[idx]
+        # get image
+        image_path = os.path.join(self.root, item["file_path"])
+        image = Image.open(image_path).convert("RGB")
+
+        # prepare image for the model
+        pixel_values = self.transform(image)
+
+        # get labels
+        labels = item[1:].values.astype(
+            np.float32
+        )  # TODO: verify this eventually ends up as bfloat16
+
+        # turn into PyTorch tensor
+        labels = torch.from_numpy(labels)
+
+        return pixel_values, labels
+
+    def __len__(self):
+        return len(self.df)
+
+
+def collate_fn(batch):
+    data = torch.stack([item[0] for item in batch])  # pixel values
+    target = torch.stack([item[1] for item in batch])  # class values vector
+    return data, target
 
 
 class LitDataModule(L.LightningDataModule):
     def __init__(
         self,
         data_dir: str,
-        tokenizer: Tokenizer,
         micro_batch_size: int,
         val_split_ratio: float,
     ):
@@ -27,38 +66,27 @@ class LitDataModule(L.LightningDataModule):
         self.save_hyperparameters(logger=False)
 
     def load_mapped_datasets(self):
-        # Note: This function cannot access any properties of self directly, or it
-        # will mess up deterministic serialization. Instead, pass them as arguments.
-        def transform(x, tokenizer: Tokenizer):
-            seq = tokenizer.encode(
-                fmt_vicuna_input(x["inputs"], x["targets"]),  # Put in Vicuna format.
-                eos=True,  # Don't see why you wouldn't want to train with an eos_token.
-            )
 
-            return {
-                "inputs": seq[:-1],
-                # Mask everything before the assistant response.
-                "targets": mask_before_inclusive(
-                    VICUNA_END_OF_USER_PROMPT_SEQUENCE, seq[1:], tokenizer
-                ),
-            }
+        df = pd.read_csv("FINAL_expanded_2_3.csv")
+        df.head()
 
-        return (
-            # All the data will be in the root level of data_dir,
-            # so it's all considered part of the "train" split.
-            load_dataset("parquet", data_dir=self.hparams.data_dir, split="train").map(
-                partial(
-                    transform,
-                    tokenizer=self.hparams.tokenizer,
-                ),
-                num_proc=32,
-            )
-            # After map so changing test_size doesn't bust the cache.
-            # Seed so the auto shuffle is 100% idempotent, just in case.
-            .train_test_split(test_size=self.hparams.val_split_ratio, seed=1337)
-            # Convert all relevant types to tensors. All int32s will become int64s.
-            .with_format("torch")
+        model_id = "google/siglip-so400m-patch14-384"
+        processor = AutoImageProcessor.from_pretrained(model_id)
+
+        # get appropriate size, mean and std based on the image processor
+        size = processor.size["height"]
+        mean = processor.image_mean
+        std = processor.image_std
+
+        transform = Compose(
+            [
+                Resize((size, size)),
+                ToTensor(),
+                Normalize(mean=mean, std=std),
+            ]
         )
+
+        return {"train": MultiLabelDataset(root="./", df=df, transform=transform)}
 
     def prepare_data(self):
         # Download the dataset and build caches on a
@@ -72,7 +100,7 @@ class LitDataModule(L.LightningDataModule):
     def train_dataloader(self):
         return DataLoader(
             self.hf_datasets["train"],
-            collate_fn=pad_collate_fn,
+            collate_fn=collate_fn,
             batch_size=self.hparams.micro_batch_size,
             num_workers=8,
             pin_memory=True,
@@ -80,15 +108,15 @@ class LitDataModule(L.LightningDataModule):
             drop_last=True,
         )
 
-    def val_dataloader(self):
-        return DataLoader(
-            self.hf_datasets["test"],
-            collate_fn=pad_collate_fn,
-            # Since we're not computing and storing gradients
-            # while validating, we can use a larger batch size.
-            batch_size=self.hparams.micro_batch_size * 2,
-            num_workers=8,
-            pin_memory=True,
-            shuffle=False,
-            drop_last=True,
-        )
+    # def val_dataloader(self):
+    #     return DataLoader(
+    #         self.hf_datasets["test"],
+    #         collate_fn=pad_collate_fn,
+    #         # Since we're not computing and storing gradients
+    #         # while validating, we can use a larger batch size.
+    #         batch_size=self.hparams.micro_batch_size * 2,
+    #         num_workers=8,
+    #         pin_memory=True,
+    #         shuffle=False,
+    #         drop_last=True,
+    #     )

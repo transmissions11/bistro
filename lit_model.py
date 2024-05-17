@@ -9,22 +9,13 @@ from typing import Callable, Optional, cast
 
 from lightning.pytorch.loggers import WandbLogger
 
-from lit_gpt import Config, Tokenizer
 
-from utils.loss import compute_loss
-from utils.inference import inference_model
-from utils.tensors import find_subtensor_end
-from utils.padding import strip_right_pad, ignored_tkn
-from utils.vicuna import VICUNA_END_OF_USER_PROMPT_SEQUENCE
-
-from model import GPT
+from transformers import AutoModelForImageClassification
 
 
 class LitModel(L.LightningModule):
     def __init__(
         self,
-        model_config: Config,
-        tokenizer: Tokenizer,
         ################################
         learning_rate: float,
         warmup_ratio: float,
@@ -55,62 +46,20 @@ class LitModel(L.LightningModule):
         )
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
-        inputs, targets = batch["inputs"], batch["targets"]
-        loss = compute_loss(self.model, input_ids=inputs, target_ids=targets)
+        pixel_values, labels = batch
 
-        self.log("train_loss", loss)
+        outputs = self.model(pixel_values=pixel_values, labels=labels)
 
-        return loss
+        self.log("train_loss", outputs.loss)
+
+        return outputs.loss
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
-        inputs, targets = batch["inputs"], batch["targets"]
-        loss = compute_loss(self.model, input_ids=inputs, target_ids=targets)
+        pixel_values, labels = batch
 
-        self.log("val_loss", loss, on_epoch=True, prog_bar=True, sync_dist=True)
+        outputs = self.model(pixel_values=pixel_values, labels=labels)
 
-        # Log a few sample inferences from the validation set to W&B.
-        if batch_idx == 0:
-            tokenizer = self.hparams.tokenizer
-
-            prompt_end_tkns = tokenizer.encode(
-                VICUNA_END_OF_USER_PROMPT_SEQUENCE,
-                device=self.device,
-                # bos/eos=False because the "end tokens"
-                # will be in the middle of the sequence.
-                bos=False,
-                eos=False,
-            )
-
-            def process_val_sample(sample, target):
-                sample = strip_right_pad(sample)
-                target = strip_right_pad(target)
-
-                input_ids = sample[: find_subtensor_end(sample, prompt_end_tkns) + 1]
-
-                return (
-                    tokenizer.decode(input_ids),
-                    tokenizer.decode(
-                        inference_model(
-                            self.model,
-                            input_ids,
-                            temperature=0.00,  # Sample 100% greedily.
-                            max_new_tokens=100,  # Should hit an eos token first.
-                            eos_id=tokenizer.eos_id,
-                        )
-                    ),
-                    # Note: target != ignored_tkn strips away ignored_tkn tokens entirely,
-                    # which may lead to confusion if ignored_tkn is used between real tokens.
-                    tokenizer.decode(target[target != ignored_tkn]),
-                )
-
-            self.logger.log_text(
-                key="val_samples",
-                columns=["input", "output", "target"],
-                data=[
-                    process_val_sample(inputs[i], targets[i])
-                    for i in range(len(inputs))  # Full batch.
-                ],
-            )
+        self.log("val_loss", outputs.loss, on_epoch=True, prog_bar=True, sync_dist=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
@@ -151,18 +100,15 @@ class LitModel(L.LightningModule):
             return time.time()  # For timing convenience.
 
         t0 = g0_print("Initializing model...")
-        self.model = GPT(config=self.hparams.model_config)
-        g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
-        if self.checkpoint_path is not None:
-            t0 = g0_print(f"Loading checkpoint weights from {self.checkpoint_path}...")
-            self.model.load_state_dict(
-                # mmap=True requires checkpoint_path to be a str.
-                torch.load(str(self.checkpoint_path), mmap=True),
-                strict=False,
-                assign=True,
-            )
-            g0_print(f"Loaded checkpoint weights in {time.time() - t0:.3f}s.")
+        model_id = "google/siglip-so400m-patch14-384"
+        self.model = AutoModelForImageClassification.from_pretrained(
+            model_id,
+            problem_type="multi_label_classification",
+            id2label={0: "lturn", 1: "rturn", 2: "noturn"},
+        )
+
+        g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
         if self.requires_grad is not None:
             t0 = g0_print("Toggling requires_grad on specified model parameters...")
