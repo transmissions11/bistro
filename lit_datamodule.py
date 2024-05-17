@@ -36,25 +36,25 @@ class LitDataModule(L.LightningDataModule):
             x,
             processor: AutoImageProcessor,
         ):
-            print("hello?")
             pixel_values = processor(x["image"], return_tensors="pt").pixel_values
 
             labels = torch.tensor([x["lturn"], x["rturn"], x["noturn"]])
 
             return pixel_values.squeeze(0), labels  # Squeeze off the batch dimension.
 
+        print("helloooooooooooooooooooooo")
+
         # All the data will be in the root level of data_dir,
         # so it's all considered part of the "train" split.
         return (
-            load_dataset(
-                "imagefolder", data_dir=self.hparams.data_dir, split="train"
-            ).map(
-                partial(
-                    transform,
-                    tokenizer=self.hparams.tokenizer,
-                ),
-                num_proc=32,
-            )
+            load_dataset("imagefolder", data_dir=self.hparams.data_dir, split="train")
+            # .map(
+            #     partial(
+            #         transform,
+            #         tokenizer=self.hparams.tokenizer,
+            #     ),
+            #     num_proc=32,
+            # )
             # After map so changing test_size doesn't bust the cache.
             # Seed so the auto shuffle is 100% idempotent, just in case.
             .train_test_split(test_size=self.hparams.val_split_ratio, seed=1337)
