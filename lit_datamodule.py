@@ -36,6 +36,7 @@ class LitDataModule(L.LightningDataModule):
             x,
             processor: AutoImageProcessor,
         ):
+            print("hello?")
             pixel_values = processor(x["image"], return_tensors="pt").pixel_values
 
             labels = torch.tensor([x["lturn"], x["rturn"], x["noturn"]])
