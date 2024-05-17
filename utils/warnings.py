@@ -19,14 +19,14 @@ def suppress_uncontrollable_warnings():
     warnings.filterwarnings(
         "ignore",
         # https://github.com/Lightning-AI/pytorch-lightning/issues/12862
-        message=r".*Using `DistributedSampler` with the dataloaders",
+        message=r".*Using `DistributedSampler` with the dataloaders.*",
         module="lightning",
     )
     warnings.filterwarnings(
         "ignore",
         # https://github.com/huggingface/transformers/issues/5421
-        message=r".*should probably TRAIN this model on a down-stream task",
-        module="lightning",
+        message=r".*should probably TRAIN this model on a down-stream task.*",
+        module="transformers",
     )
 
 
