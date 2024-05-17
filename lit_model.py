@@ -122,9 +122,8 @@ class LitModel(L.LightningModule):
             config={"vision_config": {"vision_use_head": False}},
         )
 
-        # print(self.model.config)
-        # print(self.model.use_head)
-        # print(self.model.vision_use_head)
+        print(self.model.config)
+        print(self.model.vision_model.config)
 
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
