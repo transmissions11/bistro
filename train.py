@@ -31,7 +31,7 @@ def main(
     ####################################################################
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
-    micro_batch_size: int = 32,
+    micro_batch_size: int = 40,
     gradient_accumulation_iters: int = 4,
     precision: str = "bf16-true",
     ####################################################################
@@ -52,7 +52,7 @@ def main(
     params_to_freeze: Optional[List[str]] = None,
     params_to_train: Optional[List[str]] = None,
     ####################################################################
-    log_every_n_steps: int = 5,
+    log_every_n_steps: int = 1,
     disable_wandb: bool = False,  # Also useful for debugging.
     watch_gradients: bool = False,  # Very slow if training many params.
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
