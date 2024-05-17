@@ -54,10 +54,18 @@ class LitDataModule(L.LightningDataModule):
 
         self.df = pd.read_csv(os.path.join(data_dir, "metadata.csv"))
 
-        # logger=False since we already log hparams manually in train.py.
-        self.save_hyperparameters(
-            ignore=["processor", "df", "watch_gradients"], logger=False
+        import ipdb
+
+        ipdb.set_trace(
+            cond=(
+                (0 == torch.distributed.get_rank())
+                if torch.distributed.is_initialized()
+                else True
+            )
         )
+
+        # logger=False since we already log hparams manually in train.py.
+        self.save_hyperparameters(ignore=["processor", "df"], logger=False)
 
     def setup(self, stage: str):
         dataset = MultiLabelDataset(
@@ -71,9 +79,12 @@ class LitDataModule(L.LightningDataModule):
 
         train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
-        print(f"Training on {train_size} examples and testing on {test_size} examples.")
+        if self.trainer.is_global_zero:
+            print(
+                f"Training on {train_size:,} examples and testing on {test_size:,} examples."
+            )
 
-        return {"train": train_dataset, "test": test_dataset}
+        self.datasets = {"train": train_dataset, "test": test_dataset}
 
     def train_dataloader(self):
         return DataLoader(
