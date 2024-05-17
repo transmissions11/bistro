@@ -31,7 +31,7 @@ def main(
     ####################################################################
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
-    micro_batch_size: int = 40,
+    micro_batch_size: int = 36,
     gradient_accumulation_iters: int = 4,
     precision: str = "bf16-true",
     ####################################################################
