@@ -11,6 +11,7 @@ from pprintjson import pprintjson
 
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
+from lightning.pytorch.strategies import DDPStrategy
 
 from utils.debugging import iexd
 from utils.naming import get_clean_commit_msg, get_safe_ckpt_dirpath
@@ -85,7 +86,7 @@ def main(
 
     trainer = L.Trainer(
         devices=devices,
-        strategy=strategy,
+        strategy=DDPStrategy(find_unused_parameters=True),
         max_epochs=epochs,
         max_time=max_time,
         profiler=profiler,
