@@ -86,7 +86,7 @@ class LitDataModule(L.LightningDataModule):
             ]
         )
 
-        return {"train": MultiLabelDataset(root="./", df=df, transform=transform)}
+        return {"train": MultiLabelDataset(root="./data", df=df, transform=transform)}
 
     def prepare_data(self):
         # Download the dataset and build caches on a
