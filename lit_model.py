@@ -10,7 +10,11 @@ from typing import Callable, Optional, cast
 from lightning.pytorch.loggers import WandbLogger
 
 
-from transformers import AutoModelForImageClassification
+from transformers import (
+    AutoModelForImageClassification,
+    SiglipConfig,
+    SiglipVisionConfig,
+)
 
 
 class LitModel(L.LightningModule):
@@ -128,7 +132,9 @@ class LitModel(L.LightningModule):
             model_id,
             problem_type="multi_label_classification",
             id2label={0: "lturn", 1: "rturn", 2: "noturn"},
-            config={"vision_config": {"vision_use_head": False}},
+            config=SiglipConfig(
+                vision_config=SiglipVisionConfig(vision_use_head=False)
+            ),
         )
 
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
