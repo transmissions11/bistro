@@ -146,6 +146,7 @@ def main(
     )
 
     datamodule = LitDataModule(
+        model_id=model_id,
         data_dir=str(data_dir),
         micro_batch_size=micro_batch_size,
         val_split_ratio=val_split_ratio,
