@@ -19,27 +19,23 @@ import os
 
 
 class MultiLabelDataset(Dataset):
-    def __init__(self, root, df, transform):
+    def __init__(self, root, df, processor):
         self.root = root
         self.df = df
-        self.transform = transform
+        self.pr
 
     def __getitem__(self, idx):
         item = self.df.iloc[idx]
+
         # get image
         image_path = os.path.join(self.root, item["file_path"])
         image = Image.open(image_path).convert("RGB")
 
         # prepare image for the model
-        pixel_values = self.transform(image)
+        pixel_values = self.processor(image, return_tensors="pt").pixel_values
 
         # get labels
-        labels = item[1:].values.astype(
-            np.float32
-        )  # TODO: verify this eventually ends up as bfloat16
-
-        # turn into PyTorch tensor
-        labels = torch.from_numpy(labels)
+        labels = item[1:]
 
         return pixel_values, labels
 
@@ -73,20 +69,7 @@ class LitDataModule(L.LightningDataModule):
         model_id = "google/siglip-so400m-patch14-384"
         processor = AutoImageProcessor.from_pretrained(model_id)
 
-        # get appropriate size, mean and std based on the image processor
-        size = processor.size["height"]
-        mean = processor.image_mean
-        std = processor.image_std
-
-        transform = Compose(
-            [
-                Resize((size, size)),
-                ToTensor(),
-                Normalize(mean=mean, std=std),
-            ]
-        )
-
-        return {"train": MultiLabelDataset(root="./data", df=df, transform=transform)}
+        return {"train": MultiLabelDataset(root="./data", df=df, processor=processor)}
 
     def prepare_data(self):
         # Download the dataset and build caches on a
