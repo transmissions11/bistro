@@ -83,7 +83,7 @@ class LitDataModule(L.LightningDataModule):
 
     def val_dataloader(self):
         return DataLoader(
-            self.hf_datasets["train"],
+            self.hf_datasets["test"],
             collate_fn=collate_fn,
             # Since we're not computing and storing gradients
             # while validating, we can use a larger batch size.
