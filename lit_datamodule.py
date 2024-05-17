@@ -2,11 +2,7 @@ import torch
 
 import lightning.pytorch as L
 
-from functools import partial
-
-from torch.utils.data import DataLoader
-
-from datasets import load_dataset
+from torch.utils.data import DataLoader, Dataset, random_split
 
 from transformers import AutoImageProcessor
 
@@ -14,7 +10,34 @@ from utils.collate import collate_fn
 
 from PIL import Image
 
+import numpy as np
+
+import pandas as pd
+
 import os
+
+
+class MultiLabelDataset(Dataset):
+    def __init__(self, data_dir, df, processor):
+        self.data_dir = data_dir
+        self.df = df
+        self.processor = processor
+
+    def __getitem__(self, idx):
+        item = self.df.iloc[idx]
+
+        image = Image.open(os.path.join(self.data_dir, item["file_name"])).convert(
+            "RGB"
+        )
+
+        pixel_values = self.processor(image, return_tensors="pt").pixel_values
+
+        labels = torch.from_numpy(item[1:].values.astype(np.float32))
+
+        return pixel_values.squeeze(0), labels  # Squeeze off the batch dimension.
+
+    def __len__(self):
+        return len(self.df)
 
 
 class LitDataModule(L.LightningDataModule):
@@ -29,59 +52,32 @@ class LitDataModule(L.LightningDataModule):
 
         self.processor = AutoImageProcessor.from_pretrained(model_id)
 
+        self.df = pd.read_csv(os.path.join(data_dir, "metadata.csv"))
+
         # logger=False since we already log hparams manually in train.py.
-        self.save_hyperparameters(logger=False)
-
-    def load_mapped_datasets(self):
-        # Note: This function cannot access any properties of self directly, or it
-        # will mess up deterministic serialization. Instead, pass them as arguments.
-        def transform(
-            x,
-            processor: AutoImageProcessor,
-            data_dir: str,
-        ):
-            image = Image.open(os.path.join(data_dir, x["file_name"])).convert("RGB")
-
-            pixel_values = processor(image, return_tensors="pt").pixel_values
-
-            labels = torch.tensor([x["lturn"], x["rturn"], x["noturn"]])
-
-            return {"pixel_values": pixel_values.squeeze(0), "labels": labels}
-
-        # All the data will be in the root level of data_dir,
-        # so it's all considered part of the "train" split.
-        return (
-            load_dataset(
-                "csv",
-                data_files=os.path.join(self.hparams.data_dir, "metadata.csv"),
-                split="train",
-            ).map(
-                partial(
-                    transform,
-                    processor=self.processor,
-                    data_dir=self.hparams.data_dir,
-                ),
-                num_proc=128,
-            )
-            # After map so changing test_size doesn't bust the cache.
-            # Seed so the auto shuffle is 100% idempotent, just in case.
-            .train_test_split(test_size=self.hparams.val_split_ratio, seed=1337)
-            # Convert all relevant types to tensors. All int32s will become int64s.
-            .with_format("torch")
+        self.save_hyperparameters(
+            ignore=["processor", "df", "watch_gradients"], logger=False
         )
 
-    def prepare_data(self):
-        # Download the dataset and build caches on a
-        # single process first to avoid waste w/ DDP.
-        self.load_mapped_datasets()
-
     def setup(self, stage: str):
-        # Load the dataset on each process, from cache.
-        self.hf_datasets = self.load_mapped_datasets()
+        dataset = MultiLabelDataset(
+            data_dir=self.hparams.data_dir,
+            df=self.df,
+            processor=self.processor,
+        )
+
+        test_size = int(len(dataset) * self.hparams.val_split_ratio)
+        train_size = len(dataset) - test_size
+
+        train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+
+        print(f"Training on {train_size} examples and testing on {test_size} examples.")
+
+        return {"train": train_dataset, "test": test_dataset}
 
     def train_dataloader(self):
         return DataLoader(
-            self.hf_datasets["train"],
+            self.datasets["train"],
             collate_fn=collate_fn,
             batch_size=self.hparams.micro_batch_size,
             num_workers=8,
@@ -92,7 +88,7 @@ class LitDataModule(L.LightningDataModule):
 
     def val_dataloader(self):
         return DataLoader(
-            self.hf_datasets["test"],
+            self.datasets["test"],
             collate_fn=collate_fn,
             # Since we're not computing and storing gradients
             # while validating, we can use a larger batch size.
