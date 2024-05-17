@@ -98,6 +98,9 @@ class LitModel(L.LightningModule):
             else:
                 print("used parameter:", name)
 
+        print(self.model.config)
+        print(self.model.vision_model.config)
+
     def configure_model(self):
         # Ensure this function is idempotent, as
         # the trainer may call it multiple times.
@@ -121,9 +124,6 @@ class LitModel(L.LightningModule):
             id2label={0: "lturn", 1: "rturn", 2: "noturn"},
             config={"vision_config": {"vision_use_head": False}},
         )
-
-        print(self.model.config)
-        print(self.model.vision_model.config)
 
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
