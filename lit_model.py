@@ -9,8 +9,7 @@ from typing import Callable, Optional, cast
 
 from lightning.pytorch.loggers import WandbLogger
 
-
-from transformers import AutoModelForImageClassification, AutoConfig
+from transformers import AutoModelForImageClassification, AutoConfig, logging
 
 
 class LitModel(L.LightningModule):
@@ -113,6 +112,11 @@ class LitModel(L.LightningModule):
         # that were not used in producing the loss returned by training_step."
         # Option added in https://github.com/huggingface/transformers/pull/30814.
         config.vision_config.vision_use_head = False
+
+        # To avoid "You should probably TRAIN this model on a down-stream task"
+        # warning. See: https://github.com/huggingface/transformers/issues/5421
+        if not self.trainer.is_global_zero:
+            logging.set_verbosity(logging.ERROR)
 
         self.model = AutoModelForImageClassification.from_pretrained(
             config._name_or_path,
