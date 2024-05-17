@@ -4,7 +4,6 @@ from torch.utils.data import DataLoader, Dataset
 
 from PIL import Image
 
-import numpy as np
 import torch
 
 from datasets import load_dataset
@@ -27,15 +26,11 @@ class MultiLabelDataset(Dataset):
     def __getitem__(self, idx):
         item = self.df.iloc[idx]
 
-        # get image
-        image_path = os.path.join(self.root, item["file_path"])
-        image = Image.open(image_path).convert("RGB")
+        image = Image.open(os.path.join(self.root, item["file_path"])).convert("RGB")
 
-        # prepare image for the model
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 
-        # get labels
-        labels = item[1:]
+        labels = torch.tensor(item[1:])
 
         return pixel_values, labels
 
