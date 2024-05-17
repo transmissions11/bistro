@@ -98,6 +98,16 @@ class LitModel(L.LightningModule):
             else:
                 print("used parameter:", name)
 
+        import ipdb
+
+        ipdb.set_trace(
+            cond=(
+                (0 == torch.distributed.get_rank())
+                if torch.distributed.is_initialized()
+                else True
+            )
+        )
+
     def configure_model(self):
         # Ensure this function is idempotent, as
         # the trainer may call it multiple times.
@@ -115,15 +125,6 @@ class LitModel(L.LightningModule):
         t0 = g0_print("Initializing model...")
 
         model_id = "google/siglip-so400m-patch14-384"
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(
-                (0 == torch.distributed.get_rank())
-                if torch.distributed.is_initialized()
-                else True
-            )
-        )
 
         config = AutoConfig.from_pretrained(
             model_id,
@@ -136,6 +137,8 @@ class LitModel(L.LightningModule):
             model_id,
             config=config,
         )
+
+        # TODO verify model is bfloat16
 
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
 
