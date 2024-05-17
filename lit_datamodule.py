@@ -46,7 +46,7 @@ class LitDataModule(L.LightningDataModule):
 
             labels = torch.tensor([x["lturn"], x["rturn"], x["noturn"]])
 
-            return pixel_values.squeeze(0), labels  # Squeeze off the batch dimension.
+            return {"pixel_values": pixel_values.squeeze(0), "labels": labels}
 
         # All the data will be in the root level of data_dir,
         # so it's all considered part of the "train" split.
