@@ -93,7 +93,7 @@ class LitDataModule(L.LightningDataModule):
             collate_fn=collate_fn,
             # Since we're not computing and storing gradients
             # while validating, we can use a larger batch size.
-            batch_size=self.hparams.micro_batch_size * 2,
+            batch_size=self.hparams.micro_batch_size * 16,
             num_workers=8,
             pin_memory=True,
             shuffle=False,
