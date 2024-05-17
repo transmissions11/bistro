@@ -85,6 +85,17 @@ class LitModel(L.LightningModule):
             },
         }
 
+    def on_after_backward(self) -> None:
+        super().on_after_backward()
+        if self.current_epoch != 0:
+            return
+
+        # This function is useful for debuging the following error:
+        # RuntimeError: It looks like your LightningModule has parameters that were not used in producing the loss returned by training_step.
+        for name, p in self.named_parameters():
+            if p.grad is None:
+                print("unused parameter (check code or freeze it):", name)
+
     def configure_model(self):
         # Ensure this function is idempotent, as
         # the trainer may call it multiple times.
