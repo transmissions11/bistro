@@ -12,6 +12,10 @@ from transformers import AutoImageProcessor
 
 from utils.collate import collate_fn
 
+from PIL import Image
+
+import os
+
 
 class LitDataModule(L.LightningDataModule):
     def __init__(
@@ -29,14 +33,16 @@ class LitDataModule(L.LightningDataModule):
         self.save_hyperparameters(logger=False)
 
     def load_mapped_datasets(self):
-
         # Note: This function cannot access any properties of self directly, or it
         # will mess up deterministic serialization. Instead, pass them as arguments.
         def transform(
             x,
             processor: AutoImageProcessor,
+            data_dir: str,
         ):
-            pixel_values = processor(x["image"], return_tensors="pt").pixel_values
+            image = Image.open(os.path.join(data_dir, x["file_path"])).convert("RGB")
+
+            pixel_values = processor(image, return_tensors="pt").pixel_values
 
             labels = torch.tensor([x["lturn"], x["rturn"], x["noturn"]])
 
@@ -46,11 +52,14 @@ class LitDataModule(L.LightningDataModule):
         # so it's all considered part of the "train" split.
         return (
             load_dataset(
-                "imagefolder", data_dir=self.hparams.data_dir, split="train"
+                "csv",
+                data_files=os.path.join(self.hparams.data_dir, "metadata.csv"),
+                split="train",
             ).map(
                 partial(
                     transform,
-                    tokenizer=self.hparams.tokenizer,
+                    processor=self.processor,
+                    data_dir=self.hparams.data_dir,
                 ),
                 num_proc=32,
             )
