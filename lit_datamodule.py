@@ -65,7 +65,7 @@ class LitDataModule(L.LightningDataModule):
         )
 
         # logger=False since we already log hparams manually in train.py.
-        self.save_hyperparameters(ignore=["processor", "df"], logger=False)
+        self.save_hyperparameters(logger=False)
 
     def setup(self, stage: str):
         dataset = MultiLabelDataset(
