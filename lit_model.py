@@ -13,7 +13,6 @@ from lightning.pytorch.loggers import WandbLogger
 from transformers import (
     AutoModelForImageClassification,
     SiglipConfig,
-    SiglipVisionConfig,
 )
 
 
@@ -133,7 +132,7 @@ class LitModel(L.LightningModule):
             problem_type="multi_label_classification",
             id2label={0: "lturn", 1: "rturn", 2: "noturn"},
             config=SiglipConfig(
-                vision_config=SiglipVisionConfig(vision_use_head=False)
+                vision_config={"vision_use_head": False},
             ),
         )
 
