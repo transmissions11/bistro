@@ -68,7 +68,8 @@ class LitModel(L.LightningModule):
             weight_decay=self.hparams.weight_decay,
         )
 
-        print("Estimated total steps:", self.trainer.estimated_stepping_batches)
+        if self.trainer.is_global_zero:
+            print("Estimated total steps:", self.trainer.estimated_stepping_batches)
 
         lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
             optimizer,
