@@ -133,7 +133,9 @@ class LitModel(L.LightningModule):
         )
         self.model = AutoModelForImageClassification.from_pretrained(
             model_id,
-            config=config,
+            # config=config,
+            problem_type="multi_label_classification",
+            id2label={0: "lturn", 1: "rturn", 2: "noturn"},
         )
 
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
