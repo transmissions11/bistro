@@ -61,7 +61,7 @@ class LitDataModule(L.LightningDataModule):
                     processor=self.processor,
                     data_dir=self.hparams.data_dir,
                 ),
-                num_proc=32,
+                num_proc=128,
             )
             # After map so changing test_size doesn't bust the cache.
             # Seed so the auto shuffle is 100% idempotent, just in case.
