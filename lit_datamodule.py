@@ -54,16 +54,6 @@ class LitDataModule(L.LightningDataModule):
 
         self.df = pd.read_csv(os.path.join(data_dir, "metadata.csv"))
 
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(
-                (0 == torch.distributed.get_rank())
-                if torch.distributed.is_initialized()
-                else True
-            )
-        )
-
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(logger=False)
 
