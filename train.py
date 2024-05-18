@@ -42,8 +42,9 @@ def main(
     learning_rate: float = 2e-5,
     warmup_ratio: float = 0.05,  # Spend 5% of training steps warming.
     weight_decay: float = 0.00,  # Torch's AdamW class defaults to 0.01.
+    grad_clip: Optional[float] = None,  # A value of 1.0 is commonly used.
     beta1: float = 0.9,
-    beta2: float = 0.999,
+    beta2: float = 0.999,  # A value of 0.95 can help address loss spikes.
     ####################################################################
     val_split_ratio: float = 0.05,  # 5% of training dataset.
     val_check_interval: float = 0.05,  # After every 5% of training.
@@ -97,6 +98,7 @@ def main(
         profiler=profiler,
         deterministic="warn",
         precision=precision,
+        gradient_clip_val=grad_clip,
         val_check_interval=val_check_interval,
         log_every_n_steps=log_every_n_steps,
         enable_checkpointing=save_checkpoints,
