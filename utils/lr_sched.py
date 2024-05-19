@@ -10,6 +10,15 @@ def cosine_with_linear_warmup(
     min_learning_rate: float,
     total_steps: int,
 ) -> float:
+    import ipdb
+
+    ipdb.set_trace(
+        cond=(
+            (0 == torch.distributed.get_rank())
+            if torch.distributed.is_initialized()
+            else True
+        )
+    )
     # 1) linear warmup for warmup_steps steps
     if step < warmup_steps:
         return learning_rate * step / warmup_steps
