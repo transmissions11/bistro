@@ -89,7 +89,6 @@ class LitModel(L.LightningModule):
                             self.trainer.estimated_stepping_batches
                             * self.hparams.warmup_ratio
                         ),
-                        learning_rate=self.hparams.learning_rate,
                         min_lr_ratio=self.hparams.min_lr_ratio,
                         total_steps=self.trainer.estimated_stepping_batches,
                     ),
