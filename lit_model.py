@@ -133,7 +133,7 @@ class LitModel(L.LightningModule):
 
         # To avoid "You should probably TRAIN this model on a down-stream task"
         # warning. See: https://github.com/huggingface/transformers/issues/5421
-        if not self.trainer.is_global_zero:
+        if self._trainer and not self.trainer.is_global_zero:
             logging.set_verbosity(logging.ERROR)
 
         self.model = AutoModelForImageClassification.from_pretrained(
