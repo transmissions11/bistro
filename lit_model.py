@@ -99,7 +99,10 @@ class LitModel(L.LightningModule):
         # Can't use self.print here since it will try
         # to print via the not-yet-existent prog bar.
         def g0_print(msg: str) -> None:
-            if self.trainer.is_global_zero:
+            # self._trainer will be None if we're loading a checkpoint
+            # for inference. Can't check self.trainer directly since
+            # it will throw an error if a trainer is not connected.
+            if self._trainer is None or self.trainer.is_global_zero:
                 print(msg)
 
             return time.time()  # For timing convenience.
