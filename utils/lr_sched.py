@@ -1,7 +1,5 @@
 import math
 
-import torch
-
 
 # Note: This meant to be used with a LambdaLR lr_scheduler, which
 # means the output is not the desired learning rate at step n, rather
@@ -14,15 +12,6 @@ def cosine_with_linear_warmup(
     min_lr_ratio: float,  # Ratio of max_learning_rate to anneal down to.
     total_steps: int,
 ) -> float:
-    import ipdb
-
-    ipdb.set_trace(
-        cond=(
-            (0 == torch.distributed.get_rank())
-            if torch.distributed.is_initialized()
-            else True
-        )
-    )
     # 1) linear warmup for warmup_steps steps
     if step < warmup_steps:
         return step / warmup_steps
