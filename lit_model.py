@@ -5,6 +5,10 @@ import lightning as L
 
 from pathlib import Path
 
+from functools import partial
+
+from utils.lr_sched import cosine_with_linear_warmup
+
 from typing import Callable, Optional, Tuple, cast
 
 from lightning.pytorch.loggers import WandbLogger
@@ -28,6 +32,7 @@ class LitModel(L.LightningModule):
         ################################
         learning_rate: float,
         warmup_ratio: float,
+        min_lr_ratio: float,
         ################################
         weight_decay: float,
         betas: Tuple[float, float],
@@ -121,19 +126,27 @@ class LitModel(L.LightningModule):
             betas=self.hparams.betas,
         )
 
-        lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
-            optimizer,
-            max_lr=self.hparams.learning_rate,
-            pct_start=self.hparams.warmup_ratio,
-            total_steps=self.trainer.estimated_stepping_batches,
-            div_factor=1e10,  # Large number, so we start at 0.
-            cycle_momentum=False,
-        )
+        if self.trainer.is_global_zero:
+            print("Estimated total steps:", self.trainer.estimated_stepping_batches)
 
         return {
             "optimizer": optimizer,
             "lr_scheduler": {
-                "scheduler": lr_scheduler,
+                "scheduler": torch.optim.lr_scheduler.LambdaLR(
+                    optimizer,
+                    partial(
+                        cosine_with_linear_warmup,
+                        warmup_steps=int(
+                            self.trainer.estimated_stepping_batches
+                            * self.hparams.warmup_ratio
+                        ),
+                        learning_rate=self.hparams.learning_rate,
+                        min_learning_rate=int(
+                            self.hparams.min_lr_ratio * self.hparams.learning_rate,
+                        ),
+                        total_steps=self.trainer.estimated_stepping_batches,
+                    ),
+                ),
                 "interval": "step",
             },
         }
