@@ -30,7 +30,7 @@ def main(
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
     micro_batch_size: int = 32,
-    gradient_accumulation_iters: int = 8,
+    gradient_accumulation_iters: int = 6,
     precision: str = "bf16-true",
     ####################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
@@ -42,7 +42,7 @@ def main(
     weight_decay: float = 0.00,  # Torch's AdamW class defaults to 1e-2.
     grad_clip: Optional[float] = None,  # A value of 1.0 is commonly used.
     beta1: float = 0.9,
-    beta2: float = 0.999,  # A value of 0.95 can help address loss spikes.
+    beta2: float = 0.95,  # A value of 0.95 can help address loss spikes.
     ####################################################################
     val_split_ratio: float = 0.05,  # 5% of training dataset.
     val_check_interval: float = 0.05,  # After every 5% of training.
