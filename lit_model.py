@@ -118,7 +118,6 @@ class LitModel(L.LightningModule):
 
         config = AutoConfig.from_pretrained(
             self.hparams.model_id,
-            problem_type="multi_label_classification",
             # TODO: Auto-derive mapping from the dataset?
             id2label={0: "lturn", 1: "rturn", 2: "noturn"},
         )
