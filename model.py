@@ -31,28 +31,30 @@ class MultiFrameSiglipClassifier(nn.Module):
         frames: torch.Tensor,  # [B, num_ctx_frames, C=3, H=image_size, W=image_size]
     ) -> torch.Tensor:
 
-        import ipdb
-
-        ipdb.set_trace(
-            cond=(
-                (0 == torch.distributed.get_rank())
-                if torch.distributed.is_initialized()
-                else True
-            )
-        )
+        print("frames.shape", frames.shape)
 
         frames = frames.view(
             -1, 3, self.config.image_size, self.config.image_size
         )  # [B*num_ctx_frames, 3, image_size, image_size]
 
+        print("frames.shape", frames.shape)
+
         x = self.model(frames).pooler_output  # [B*num_ctx_frames, hidden_size]
+
+        print("x.shape", x.shape)
 
         x = x.view(
             -1, self.num_ctx_frames, self.config.hidden_size
         )  # [B, num_ctx_frames, hidden_size]
 
+        print("x.shape", x.shape)
+
         x = x + self.pos_embeddings.weight  # [B, num_ctx_frames, hidden_size]
 
+        print("x.shape", x.shape)
+
         x = self.classification_head(x.flatten(1))  # [B, num_classes]
+
+        print("x.shape", x.shape)
 
         return x
