@@ -27,6 +27,9 @@ def main(
     model_id: str = "google/siglip-so400m-patch14-384",
     data_dir: Path = Path("data"),
     ####################################################################
+    num_ctx_frames: int = 3,  # Must be >=1 for the model to see anything.
+    num_classes: int = 3,  # Number of classes used in the dataset.
+    ####################################################################
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
     micro_batch_size: int = 32,
@@ -131,6 +134,8 @@ def main(
 
     model = LitModel(
         model_id=model_id,
+        num_ctx_frames=num_ctx_frames,
+        num_classes=num_classes,
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         min_lr_ratio=min_lr_ratio,
@@ -155,6 +160,7 @@ def main(
     datamodule = LitDataModule(
         model_id=model_id,
         data_dir=str(data_dir),
+        num_ctx_frames=num_ctx_frames,
         micro_batch_size=micro_batch_size,
         val_split_ratio=val_split_ratio,
     )
