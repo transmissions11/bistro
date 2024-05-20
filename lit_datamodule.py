@@ -49,7 +49,7 @@ class MultiLabelDataset(Dataset):
                 dim=0,
             )  # [num_ctx_frames, C=3, hidden_size, hidden_size]
 
-        labels = torch.from_numpy(item[1:].values.astype(np.int))  # [num_classes]
+        labels = torch.from_numpy(item[1:].values.astype(np.int32))  # [num_classes]
 
         return frames, labels
 
