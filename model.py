@@ -22,7 +22,7 @@ class MultiFrameSiglipClassifier(nn.Module):
 
         self.pos_embeddings = nn.Embedding(self.num_ctx_frames, self.config.hidden_size)
 
-        self.classifier = nn.Linear(
+        self.classification_head = nn.Linear(
             self.num_ctx_frames * self.config.hidden_size, self.num_classes
         )
 
@@ -43,6 +43,6 @@ class MultiFrameSiglipClassifier(nn.Module):
 
         x = x + self.pos_embeddings.weight  # [B, num_ctx_frames, hidden_size]
 
-        x = self.projection(x.flatten(1))  # [B, hidden_size]
+        x = self.classification_head(x.flatten(1))  # [B, num_classes]
 
         return x
