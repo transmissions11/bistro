@@ -37,9 +37,11 @@ class MultiLabelDataset(Dataset):
 
         if idx <= self.num_ctx_frames:
             pixel_values = self.load_and_process_image(self.df.iloc[idx])
+            print("pixel_values.shape", pixel_values.shape)
             frames = torch.cat(
                 [pixel_values] * self.num_ctx_frames, dim=0
             )  # [num_ctx_frames, C=3, hidden_size, hidden_size]
+            print("frames.shape", frames.shape)
         else:
             frames = torch.cat(
                 [
@@ -51,7 +53,7 @@ class MultiLabelDataset(Dataset):
 
         labels = torch.from_numpy(item[1:].values.astype(np.int32))  # [num_classes]
 
-        print("frames.shape", frames.shape, "labels.shape", labels.shape)
+        # print("frames.shape", frames.shape, "labels.shape", labels.shape)
 
         return frames, labels
 
