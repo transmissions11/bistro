@@ -28,12 +28,12 @@ class MultiFrameSiglipClassifier(nn.Module):
 
     def forward(
         self,
-        frames: torch.Tensor,  # [B, num_ctx_frames, C=3, H=hidden_size, W=hidden_size]
+        frames: torch.Tensor,  # [B, num_ctx_frames, C=3, H=image_size, W=image_size]
     ) -> torch.Tensor:
 
         frames = frames.view(
-            -1, 3, self.config.hidden_size, self.config.hidden_size
-        )  # [B*num_ctx_frames, C=3, H=hidden_size, W=hidden_size]
+            -1, 3, self.config.image_size, self.config.image_size
+        )  # [B*num_ctx_frames, 3, image_size, image_size]
 
         x = self.model(frames).pooler_output  # [B*num_ctx_frames, hidden_size]
 
