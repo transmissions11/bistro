@@ -51,6 +51,8 @@ class MultiLabelDataset(Dataset):
 
         labels = torch.from_numpy(item[1:].values.astype(np.int32))  # [num_classes]
 
+        print("frames.shape", frames.shape, "labels.shape", labels.shape)
+
         return frames, labels
 
     def __len__(self):
