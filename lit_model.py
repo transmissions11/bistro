@@ -71,7 +71,10 @@ class LitModel(L.LightningModule):
 
         ceLoss = CrossEntropyLoss()(logits.view(-1, 3), labels.view(-1))
         bceLoss = BCEWithLogitsLoss()(
-            logits, torch.nn.functional.one_hot(labels.squeeze(), num_classes=3)
+            logits,
+            torch.nn.functional.one_hot(labels.squeeze(), num_classes=3).type_as(
+                logits
+            ),
         )
 
         print(ceLoss, bceLoss)
