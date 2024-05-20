@@ -63,6 +63,8 @@ class LitModel(L.LightningModule):
     def validation_step(self, batch: dict, batch_idx: int) -> None:
         pixel_values, labels = batch
 
+        print(labels.shape)
+
         outputs = self.model(pixel_values=pixel_values, labels=labels)
 
         self.log("val_loss", outputs.loss, on_epoch=True, prog_bar=True, sync_dist=True)
