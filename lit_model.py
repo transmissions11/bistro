@@ -65,6 +65,15 @@ class LitModel(L.LightningModule):
 
         outputs = self.model(pixel_values=pixel_values, labels=labels)
 
+        logits = outputs.logits
+
+        from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss
+
+        ceLoss = CrossEntropyLoss()(logits.view(-1, self.num_labels), labels.view(-1))
+        bceLoss = BCEWithLogitsLoss()(logits, labels)
+
+        print(ceLoss, bceLoss)
+
         self.log("val_loss", outputs.loss, on_epoch=True, prog_bar=True, sync_dist=True)
 
     def configure_optimizers(self):
