@@ -31,6 +31,16 @@ class MultiFrameSiglipClassifier(nn.Module):
         frames: torch.Tensor,  # [B, num_ctx_frames, C=3, H=image_size, W=image_size]
     ) -> torch.Tensor:
 
+        import ipdb
+
+        ipdb.set_trace(
+            cond=(
+                (0 == torch.distributed.get_rank())
+                if torch.distributed.is_initialized()
+                else True
+            )
+        )
+
         frames = frames.view(
             -1, 3, self.config.image_size, self.config.image_size
         )  # [B*num_ctx_frames, 3, image_size, image_size]
