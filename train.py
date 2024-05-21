@@ -25,6 +25,7 @@ def main(
     ####################################################################
     model_id: str = "google/siglip-so400m-patch14-384",
     data_dir: Path = Path("data"),
+    ckpt_path: Optional[str] = None,  # Use 'last' to resume previous run.
     ####################################################################
     num_classes: int = 3,  # Number of classes used in the dataset.
     ####################################################################
@@ -168,7 +169,7 @@ def main(
     if not skip_starting_validation:
         trainer.validate(model, datamodule=datamodule)
 
-    trainer.fit(model, datamodule=datamodule)
+    trainer.fit(model, datamodule=datamodule, ckpt_path=ckpt_path)
 
 
 if __name__ == "__main__":
