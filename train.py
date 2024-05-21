@@ -167,7 +167,7 @@ def main(
         print("Training with the following hyperparameters:")
         pprintjson(hparams)
 
-    if not skip_starting_validation:
+    if not skip_starting_validation and ckpt_path is None:
         trainer.validate(model, datamodule=datamodule)
 
     trainer.fit(model, datamodule=datamodule, ckpt_path=ckpt_path)
