@@ -27,9 +27,7 @@ class SiglipClassifier(nn.Module):
 
         x = self.model(frames).last_hidden_state  # [B, hidden_size]
 
-        sequence_output = torch.mean(
-            sequence_output[:, 1:, :], dim=1
-        )  # TODO: why skip first token?
+        x = torch.mean(x[:, 1:, :], dim=1)  # TODO: why skip first token?
 
         x = self.classification_head(x)  # [B, num_classes]
 
