@@ -123,7 +123,6 @@ def main(
                     save_top_k=save_top_k_checkpoints,
                     dirpath=get_safe_ckpt_dirpath(project, run_name),
                     filename="{epoch}-{step}-{val_loss:.2f}",
-                    save_last="link",
                 )
             ]
             if save_checkpoints
