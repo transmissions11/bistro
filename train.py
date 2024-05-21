@@ -4,13 +4,12 @@ import lightning as L
 
 from pathlib import Path
 
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from pprintjson import pprintjson
 
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
-from lightning.pytorch.strategies import DDPStrategy
 
 from utils.debugging import iexd
 from utils.naming import get_clean_commit_msg, get_safe_ckpt_dirpath
