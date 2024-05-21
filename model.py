@@ -21,6 +21,12 @@ class SiglipClassifier(nn.Module):
 
         self.classification_head = nn.Linear(self.config.hidden_size, self.num_classes)
         self._init_weights(self.classification_head)
+        print("printed weights")
+        print(
+            self.classification_head.weight[0][0],
+            self.classification_head.weight[0][1],
+            self.classification_head.weight[0][2],
+        )
 
     def _init_weights(self, module):
         if isinstance(module, nn.Linear):
