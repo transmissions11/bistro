@@ -77,7 +77,7 @@ class LitModel(L.LightningModule):
             ),
         )
 
-        print(ceLoss, bceLoss)
+        print("ce loss", ceLoss, "bce loss", bceLoss)
 
         self.log("val_loss_ce", ceLoss, on_epoch=True, prog_bar=True, sync_dist=True)
         self.log("val_loss_bce", bceLoss, on_epoch=True, prog_bar=True, sync_dist=True)
