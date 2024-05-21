@@ -129,28 +129,7 @@ def main(
         ),
     )
 
-    model = LitModel(
-        model_id=model_id,
-        learning_rate=learning_rate,
-        warmup_ratio=warmup_ratio,
-        min_lr_ratio=min_lr_ratio,
-        weight_decay=weight_decay,
-        betas=(beta1, beta2),
-        requires_grad=(
-            # If params_to_freeze is set, freeze all
-            # params except those in params_to_freeze.
-            (lambda name: name not in params_to_freeze)
-            if params_to_freeze is not None
-            # If params_to_train is set, only train those.
-            else (
-                (lambda name: name in params_to_train)
-                if params_to_train is not None
-                # Otherwise, train everything.
-                else None
-            )
-        ),
-        watch_gradients=watch_gradients,
-    )
+    model = LitModel.load_from_checkpoint("the_final_night.ckpt")
 
     datamodule = LitDataModule(
         model_id=model_id,
@@ -159,14 +138,14 @@ def main(
         val_split_ratio=val_split_ratio,
     )
 
-    if trainer.is_global_zero:
-        print("Training with the following hyperparameters:")
-        pprintjson(hparams)
+    # if trainer.is_global_zero:
+    #     print("Training with the following hyperparameters:")
+    #     pprintjson(hparams)
 
-    if not skip_starting_validation:
-        trainer.validate(model, datamodule=datamodule)
+    # if not skip_starting_validation:
+    trainer.validate(model, datamodule=datamodule)
 
-    trainer.fit(model, datamodule=datamodule)
+    # trainer.fit(model, datamodule=datamodule)
 
 
 if __name__ == "__main__":
