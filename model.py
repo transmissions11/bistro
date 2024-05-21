@@ -25,7 +25,11 @@ class SiglipClassifier(nn.Module):
         frames: torch.Tensor,  # [B, C=3, H=image_size, W=image_size]
     ) -> torch.Tensor:
 
-        x = self.model(frames).pooler_output  # [B, hidden_size]
+        x = self.model(frames).last_hidden_state  # [B, hidden_size]
+
+        sequence_output = torch.mean(
+            sequence_output[:, 1:, :], dim=1
+        )  # TODO: why skip first token?
 
         x = self.classification_head(x)  # [B, num_classes]
 
