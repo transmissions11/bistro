@@ -79,7 +79,8 @@ class LitModel(L.LightningModule):
 
         print(ceLoss, bceLoss)
 
-        self.log("val_loss", outputs.loss, on_epoch=True, prog_bar=True, sync_dist=True)
+        self.log("val_loss_ce", ceLoss, on_epoch=True, prog_bar=True, sync_dist=True)
+        self.log("val_loss_bce", bceLoss, on_epoch=True, prog_bar=True, sync_dist=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
