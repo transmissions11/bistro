@@ -62,7 +62,7 @@ def main(
     profiler: Optional[str] = None,  # Either simple, advanced, or None.
     ####################################################################
     save_checkpoints: bool = True,
-    save_top_k_checkpoints: int = 3,
+    save_top_k_checkpoints: int = 1,
     ####################################################################
     run_name: str = get_clean_commit_msg(),  # Used for ckpt dirpath and W&B.
 ):
