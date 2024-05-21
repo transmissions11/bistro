@@ -38,7 +38,7 @@ def main(
     epochs: int = 4,  # Make this -1 to train forever / until max_time.
     ####################################################################
     learning_rate: float = 5e-5,  # Maximum learning rate before annealing.
-    warmup_ratio: float = 0.10,  # Percent of total steps to spend warming.
+    warmup_ratio: float = 0.05,  # Percent of total steps to spend warming.
     min_lr_ratio: float = 0.10,  # Percent of learning_rate to anneal to.
     weight_decay: float = 0.00,  # Torch's AdamW class defaults to 1e-2.
     grad_clip: Optional[float] = None,  # A value of 1.0 is commonly used.
