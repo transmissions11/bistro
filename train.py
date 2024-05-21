@@ -118,10 +118,10 @@ def main(
             [
                 ModelCheckpoint(
                     verbose=True,
-                    monitor="val_loss",
+                    monitor="val_loss_ce",
                     save_top_k=save_top_k_checkpoints,
                     dirpath=get_safe_ckpt_dirpath(project, run_name),
-                    filename="{epoch}-{step}-{val_loss:.2f}",
+                    filename="{epoch}-{step}-{val_loss_ce:.2f}",
                 )
             ]
             if save_checkpoints
