@@ -4,7 +4,7 @@ import lightning as L
 
 from pathlib import Path
 
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from pprintjson import pprintjson
 
