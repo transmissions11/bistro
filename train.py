@@ -25,7 +25,7 @@ def main(
     ####################################################################
     model_id: str = "google/siglip-so400m-patch14-384",
     data_dir: Path = Path("data"),
-    ckpt_path: Optional[str] = None,  # Use 'last' to resume previous run.
+    ckpt_path: Optional[str] = None,  # To resume training from a ckpt.
     ####################################################################
     num_classes: int = 3,  # Number of classes used in the dataset.
     ####################################################################
