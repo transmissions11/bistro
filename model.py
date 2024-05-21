@@ -19,6 +19,9 @@ class SiglipClassifier(nn.Module):
         self.config: SiglipVisionConfig = self.model.config
 
         self.classification_head = nn.Linear(self.config.hidden_size, self.num_classes)
+        nn.init.lecun_normal_(self.classification_head.weight)
+        if self.classification_head.bias is not None:
+            nn.init.zeros_(self.classification_head.bias)
 
     def forward(
         self,
