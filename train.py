@@ -27,6 +27,8 @@ def main(
     model_id: str = "google/siglip-so400m-patch14-384",
     data_dir: Path = Path("data"),
     ####################################################################
+    num_classes: int = 3,  # Number of classes used in the dataset.
+    ####################################################################
     devices: int = -1,  # -1 for all available GPUs, 1 for 1 GPU, etc.
     strategy: str = "auto",
     micro_batch_size: int = 32,
@@ -118,10 +120,10 @@ def main(
             [
                 ModelCheckpoint(
                     verbose=True,
-                    monitor="val_loss_ce",
+                    monitor="val_loss",
                     save_top_k=save_top_k_checkpoints,
                     dirpath=get_safe_ckpt_dirpath(project, run_name),
-                    filename="{epoch}-{step}-{val_loss_ce:.2f}",
+                    filename="{epoch}-{step}-{val_loss:.2f}",
                 )
             ]
             if save_checkpoints
@@ -129,7 +131,29 @@ def main(
         ),
     )
 
-    model = LitModel.load_from_checkpoint("the_final_night.ckpt")
+    model = LitModel(
+        model_id=model_id,
+        num_classes=num_classes,
+        learning_rate=learning_rate,
+        warmup_ratio=warmup_ratio,
+        min_lr_ratio=min_lr_ratio,
+        weight_decay=weight_decay,
+        betas=(beta1, beta2),
+        requires_grad=(
+            # If params_to_freeze is set, freeze all
+            # params except those in params_to_freeze.
+            (lambda name: name not in params_to_freeze)
+            if params_to_freeze is not None
+            # If params_to_train is set, only train those.
+            else (
+                (lambda name: name in params_to_train)
+                if params_to_train is not None
+                # Otherwise, train everything.
+                else None
+            )
+        ),
+        watch_gradients=watch_gradients,
+    )
 
     datamodule = LitDataModule(
         model_id=model_id,
@@ -138,14 +162,14 @@ def main(
         val_split_ratio=val_split_ratio,
     )
 
-    # if trainer.is_global_zero:
-    #     print("Training with the following hyperparameters:")
-    #     pprintjson(hparams)
+    if trainer.is_global_zero:
+        print("Training with the following hyperparameters:")
+        pprintjson(hparams)
 
-    # if not skip_starting_validation:
-    trainer.validate(model, datamodule=datamodule)
+    if not skip_starting_validation:
+        trainer.validate(model, datamodule=datamodule)
 
-    # trainer.fit(model, datamodule=datamodule)
+    trainer.fit(model, datamodule=datamodule)
 
 
 if __name__ == "__main__":

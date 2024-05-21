@@ -6,6 +6,7 @@ import lightning as L
 from pathlib import Path
 
 from functools import partial
+from utils.loss import compute_loss
 
 from utils.lr_sched import cosine_with_linear_warmup
 
@@ -13,13 +14,16 @@ from typing import Callable, Optional, Tuple, cast
 
 from lightning.pytorch.loggers import WandbLogger
 
-from transformers import AutoModelForImageClassification, AutoConfig, logging
+from transformers import logging
+
+from model import SiglipClassifier
 
 
 class LitModel(L.LightningModule):
     def __init__(
         self,
         model_id: str,
+        num_classes: int,
         ################################
         learning_rate: float,
         warmup_ratio: float,
@@ -52,35 +56,20 @@ class LitModel(L.LightningModule):
         )
 
     def training_step(self, batch: dict, batch_idx: int) -> torch.Tensor:
-        pixel_values, labels = batch
+        frames, labels = batch
 
-        outputs = self.model(pixel_values=pixel_values, labels=labels)
+        loss = compute_loss(self.model, inputs=frames, labels=labels)
 
-        self.log("train_loss", outputs.loss)
+        self.log("train_loss", loss)
 
-        return outputs.loss
+        return loss
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
-        pixel_values, labels = batch
+        frames, labels = batch
 
-        outputs = self.model(pixel_values=pixel_values, labels=labels)
+        loss = compute_loss(self.model, inputs=frames, labels=labels)
 
-        logits = outputs.logits
-
-        from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss
-
-        ceLoss = CrossEntropyLoss()(logits.view(-1, 3), labels.view(-1))
-        bceLoss = BCEWithLogitsLoss()(
-            logits,
-            torch.nn.functional.one_hot(labels.squeeze(), num_classes=3).type_as(
-                logits
-            ),
-        )
-
-        print("ce loss", ceLoss, "bce loss", bceLoss)
-
-        self.log("val_loss_ce", ceLoss, on_epoch=True, prog_bar=True, sync_dist=True)
-        self.log("val_loss_bce", bceLoss, on_epoch=True, prog_bar=True, sync_dist=True)
+        self.log("val_loss", loss, on_epoch=True, prog_bar=True, sync_dist=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
@@ -131,25 +120,14 @@ class LitModel(L.LightningModule):
 
         t0 = g0_print("Initializing model...")
 
-        config = AutoConfig.from_pretrained(
-            self.hparams.model_id,
-            # TODO: Auto-derive mapping from the dataset?
-            id2label={0: "lturn", 1: "rturn", 2: "noturn"},
-        )
-
-        # To avoid the error "It looks like your LightningModule has parameters
-        # that were not used in producing the loss returned by training_step."
-        # Option added in https://github.com/huggingface/transformers/pull/30814.
-        config.vision_config.vision_use_head = False
-
         # To avoid "You should probably TRAIN this model on a down-stream task"
         # warning. See: https://github.com/huggingface/transformers/issues/5421
         if self._trainer and not self.trainer.is_global_zero:
             logging.set_verbosity(logging.ERROR)
 
-        self.model = AutoModelForImageClassification.from_pretrained(
-            config._name_or_path,
-            config=config,
+        self.model = SiglipClassifier(
+            model_id=self.hparams.model_id,
+            num_classes=self.hparams.num_classes,
         )
 
         g0_print(f"Initialized model in {time.time() - t0:.3f}s.")
