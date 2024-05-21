@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 from transformers import SiglipVisionModel, SiglipVisionConfig
+from transformers.models.siglip.modeling_siglip import lecun_normal_
 
 
 class SiglipClassifier(nn.Module):
@@ -19,9 +20,13 @@ class SiglipClassifier(nn.Module):
         self.config: SiglipVisionConfig = self.model.config
 
         self.classification_head = nn.Linear(self.config.hidden_size, self.num_classes)
-        nn.init.lecun_normal_(self.classification_head.weight)
-        if self.classification_head.bias is not None:
-            nn.init.zeros_(self.classification_head.bias)
+        self._init_weights(self.classification_head)
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            lecun_normal_(module.weight)
+            if module.bias is not None:
+                nn.init.zeros_(module.bias)
 
     def forward(
         self,
