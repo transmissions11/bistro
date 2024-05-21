@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 
 from transformers import SiglipVisionModel, SiglipVisionConfig
-from transformers.models.siglip.modeling_siglip import lecun_normal_
 
 
 class SiglipClassifier(nn.Module):
@@ -20,28 +19,13 @@ class SiglipClassifier(nn.Module):
         self.config: SiglipVisionConfig = self.model.config
 
         self.classification_head = nn.Linear(self.config.hidden_size, self.num_classes)
-        self._init_weights(self.classification_head)
-        print("printed weights")
-        print(
-            self.classification_head.weight[0][0],
-            self.classification_head.weight[0][1],
-            self.classification_head.weight[0][2],
-        )
-
-    def _init_weights(self, module):
-        if isinstance(module, nn.Linear):
-            lecun_normal_(module.weight)
-            if module.bias is not None:
-                nn.init.zeros_(module.bias)
 
     def forward(
         self,
         frames: torch.Tensor,  # [B, C=3, H=image_size, W=image_size]
     ) -> torch.Tensor:
 
-        x = self.model(frames).last_hidden_state  # [B, hidden_size]
-
-        x = torch.mean(x[:, 1:, :], dim=1)  # TODO: why skip first token?
+        x = self.model(frames).pooler_output  # [B, hidden_size]
 
         x = self.classification_head(x)  # [B, num_classes]
 
