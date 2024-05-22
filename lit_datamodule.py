@@ -10,9 +10,7 @@ from utils.collate import collate_fn
 
 from PIL import Image
 
-import numpy as np
-
-import pandas as pd
+import polars as pl
 
 import os
 
@@ -24,34 +22,30 @@ class MultiLabelDataset(Dataset):
         self.processor = processor
         self.num_ctx_frames = num_ctx_frames
 
-    def load_and_process_image(self, frame_item):
-        image = Image.open(
-            os.path.join(self.data_dir, frame_item["file_name"])
-        ).convert("RGB")
+    def load_and_process_image(self, file_name):
+        image = Image.open(os.path.join(self.data_dir, file_name)).convert("RGB")
         return self.processor(
             image, return_tensors="pt"
         ).pixel_values  # [1, C=3, hidden_size, hidden_size]
 
     def __getitem__(self, idx):
-        item = self.df.iloc[idx]
+        file_name, *labels = self.df.row(idx)
 
         if idx <= self.num_ctx_frames:
-            pixel_values = self.load_and_process_image(self.df.iloc[idx])
-            print("pixel_values.shape", pixel_values.shape)
+            pixel_values = self.load_and_process_image(file_name)
             frames = torch.cat(
                 [pixel_values] * self.num_ctx_frames, dim=0
             )  # [num_ctx_frames, C=3, hidden_size, hidden_size]
-            print("frames.shape", frames.shape)
         else:
             frames = torch.cat(
                 [
-                    self.load_and_process_image(self.df.iloc[i])
+                    self.load_and_process_image(self.df.row(i)[0])
                     for i in range(idx - (self.num_ctx_frames - 1), idx + 1)
                 ],
                 dim=0,
             )  # [num_ctx_frames, C=3, hidden_size, hidden_size]
 
-        labels = torch.tensor(np.nonzero(item[1:].values.astype(np.int32))[0])  # [1]
+        labels = torch.tensor(labels).nonzero(as_tuple=True)[0]  # [1]
 
         return frames, labels
 
@@ -72,7 +66,7 @@ class LitDataModule(L.LightningDataModule):
 
         self.processor = AutoImageProcessor.from_pretrained(model_id)
 
-        self.df = pd.read_csv(os.path.join(data_dir, "metadata.csv"))
+        self.df = pl.read_csv(os.path.join(data_dir, "metadata.csv"))
 
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(logger=False)
