@@ -94,5 +94,4 @@ class LitDataModule(L.LightningDataModule):
             pin_memory=True,
             shuffle=False,
             drop_last=True,
-            persistent_workers=True,
         )
