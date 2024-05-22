@@ -72,28 +72,6 @@ class LitDataModule(L.LightningDataModule):
 
         self.datasets = {"train": train_dataset, "test": test_dataset}
 
-        from time import time
-        import multiprocessing as mp
-
-        for num_workers in range(2, mp.cpu_count(), 2):
-            train_loader = DataLoader(
-                self.datasets["train"],
-                shuffle=True,
-                collate_fn=collate_fn,
-                num_workers=num_workers,
-                batch_size=self.hparams.micro_batch_size,
-                pin_memory=True,
-            )
-            start = time()
-            for epoch in range(1, 3):
-                for i, data in enumerate(train_loader, 0):
-                    if i >= 10000:
-                        break
-            end = time()
-            print(
-                "Finish with:{} second, num_workers={}".format(end - start, num_workers)
-            )
-
     def train_dataloader(self):
         return DataLoader(
             self.datasets["train"],
