@@ -35,7 +35,7 @@ def main(
     precision: str = "bf16-true",
     ####################################################################
     max_time: Optional[str] = None,  # Specify with DD:HH:MM:SS format.
-    epochs: int = 4,  # Make this -1 to train forever / until max_time.
+    epochs: int = 3,  # Make this -1 to train forever / until max_time.
     ####################################################################
     learning_rate: float = 5e-5,  # Maximum learning rate before annealing.
     warmup_ratio: float = 0.05,  # Percent of total steps to spend warming.
