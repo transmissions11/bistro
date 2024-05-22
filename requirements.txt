@@ -13,3 +13,4 @@ ipdb
 pillow
 pandas
 transformers @ git+https://github.com/huggingface/transformers.git
+polars

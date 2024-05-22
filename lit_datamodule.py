@@ -10,9 +10,7 @@ from utils.collate import collate_fn
 
 from PIL import Image
 
-import numpy as np
-
-import pandas as pd
+import polars as pl
 
 import os
 
@@ -24,15 +22,13 @@ class MultiLabelDataset(Dataset):
         self.processor = processor
 
     def __getitem__(self, idx):
-        item = self.df.iloc[idx]
+        file_name, *labels = self.df.row(idx)
 
-        image = Image.open(os.path.join(self.data_dir, item["file_name"])).convert(
-            "RGB"
-        )
+        image = Image.open(os.path.join(self.data_dir, file_name)).convert("RGB")
 
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 
-        labels = torch.tensor(np.nonzero(item[1:].values.astype(np.int32))[0])  # [1]
+        labels = torch.tensor(labels).nonzero(as_tuple=True)[0]  # [1]
 
         return pixel_values.squeeze(0), labels  # Squeeze off the batch dimension.
 
@@ -52,7 +48,7 @@ class LitDataModule(L.LightningDataModule):
 
         self.processor = AutoImageProcessor.from_pretrained(model_id)
 
-        self.df = pd.read_csv(os.path.join(data_dir, "metadata.csv"))
+        self.df = pl.read_csv(os.path.join(data_dir, "metadata.csv"))
 
         # logger=False since we already log hparams manually in train.py.
         self.save_hyperparameters(logger=False)
